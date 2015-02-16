@@ -998,7 +998,9 @@ $(document).ready(function(){
             type: "POST",
             data: formElement+"&option="+option+"&string="+imageData,
             success: function(response){
-                var msg_alert=response;
+                var recived=JSON.parse(response);
+                var msg_alert=recived[0];
+                var parnt_foldid=recived[1];
                 $('.preloader', window.parent.document).hide();
                 if(msg_alert==1)
                 {
@@ -1008,7 +1010,7 @@ $(document).ready(function(){
                     $("#USRC_UPD_tb_date").val('').hide()
                     $('#USRC_UPD_lbl_dte').hide();
                 }
-                else if(msg_alert==0)
+                if(msg_alert==0)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"USER SEARCH AND UPDATE",msgcontent:err_msg[7],position:{top:150,left:500}}});
                     UARD_clear()
@@ -1016,7 +1018,16 @@ $(document).ready(function(){
                     $("#USRC_UPD_tb_date").val('').hide()
                     $('#USRC_UPD_lbl_dte').hide();
                 }
-                else
+                if(msg_alert==0 && parnt_foldid!='')
+                {
+                    var foldererrmsg=err_msg[11].replace("[FID]",parnt_foldid);
+                    $(document).doValidation({rule:'messagebox',prop:{msgtitle:"USER SEARCH AND UPDATE",msgcontent:foldererrmsg,position:{top:150,left:500}}});
+                    UARD_clear()
+                    flextable()
+                    $("#USRC_UPD_tb_date").val('').hide()
+                    $('#USRC_UPD_lbl_dte').hide();
+                }
+                if(msg_alert!=0 && msg_alert!=1)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"USER SEARCH AND UPDATE",msgcontent:msg_alert,position:{top:150,left:500}}});
                     UARD_clear()
@@ -1093,8 +1104,8 @@ $(document).ready(function(){
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="radio" id="USRC_UPD_rd_nopermission" name="permission" value="NOPERMISSION" class="update_validate"/>
-                        <label name="USRC_UPD_permission" id="USRC_UPD_lbl_nopermission" >NO PERMISSION <em>*</em></label></td>
+                    <td nowrap><input type="radio" id="USRC_UPD_rd_nopermission" name="permission" value="NOPERMISSION" class="update_validate"/>
+                        <label name="USRC_UPD_permission" id="USRC_UPD_lbl_nopermission" nowrap>NO PERMISSION <em>*</em></label></td>
                 </tr>
                 <tr>
                     <td><label name="USRC_UPD_lbl_session" id="USRC_UPD_lbl_session" hidden >SESSION</label></td>

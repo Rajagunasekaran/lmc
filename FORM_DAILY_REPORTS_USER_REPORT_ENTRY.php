@@ -193,25 +193,25 @@ $(document).ready(function(){
                 if (xmlhttp.readyState==4 && xmlhttp.status==200) {
                     $('.preloader', window.parent.document).hide();
                     var response=xmlhttp.responseText;
-//                    if(response==1)
-//                    {
-//                        $('#URE_lbl_checkmsg').text(err_msg[11]).show();
-//                        $('#URE_lb_timing').hide();
-//                        $('#URE_lbl_permission').hide();
-//                        $('#URE_rd_permission').hide();
-//                        $('#URE_rd_nopermission').hide();
-//                        $('#URE_lbl_nopermission').hide();
-//                        $('#URE_lbl_session').hide();
-//                        $('#URE_lb_ampm').hide();
-//                        $('#URE_tble_projectlistbx').hide();
-//                        $('#URE_btn_submit').hide();
-//                        $('#URE_rd_permission').removeAttr("disabled");
-//                        $('#URE_rd_nopermission').removeAttr("disabled");
-//                        $('#URE_lbl_errmsg').hide();
-//                        $('#URE_tble_paint').hide();
-//                    }
-//                    else if(response==0)
-//                    {
+                    if(response==0)
+                    {
+                        $('#URE_lbl_checkmsg').text(err_msg[10]).show();
+                        $('#URE_lb_timing').hide();
+                        $('#URE_lbl_permission').hide();
+                        $('#URE_rd_permission').hide();
+                        $('#URE_rd_nopermission').hide();
+                        $('#URE_lbl_nopermission').hide();
+                        $('#URE_lbl_session').hide();
+                        $('#URE_lb_ampm').hide();
+                        $('#URE_tble_projectlistbx').hide();
+                        $('#URE_btn_submit').hide();
+                        $('#URE_rd_permission').removeAttr("disabled");
+                        $('#URE_rd_nopermission').removeAttr("disabled");
+                        $('#URE_lbl_errmsg').hide();
+                        $('#URE_tble_paint').hide();
+                    }
+                    else if(response==1)
+                    {
                         $("html, body").animate({ scrollTop: 300 }, "1000");
                         $('#URE_tble_enterthereport,#URE_ta_reason').html('');
                         $('#URE_rd_permission').attr('checked',false);
@@ -238,7 +238,7 @@ $(document).ready(function(){
                         $('#URE_lbl_errmsg').hide();
                         $('#URE_lbl_checkmsg').hide();
                         $('#URE_tble_paint').show();
-//                    }
+                    }
                 }
 
             }
@@ -390,21 +390,21 @@ $(document).ready(function(){
                 if (xmlhttp.readyState==4 && xmlhttp.status==200) {
                     $('.preloader', window.parent.document).hide();
                     var response=xmlhttp.responseText;
-//                    if(response==1)
-//                    {
-//                        $('#URE_tble_projectlistbx').hide();
-//                        $('#URE_btn_submit').hide();
-//                        $('#URE_lbl_permission').hide();
-//                        $('#URE_rd_permission').hide();
-//                        $('#URE_rd_nopermission').hide();
-//                        $('#URE_lbl_nopermission').hide();
-//                        $('#URE_lb_timing').hide();
-//                        $('#URE_lbl_errmsg').hide();
-//                        $('#URE_tble_paint').hide();
-//                        $('#URE_lbl_checkmsg').text(err_msg[11]).show();
-//                    }
-//                    else
-//                    {
+                    if(response==0)
+                    {
+                        $('#URE_tble_projectlistbx').hide();
+                        $('#URE_btn_submit').hide();
+                        $('#URE_lbl_permission').hide();
+                        $('#URE_rd_permission').hide();
+                        $('#URE_rd_nopermission').hide();
+                        $('#URE_lbl_nopermission').hide();
+                        $('#URE_lb_timing').hide();
+                        $('#URE_lbl_errmsg').hide();
+                        $('#URE_tble_paint').hide();
+                        $('#URE_lbl_checkmsg').text(err_msg[10]).show();
+                    }
+                    else
+                    {
                         $("html, body").animate({ scrollTop: $(document).height() }, "fast");
                         $('#URE_tble_projectlistbx').show();
                         URE_tble_reason();
@@ -424,7 +424,7 @@ $(document).ready(function(){
                         $('#URE_lbl_errmsg').hide();
                         $('#URE_lbl_checkmsg').hide();
                         $('#URE_tble_paint').show();
-//                    }
+                    }
                 }
 
             }
@@ -575,7 +575,9 @@ $(document).ready(function(){
             type: "POST",
             data: formElement+"&option="+option+"&string="+imageData,
             success: function(response){
-                var msg_alert=response;
+                var recived=JSON.parse(response);
+                var msg_alert=recived[0];
+                var parnt_foldid=recived[1];
                 $('.preloader', window.parent.document).hide();
                 if(msg_alert==1)
                 {
@@ -583,13 +585,20 @@ $(document).ready(function(){
                     UARD_clear();
                     $('#URE_tb_date').val('');
                 }
-                else if(msg_alert==0)
+                if(msg_alert==0)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"USER REPORT ENTRY",msgcontent:err_msg[4],position:{top:150,left:500}}});
                     UARD_clear();
                     $('#URE_tb_date').val('');
                 }
-                else
+                if(msg_alert==0 && parnt_foldid!='')
+                {
+                    var foldererrmsg=err_msg[11].replace("[FID]",parnt_foldid);
+                    $(document).doValidation({rule:'messagebox',prop:{msgtitle:"USER REPORT ENTRY",msgcontent:foldererrmsg,position:{top:150,left:500}}});
+                    UARD_clear();
+                    $('#URE_tb_date').val('');
+                }
+                if(msg_alert!=0 && msg_alert!=1)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"USER REPORT ENTRY",msgcontent:msg_alert,position:{top:150,left:500}}});
                     UARD_clear();
@@ -830,8 +839,8 @@ $(document).ready(function(){
                 </td>
             </tr>
             <tr>
-                <td><input type="radio" id="URE_rd_nopermission" name="permission" value="NOPERMISSION"/>
-                    <label name="URE_nopermission" id="URE_lbl_nopermission">NO PERMISSION<em>*</em></label></td>
+                <td nowrap><input type="radio" id="URE_rd_nopermission" name="permission" value="NOPERMISSION"/>
+                    <label name="URE_nopermission" id="URE_lbl_nopermission" nowrap>NO PERMISSION<em>*</em></label></td>
             </tr>
             <tr>
                 <td><label name="URE_lbl_session" id="URE_lbl_session" hidden >SESSION</label></td>

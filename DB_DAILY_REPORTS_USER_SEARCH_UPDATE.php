@@ -15,7 +15,6 @@ if(isset($_REQUEST)){
     $timeZoneFormat=getTimezone();
     $USERSTAMP=$UserStamp;
     $bucket_id=get_appbucket_id();
-    $driveparentid=get_parentfolder_id();
     if($_REQUEST["option"]=="DATE")
     {
         $date=$_REQUEST['date_change'];
@@ -91,6 +90,7 @@ where UARD_DATE BETWEEN '$startdate' AND '$enddate' AND UARD.ULD_ID='$ure_uld_id
                 $data = file_get_contents($path);
                 $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
             }
+//STRING REPLACED
             if($ure_report!=null){
                 $email_body='';
                 $body_msg =explode("\n", $ure_report);
@@ -151,6 +151,7 @@ where UARD_DATE BETWEEN '$startdate' AND '$enddate' AND UARD.ULD_ID='$ure_uld_id
             while($row=mysqli_fetch_array($logname)){
                 $loginid=$row["ULD_ID"];
             }
+            $driveparentid=get_emp_folderid($loginid);
             $daterep=str_replace('-','',$date);
             $filename=$loginid.'_'.$daterep.'_'.date('His');
             $filedesc='USER REPORT SEARCH/UPDATE PAINT IMAGE';
@@ -161,10 +162,13 @@ where UARD_DATE BETWEEN '$startdate' AND '$enddate' AND UARD.ULD_ID='$ure_uld_id
             $options = ['gs' => ['Content-Type' => 'image/png']];
             $ctx = stream_context_create($options);
             file_put_contents($uploadimgname, $data, 0, $ctx);
-            $filesid=insertFile($service,$filename,$filedesc,$driveparentid,'image/png',$uploadimgname);
+            $finalvalue=insertFile($service,$filename,$filedesc,$driveparentid,'image/png',$uploadimgname);
+            $filesid=$finalvalue[0];
+            $fileflg=$finalvalue[1];
         }
         elseif((($attendance=="0") && ($ampm=="FULLDAY")) || (($attendance=="OD") && ($ampm=="FULLDAY"))){
             $filesid='';
+            $fileflg=1;
         }
         if($perm_time=='SELECT')
         {
@@ -319,6 +323,7 @@ where UARD_DATE BETWEEN '$startdate' AND '$enddate' AND UARD.ULD_ID='$ure_uld_id
         }
         $report= $con->real_escape_string($report);
         $reason= $con->real_escape_string($reason);
+        if($fileflg!=0){
         $result = $con->query("CALL SP_TS_DAILY_REPORT_SEARCH_UPDATE($id,'$report','$reason','$finaldate',$ure_urc_id,'$USERSTAMP','$perm_time','$ure_attendance','$projectid','$uard_morning_session','$uard_afternoon_session','$USERSTAMP','','$filesid',@success_flag)");
         if(!$result) die("CALL failed: (" . $con->errno . ") " . $con->error);
         $select = $con->query('SELECT @success_flag');
@@ -331,6 +336,11 @@ where UARD_DATE BETWEEN '$startdate' AND '$enddate' AND UARD.ULD_ID='$ure_uld_id
             $delpath= $bucket_id.'images/'.$deletUrl.'.png';
             unlink($delpath);
             delete_file($service,$filesid);
+        }
+            $flagarry=[$flag];
+        }else{
+            $retnflag=0;
+            $flagarry=[$retnflag,$driveparentid];
         }
         if($flag==1 && ($old_fileid!='' || $old_fileid!=null))
         {
@@ -421,7 +431,7 @@ where UARD_DATE BETWEEN '$startdate' AND '$enddate' AND UARD.ULD_ID='$ure_uld_id
             $drop_query="DROP TABLE $temp_tickler_history ";
             mysqli_query($con,$drop_query);
         }
-        echo $flag;
+        echo json_encode($flagarry);
     }
 }
 function insertFile($service, $title, $description, $parentId,$mimeType,$uploadfilename)
@@ -445,12 +455,14 @@ function insertFile($service, $title, $description, $parentId,$mimeType,$uploadf
         ));
 
         $fileid = $createdFile->getId();
+        $fileflag=1;
     }
     catch (Exception $e)
     {
-        echo "An error occurred: " . $e->getMessage();
+        $fileflag=0;
     }
-    return $fileid;
+    $finalarry=[$fileid,$fileflag];
+    return $finalarry;
 }
 function delete_file($service,$fileid){
 

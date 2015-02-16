@@ -33,6 +33,19 @@ $arrcall=array(3=>"CALL SP_TS_USER_ADMIN_REPORT_DETAILS_TICKLER_DATA((select ULD
     15=>"CALL SP_TS_REPORT_BANDWIDTH_CALCULATION('$inputValOne','$inputValTwo','$USERSTAMP',@TEMP_TABLE)",
     19=>"CALL SP_TS_CALCULATE_TOTAL_NO_OF_WEEKS('$inputValOne','$inputValTwo','$USERSTAMP',@TEMP_TABLE)");
 
+//ALIGNMENT CENTER OR LEFT
+$arrAlignment=array(1=>array('left','center','center','center','center','left','center','left','center'),
+    3=>array('left','left','center'),
+    4=>array('EMPLOYEE NAME','DOOR ACCESS'),
+    5=>array('EMPLOYEE NAME','NUMBER OF DAYS','NUMBER OF HRS','NUMBER OF MINUTES'),
+    6=>array('PROJECT DATE','DAYS','HOURS','MINUTES'),
+    7=>array('PROJECT NAME','DAYS','HOURS','MINUTES'),8=>array('PROJECT DATE','DAYS','HOURS','MINUTES'),9=>array('PROJECT NAME','DAYS','HOURS','MINUTES'),10=>array('EMPLOYEE NAME','NUMBER OF DAYS','NUMBER OF HRS','NUMBER OF MINUTES'),
+    11=>array('DATE','PRESENT','ABSENT','ONDUTY','PERMISSION HOUR(S)'),12=>array('EMPLOYEE NAME','NO OF PRESENT','NO OF ABSENT','NO OF ONDUTY','TOTAL HOUR(S) OF PERMISSION'),
+    13=>array('EMPLOYEE NAME','REPORT ENTRY MISSED'),14=>array('EMPLOYEE NAME','BANDWIDTH'),15=>array('REPORT DATE','BANDWIDTH'),16=>array('DATE','DESCRIPTION','USERSTAMP','TIMESTAMP'),
+    17=>array('left','left','center','center','center','center','left','center'),
+    18=>array('DATE','REPORT','TIMESTAMP'),19=>array('WEEK','WEEKLY REPORT','USERSTAMP','TIMESTAMP'),
+    20=>array('DATE','DESCRIPTION','USERSTAMP','TIMESTAMP'),21=>array('EMPLOYEE NAME','REPORT','USERSTAMP','TIMESTAMP'),
+    22=>array('DATE','REPORT','USERSTAMP','TIMESTAMP'),23=>array('EMPLOYEE NAME','CLOCK IN','CLOCK IN LOCATION','CLOCK OUT','CLOCK OUT LOCATION'),24=>array('DATE','CLOCK IN','CLOCK IN LOCATION','CLOCK OUT','CLOCK OUT LOCATION'));
 //APPEND TABLE HEADER
 $arrHeader=array(1=>array('EMPLOYEE NAME','ROLE','REC VER','JOIN DATE','TERMINATION DATE','REASON OF TERMINATION','EMP TYPE','USERSTAMP','TIMESTAMP'),
     3=>array('HISTORY','USERSTAMP','TIMESTAMP'),
@@ -48,16 +61,16 @@ $arrHeader=array(1=>array('EMPLOYEE NAME','ROLE','REC VER','JOIN DATE','TERMINAT
     22=>array('DATE','REPORT','USERSTAMP','TIMESTAMP'),23=>array('EMPLOYEE NAME','CLOCK IN','CLOCK IN LOCATION','CLOCK OUT','CLOCK OUT LOCATION'),24=>array('DATE','CLOCK IN','CLOCK IN LOCATION','CLOCK OUT','CLOCK OUT LOCATION'));
 //TABLE HEADER WIDTH
 $arrHeaderWidth=array(1=>array(20,20,20,150,20,20,20,20,20),
-    3=>array(400,180,180),
+    3=>array(300,180,145),
     4=>array(300,100),
     5=>array(200,60,60,60),
     6=>array(200,60,60,60),7=>array(100,60,60,60),8=>array(100,60,60,60),9=>array(100,60,60,60),9=>array(100,60,60,60),10=>array(100,60,60,60)
 ,11=>array(100,100,100,100,100),12=>array(200,100,100,100,100),13=>array(200,60),14=>array(200,60),15=>array(200,60),16=>array(60,160,160,160),
-    17=>array(180,200,60,80,80,80,180,130),18=>array(80,300,180),19=>array(130,450,180,140),20=>array(80,300,180,180),21=>array(220,610,180,145),22=>array(85,610,180,145),
+    17=>array(180,200,60,80,80,80,180,130),18=>array(80,550,145),19=>array(130,450,180,140),20=>array(80,300,180,180),21=>array(220,610,180,145),22=>array(85,610,180,145),
     23=>array(200,100,200,100,200),24=>array(80,100,200,100,200));
 //TABLE WIDTH
 
-$arrTableWidth=array(1=>1500,3=>1800,4=>600,5=>700,6=>700,7=>700,8=>800,9=>700,9=>700,10=>700,11=>800,12=>800,13=>700,14=>700,15=>700,16=>1000,17=>1400,18=>1200,19=>1300,20=>800,21=>1600,22=>1400,23=>1500,24=>1500);
+$arrTableWidth=array(1=>1500,3=>1500,4=>600,5=>700,6=>700,7=>700,8=>800,9=>700,9=>700,10=>700,11=>800,12=>800,13=>700,14=>700,15=>700,16=>1000,17=>1400,18=>1000,19=>1300,20=>800,21=>1600,22=>1400,23=>1500,24=>1500);
 //script to execute call query
 if(($flag==3)||($flag==5)||($flag==6)||($flag==19)||($flag==7)||($flag==8)||($flag==9)||($flag==10)||($flag==11)||($flag==12)||($flag==13)||($flag==14)||($flag==15)){
     $result = $con->query($arrcall[$flag]);
@@ -86,7 +99,7 @@ $arrQuery=array( 1=>"SELECT AE.EMPLOYEE_NAME,RC.RC_NAME,UA.UA_REC_VER,DATE_FORMA
     15=>"SELECT REPORT_DATE,BANDWIDTH_MB from $temp_table ",
     16=>"SELECT DATE_FORMAT(PH.PH_DATE,'%d-%m-%Y') AS PH_DATE,PH.PH_DESCRIPTION,ULD.ULD_LOGINID,DATE_FORMAT(PH.PH_TIMESTAMP , '%d-%m-%Y %h:%m:%s') AS PH_TIMESTAMP FROM PUBLIC_HOLIDAY PH ,USER_LOGIN_DETAILS ULD WHERE PH.ULD_ID=ULD.ULD_ID AND YEAR(PH.PH_DATE)='$inputValOne'",
     17=>"SELECT PD.PD_PROJECT_NAME,PS.PS_PROJECT_DESCRIPTION,PS.PS_REC_VER,PC.PC_DATA,DATE_FORMAT(PS.PS_START_DATE,'%d-%m-%Y') as PS_START_DATE,DATE_FORMAT(PS.PS_END_DATE,'%d-%m-%Y')as PS_END_DATE,ULD.ULD_LOGINID as  ULD_USERSTAMP,DATE_FORMAT(CONVERT_TZ(PD.PD_TIMESTAMP,'+00:00','+08:00'), '%d-%m-%Y %T') as TIMESTAMP FROM PROJECT_DETAILS PD JOIN PROJECT_STATUS PS on PD.PD_ID = PS.PD_ID JOIN PROJECT_CONFIGURATION PC on PS.PC_ID = PC.PC_ID JOIN USER_LOGIN_DETAILS ULD on PD.ULD_ID=ULD.ULD_ID ORDER BY PD.PD_PROJECT_NAME ASC",
-    18=>"SELECT DATE_FORMAT(UARD_DATE,'%d-%m-%Y') AS UARD_DATE,UARD_REPORT,UARD_REASON,b.AC_DATA as UARD_PERMISSION, c.AC_DATA as UARD_ATTENDANCE,G.AC_DATA AS UARD_AM_SESSION,H.AC_DATA AS UARD_PM_SESSION,I.ULD_LOGINID AS ULD_ID,DATE_FORMAT(CONVERT_TZ(UARD.UARD_TIMESTAMP,'+00:00','+08:00'), '%d-%m-%Y %T') AS UARD_TIMESTAMP,UARD_BANDWIDTH FROM USER_ADMIN_REPORT_DETAILS UARD LEFT JOIN ATTENDANCE_CONFIGURATION b ON b.AC_ID=UARD.UARD_PERMISSION left JOIN ATTENDANCE_CONFIGURATION c on c.AC_ID=UARD.UARD_ATTENDANCE LEFT JOIN ATTENDANCE_CONFIGURATION G ON G.AC_ID=UARD.UARD_AM_SESSION LEFT JOIN ATTENDANCE_CONFIGURATION H ON H.AC_ID=UARD.UARD_PM_SESSION
+    18=>"SELECT DATE_FORMAT(UARD_DATE,'%d-%m-%Y') AS UARD_DATE,UARD_REPORT,UARD_REASON,b.AC_DATA as UARD_PERMISSION, c.AC_DATA as UARD_ATTENDANCE,G.AC_DATA AS UARD_AM_SESSION,H.AC_DATA AS UARD_PM_SESSION,I.ULD_LOGINID AS ULD_ID,DATE_FORMAT(CONVERT_TZ(UARD.UARD_TIMESTAMP,'+00:00','+08:00'), '%d-%m-%Y %T') AS UARD_TIMESTAMP FROM USER_ADMIN_REPORT_DETAILS UARD LEFT JOIN ATTENDANCE_CONFIGURATION b ON b.AC_ID=UARD.UARD_PERMISSION left JOIN ATTENDANCE_CONFIGURATION c on c.AC_ID=UARD.UARD_ATTENDANCE LEFT JOIN ATTENDANCE_CONFIGURATION G ON G.AC_ID=UARD.UARD_AM_SESSION LEFT JOIN ATTENDANCE_CONFIGURATION H ON H.AC_ID=UARD.UARD_PM_SESSION
          LEFT JOIN USER_LOGIN_DETAILS I ON I.ULD_ID=UARD.ULD_ID where UARD_DATE BETWEEN '$inputValOne' AND '$inputValTwo' AND UARD.ULD_ID=(SELECT ULD_ID FROM USER_LOGIN_DETAILS where ULD_LOGINID='$USERSTAMP') ORDER BY UARD.UARD_DATE",
     19=>"SELECT WEEK,WEEKLY_REPORT,USERSTAMP,DATE_FORMAT(CONVERT_TZ(TIMESTAMP,'+00:00','+08:00'), '%d-%m-%Y %T')as TIMESTAMP from $temp_table",
     20=>"SELECT DISTINCT DATE_FORMAT(A.OED_DATE,'%d-%m-%Y') AS OED_DATE,A.OED_DESCRIPTION,B.ULD_LOGINID,DATE_FORMAT(CONVERT_TZ(A.OED_TIMESTAMP,'+00:00','+08:00'), '%d-%m-%Y %T')as OED_TIMESTAMP FROM ONDUTY_ENTRY_DETAILS A
@@ -117,35 +130,42 @@ while($row=mysqli_fetch_array($stmtExecute)){
     if($flag==18 || $flag==21 || $flag==22){
         $appendTable .='<tr>';
         $x=0;
-        $appendTable .="<td>".$row[$x]."</td>";
+        if($flag==22 || $flag==18){
+            $appendTable .="<td align='center'>".$row[$x]."</td>";
+        }
+        if($flag==21){
+            $appendTable .="<td align='left'>".$row[$x]."</td>";
+        }
         if($row[$x+4]==1){
             if($row[$x+3]!=null)
-                $appendTable .="<td>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>PERMISSION :".$row[$x+3]."</td>";
+                $appendTable .="<td align='left'>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>PERMISSION :".$row[$x+3]."</td>";
             else if($row[$x+3]==null)
-                $appendTable .="<td>".str_replace("\n", "<br/>", $row[$x+1])."</td>";
+                $appendTable .="<td align='left'>".str_replace("\n", "<br/>", $row[$x+1])."</td>";
         }
         else if($row[$x+4]=='OD'){
-            $appendTable .="<td>ONDUTY - REASON:".$row[$x+2]."</td>";
+            $appendTable .="<td align='left'>ONDUTY - REASON:".$row[$x+2]."</td>";
         }
         else if($row[$x+4]=='0.5'){
             if($row[$x+5]=='ABSENT')
-                $appendTable .="<td>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ABSENT (AM)- REASON:".$row[$x+2]."</td>";
+                $appendTable .="<td align='left'>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ABSENT (AM)- REASON:".$row[$x+2]."</td>";
             else if($row[$x+6]=='ABSENT')
-                $appendTable .="<td>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ABSENT (PM)- REASON:".$row[$x+2]."</td>";
+                $appendTable .="<td align='left'>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ABSENT (PM)- REASON:".$row[$x+2]."</td>";
         }
         else if($row[$x+4]=='0'){
-            $appendTable .="<td>ABSENT - REASON:".$row[$x+2]."</td>";
+            $appendTable .="<td align='left'>ABSENT - REASON:".$row[$x+2]."</td>";
         }
         else if($row[$x+4]=='0.5OD'){
             if($row[$x+5]=='ONDUTY')
-                $appendTable .="<td>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ONDUTY (AM)- REASON:".$row[$x+2]."</td>";
+                $appendTable .="<td align='left'>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ONDUTY (AM)- REASON:".$row[$x+2]."</td>";
             else if($row[$x+6]=='ONDUTY')
-                $appendTable .="<td>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ONDUTY (PM)- REASON:".$row[$x+2]."</td>";
+                $appendTable .="<td align='left'>".str_replace("\n", "<br/>", $row[$x+1])."<br><br>ONDUTY (PM)- REASON:".$row[$x+2]."</td>";
         }
         if($flag==21 || $flag==22)
-            $appendTable .="<td>".$row[7]."</td>";
+            $appendTable .="<td align='left'>".$row[7]."</td>";
         if($flag==21 || $flag==22)
-            $appendTable .="<td>".$row[8]."</td>";
+            $appendTable .="<td align='center'>".$row[8]."</td>";
+        if($flag==18)
+            $appendTable .="<td align='center'>".$row[8]."</td>";
     }
     else if($flag==19){
         $appendTable .='<tr>';
@@ -164,9 +184,9 @@ while($row=mysqli_fetch_array($stmtExecute)){
             if(($flag == 3) &&($x == 0)){
                 $appendTable .="<td >UPDATION/DELETION: ".$row[$x]."<br><br>TABLE NAME: ".$row[$x+1]."<br><br>OLD VALUE :".htmlspecialchars(str_replace(',', ' , ', $row[$x+2]))."<br><br>NEW VALUE :".htmlspecialchars($row[$x+3])."</td>";
             }else if((($flag == 3) && ($x == 4))||(($flag == 3) && ($x ==5))){
-                $appendTable .="<td>".$row[$x]."</td>";}
+                $appendTable .="<td align='".$arrAlignment[$flag][$x-3]."'>".$row[$x]."</td>";}
             else if($flag != 3){
-                $appendTable .="<td align='center'>".$row[$x]."</td>";
+                $appendTable .="<td align='".$arrAlignment[$flag][$x]."'>".$row[$x]."</td>";
             }}
     }
     $appendTable .='</tr>';

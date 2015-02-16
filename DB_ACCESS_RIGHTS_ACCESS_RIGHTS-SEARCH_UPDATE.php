@@ -156,8 +156,25 @@ if(isset($_REQUEST)){
         {
             $URSRC_voterid='';
         }
+        $drive = new Google_Client();
+        $drive->setClientId($ClientId);
+        $drive->setClientSecret($ClientSecret);
+        $drive->setRedirectUri($RedirectUri);
+        $drive->setScopes(array($DriveScopes,$CalenderScopes));
+        $drive->setAccessType('online');
+        $authUrl = $drive->createAuthUrl();
+        $refresh_token= $Refresh_Token;
+        $drive->refreshToken($refresh_token);
+        $service = new Google_Service_Drive($drive);
+        $parentfolderid=get_parentfolder_id();
+        $daterep=str_replace('-','',$date);
+        $subfoldername=$URSRC_firstname.'_'.$daterep.'_'.date('His');
+         $sub_folderid=createSubfolder($service,$subfoldername, 'EMPLOYEE IMAGE FOLDER', $parentfolderid, 'application/vnd.google-apps.folder');
+if($sub_folderid!=''){
         $con->autocommit(false);
-        $result = $con->query("CALL SP_TS_LOGIN_CREATION_INSERT(1,'$loginid',$empty_field,'$final_radioval','$finaldate','$emp_type','$URSRC_firstname','$URSRC_lastname','$URSRC_finaldob','$radio_gender','$URSRC_designation','$URSRC_Mobileno','$URSRC_kinname','$URSRC_relationhd','$URSRC_mobile','$URSRC_bankname','$URSRC_brancname','$URSRC_acctname','$URSRC_acctno','$URSRC_ifsccode','$URSRC_acctype','$URSRC_branchaddr','$URSRC_aadharno','$URSRC_passportno','$URSRC_voterid','$comments','$URSRC_laptopno','$URSRC_chrgrno','$URSRC_bag','$URSRC_mouse','$URSRC_dooracess','$URSRC_idcard','$URSRC_headset','$USERSTAMP',@success_flag)");
+//    echo "CALL SP_TS_LOGIN_CREATION_INSERT(1,'$loginid',$empty_field,'$final_radioval','$finaldate','$emp_type','$URSRC_firstname','$URSRC_lastname','$URSRC_finaldob','$radio_gender','$URSRC_designation','$URSRC_Mobileno','$URSRC_kinname','$URSRC_relationhd','$URSRC_mobile','$URSRC_bankname','$URSRC_brancname','$URSRC_acctname','$URSRC_acctno','$URSRC_ifsccode','$URSRC_acctype','$URSRC_branchaddr','$URSRC_aadharno','$URSRC_passportno','$URSRC_voterid','$comments','$sub_folderid',$URSRC_laptopno','$URSRC_chrgrno','$URSRC_bag','$URSRC_mouse','$URSRC_dooracess','$URSRC_idcard','$URSRC_headset','$USERSTAMP',@success_flag)";
+
+        $result = $con->query("CALL SP_TS_LOGIN_CREATION_INSERT(1,'$loginid',$empty_field,'$final_radioval','$finaldate','$emp_type','$URSRC_firstname','$URSRC_lastname','$URSRC_finaldob','$radio_gender','$URSRC_designation','$URSRC_Mobileno','$URSRC_kinname','$URSRC_relationhd','$URSRC_mobile','$URSRC_bankname','$URSRC_brancname','$URSRC_acctname','$URSRC_acctno','$URSRC_ifsccode','$URSRC_acctype','$URSRC_branchaddr','$URSRC_aadharno','$URSRC_passportno','$URSRC_voterid','$comments','$sub_folderid','$URSRC_laptopno','$URSRC_chrgrno','$URSRC_bag','$URSRC_mouse','$URSRC_dooracess','$URSRC_idcard','$URSRC_headset','$USERSTAMP',@success_flag)");
         if(!$result) die("CALL failed: (" . $con->errno . ") " . $con->error);
         $select = $con->query('SELECT @success_flag');
         $result = $select->fetch_assoc();
@@ -235,6 +252,7 @@ if(isset($_REQUEST)){
                 $ss_flag=1;
             } catch (Exception $e) {
                 $ss_flag=0;
+                delete_file($service,$sub_folderid);
                 $con->rollback();
             }
             $loginid_name = strtoupper(substr($loginid, 0, strpos($loginid, '@')));
@@ -272,6 +290,7 @@ if(isset($_REQUEST)){
                     if(count($file_array)==0){
                         $file_flag=0;
                         URSRC_unshare_document($loginid,$fileId);
+                        delete_file($service,$sub_folderid);
                         $con->rollback();
 
                     }
@@ -289,6 +308,7 @@ if(isset($_REQUEST)){
                             delete_file($service,$file_array[$i]);
 
                         }
+                        delete_file($service,$sub_folderid);
                         $con->rollback();
                     }
                 }
@@ -303,13 +323,16 @@ if(isset($_REQUEST)){
 
                     if($cal_flag==0){
                         URSRC_unshare_document($loginid,$fileId);
+                        delete_file($service,$sub_folderid);
                         $con->rollback();
                     }
 
                 }
 
             }
+
             if(($ss_flag==1)&&($cal_flag==1)){
+
                 $email_body;
                 $body_msg =explode("^", $body);
                 $length=count($body_msg);
@@ -319,6 +342,8 @@ if(isset($_REQUEST)){
                 $replace= array("[LOGINID]", "[LINK]","[SSLINK]", "[VLINK]","[DES]");
                 $str_replaced  = array($URSRC_firstname,$site_link, $ss_link, $youtubelink,'<b>'.$URSRC_designation.'</b>');
                 $final_message = str_replace($replace, $str_replaced, $email_body);
+
+
                 $select_template="SELECT * FROM EMAIL_TEMPLATE_DETAILS WHERE ET_ID=9";
                 $select_template_rs=mysqli_query($con,$select_template);
                 if($row=mysqli_fetch_array($select_template_rs)){
@@ -382,6 +407,7 @@ if(isset($_REQUEST)){
 
 
                 $newphrase = str_replace($replace, $str_replaced, $emp_email_body);
+
                 $final_message=$final_message.'<br>'.$newphrase;
                 $mail_options = [
                     "sender" =>$admin,
@@ -428,10 +454,16 @@ if(isset($_REQUEST)){
             $flag_array=[$flag,$ss_flag,$cal_flag,$fileId,$file_flag,$folderid];
         }
         else{
-
+            delete_file($service,$sub_folderid);
             $flag_array=[$flag];
         }
         $con->commit();
+}
+        else{
+            $flag=0;
+            $flag_array=[$flag,$parentfolderid];
+
+        }
         echo JSON_ENCODE($flag_array);
     }
     //FETCHING LOGIN DETAILS
@@ -1210,6 +1242,10 @@ function URSRC_calendar_create($loginid_name,$URSC_uld_id,$finaldate,$calenderid
     if($status=='JOIN DATE'){
         $event->setDescription($URSC_uld_id);
     }
+//    else if($status=='BIRTH DATE'){
+//        $event->setDescription($URSC_uld_id.'B');
+//
+//    }
     $start = new Google_Service_Calendar_EventDateTime();
     $start->setDate($finaldate);//setDate('2014-11-18');
     $event->setStart($start);
@@ -1419,4 +1455,34 @@ function delete_file($service,$fileid){
     return $f;
 
 }
+
+//create folder
+
+function createSubfolder($service, $title, $description, $parentId, $mimeType) {
+    $file = new Google_Service_Drive_DriveFile();
+    $file->setTitle($title);
+    $file->setDescription($description);
+    $file->setMimeType($mimeType);
+
+    // Set the parent folder.
+    if ($parentId != null) {
+        $parent = new Google_Service_Drive_ParentReference();
+        $parent->setId($parentId);
+        $file->setParents(array($parent));
+    }
+    try
+    {
+
+        $createdFile = $service->files->insert($file, array(
+            'mimeType' => 'application/vnd.google-apps.folder',
+        ));
+
+        // Uncomment the following line to print the File ID
+        // print 'File ID: %s' % $createdFile->getId();
+        $fileid = $createdFile->getId();
+    } catch (Exception $e) {
+    }
+    return $fileid;
+}
+
 ?>

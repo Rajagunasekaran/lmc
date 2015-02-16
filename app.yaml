@@ -110,8 +110,6 @@ handlers:
 - url: /ALLIANCE_REPORT_MAIL
   script: ALLIANCE_REPORT_MAIL.php
 
-- url: /EXCEL_REPORT_MAIL
-  script: EXCEL_REPORT_MAIL.php
 
 - url: .*
   script: MENU.php

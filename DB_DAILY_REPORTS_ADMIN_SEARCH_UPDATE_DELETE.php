@@ -15,7 +15,7 @@ if(isset($_REQUEST)){
     date_default_timezone_set('Asia/Singapore');
     $USERSTAMP=$UserStamp;
     $bucket_id=get_appbucket_id();
-    $driveparentid=get_parentfolder_id();
+//    unlink($bucket_id.'images/');
     if($_REQUEST["option"]=="login_id"){
         $ADM_uld_id=$_REQUEST['login_id'];
         $admin_searchmin_date=mysqli_query($con,"SELECT MIN(UARD_DATE) as UARD_DATE FROM USER_ADMIN_REPORT_DETAILS where ULD_ID='$ADM_uld_id' ");
@@ -115,7 +115,7 @@ where UARD_DATE BETWEEN '$startdate' AND '$enddate' and UARD.ULD_ID='$ure_uld_id
             $final_values=(object) ['id'=>$ure_id,'date' => $ure_date,'report' =>$ure_report,'report1' =>$ure_reprt,'userstamp'=> $ure_userstamp,'timestamp'=>$ure_timestamp,'reason'=>$ure_reason,'reason1'=>$ure_reason_txt,'permission'=>$ure_permission,'attendance'=>$ure_attendance,'pdid'=>$ure_pdid,'morningsession'=>$ure_morningsession,'afternoonsession'=>$ure_afternoonsession,'user_stamp'=>$userstamp,'flag'=>$ure_flag,'imageurl'=>$base64];
             $ure_values[]=$final_values;
         }
-        echo json_encode($ure_values);
+        echo JSON_ENCODE($ure_values);
     }
     if($_REQUEST['option']=='ALLDATE')
     {
@@ -176,6 +176,7 @@ INNER JOIN USER_ACCESS D LEFT JOIN ATTENDANCE_CONFIGURATION G ON G.AC_ID=A.UARD_
             $finaldate = date('Y-m-d',strtotime($date));
         }
         $imagedata=$_POST['string'];
+        $driveparentid=get_emp_folderid($ADM_uld_id);
         $drive = new Google_Client();
         $drive->setClientId($ClientId);
         $drive->setClientSecret($ClientSecret);
@@ -197,10 +198,13 @@ INNER JOIN USER_ACCESS D LEFT JOIN ATTENDANCE_CONFIGURATION G ON G.AC_ID=A.UARD_
             $options = ['gs' => ['Content-Type' => 'image/png']];
             $ctx = stream_context_create($options);
             file_put_contents($uploadimgname, $data, 0, $ctx);
-            $filesid=insertFile($service,$filename,$filedesc,$driveparentid,'image/png',$uploadimgname);
+            $finalvalue=insertFile($service,$filename,$filedesc,$driveparentid,'image/png',$uploadimgname);
+            $filesid=$finalvalue[0];
+            $fileflg=$finalvalue[1];
         }
         elseif((($attendance=="0") && ($ampm=="FULLDAY")) || (($attendance=="OD") && ($ampm=="FULLDAY"))){
             $filesid='';
+            $fileflg=1;
         }
         $length=count($project);
         if($flag_abs=='on'){
@@ -371,6 +375,7 @@ INNER JOIN USER_ACCESS D LEFT JOIN ATTENDANCE_CONFIGURATION G ON G.AC_ID=A.UARD_
         }
         $report= $con->real_escape_string($report);
         $reason= $con->real_escape_string($reason);
+        if($fileflg!=0){
         $result = $con->query("CALL SP_TS_DAILY_REPORT_SEARCH_UPDATE($id,'$report','$reason','$finaldate',$ADM_urc_id,'$login_id','$perm_time','$ADM_attendance','$projectid','$uard_morning_session','$uard_afternoon_session','$USERSTAMP','$flag_absent','$filesid',@success_flag)");
         if(!$result) die("CALL failed: (" . $con->errno . ") " . $con->error);
         $select = $con->query('SELECT @success_flag');
@@ -383,6 +388,11 @@ INNER JOIN USER_ACCESS D LEFT JOIN ATTENDANCE_CONFIGURATION G ON G.AC_ID=A.UARD_
             $delpath= $bucket_id.'images/'.$deletUrl.'.png';
             unlink($delpath);
             delete_file($service,$filesid);
+        }
+            $flagarry=[$flag];
+        }else{
+            $retnflag=0;
+            $flagarry=[$retnflag,$driveparentid];
         }
         $select_admin="SELECT * FROM VW_ACCESS_RIGHTS_TERMINATE_LOGINID WHERE URC_DATA='ADMIN'";
         $select_sadmin="SELECT * FROM VW_ACCESS_RIGHTS_TERMINATE_LOGINID WHERE URC_DATA='SUPER ADMIN'";
@@ -474,7 +484,7 @@ INNER JOIN USER_ACCESS D LEFT JOIN ATTENDANCE_CONFIGURATION G ON G.AC_ID=A.UARD_
             $drop_query="DROP TABLE $temp_tickler_history ";
             mysqli_query($con,$drop_query);
         }
-        echo $flag;
+        echo json_encode($flagarry);
     }
     if($_REQUEST['option']=='DELETE')
     {
@@ -599,12 +609,14 @@ function insertFile($service, $title, $description, $parentId,$mimeType,$uploadf
         ));
 
         $fileid = $createdFile->getId();
+        $fileflag=1;
     }
     catch (Exception $e)
     {
-        echo "An error occurred: " . $e->getMessage();
+        $fileflag=0;
     }
-    return $fileid;
+    $finalarry=[$fileid,$fileflag];
+    return $finalarry;
 }
 function delete_file($service,$fileid){
 

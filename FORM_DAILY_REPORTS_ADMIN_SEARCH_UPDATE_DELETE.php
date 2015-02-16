@@ -106,8 +106,7 @@ $(document).ready(function(){
             allmindate=value_array[2];
             err_msg=value_array[3];
             odmindate=value_array[8];
-            odmaxdate=value_array[9];
-            if(allmindate=='01-01-1970' || odmindate=='01-01-1970')
+            if(allmindate=='01-01-1970' && odmindate=='01-01-1970')
             {
                 $('#ASRC_UPD_DEL_form_adminsearchupdate').replaceWith('<p><label class="errormsg">'+err_msg[10]+'</label></p>');
             }
@@ -116,7 +115,6 @@ $(document).ready(function(){
                 active_emp=value_array[5];
                 nonactive_emp=value_array[6];
                 allmaxdate=value_array[7];
-                odmindate=value_array[8];
                 odmaxdate=value_array[9];
                 userstamp=value_array[10];
                 $('#ASRC_UPD_DEL_tb_dte').datepicker("option","minDate",allmindate);
@@ -386,42 +384,49 @@ $(document).ready(function(){
     });
     //CHANGE EVENT FOR ALL ACTIVE  RANGE RADIO BTN
     $(document).on('change','#ASRC_UPD_DEL_rd_allactveemp',function(){
-        $('#ASRC_UPD_DEL_lbl_reportdte').hide();
-        $('#ASRC_UPD_DEL_ta_reportdate').hide();
-        $('#ASRC_UPD_DEL_lbl_allactveemps').show();
-        $('#ASRC_UPD_DEL_btn_searchupd').hide();
-        $('#ASRC_UPD_DEL_btn_search').hide();
-        $('#ASRC_UPD_DEL_btn_srch').hide();
-        $('#ASRC_UPD_DEL_tb_dte').show();
-        $('#ASRC_UPD_DEL_lbl_dte').show();
-        $('#ASRC_UPD_DEL_tb_dte').val('');
-        $('#ASRC_UPD_DEL_btn_allsearch').show();
-        $("#ASRC_UPD_DEL_btn_allsearch").attr("disabled", "disabled");
-        $('#ASRC_UPD_DEL_lbl_session').hide();
         $('#ASRC_UPD_DEL_lbl_nonactveemp').hide();
         $('#ASRC_UPD_DEL_rd_nonactveemp').hide();
         $('#ASRC_UPD_DEL_lbl_actveemp').hide();
         $('#ASRC_UPD_DEL_rd_actveemp').hide();
         $('#ASRC_UPD_DEL_lbl_btwnranges').hide();
-        $('#ASRC_UPD_DEL_lbl_strtdte').hide();
-        $('#ASRC_UPD_DEL_tb_strtdte').hide();
-        $('#ASRC_UPD_DEL_lbl_enddte').hide();
-        $('#ASRC_UPD_DEL_tb_enddte').hide();
         $('#ASRC_UPD_DEL_lbl_loginid').hide();
         $('#ASRC_UPD_DEL_lb_loginid').hide();
-        $('#ASRC_UPD_DEL_tble_paint').hide();
-        $('#ASRC_UPD_DEL_tbl_htmltable').hide();
-        $('#ASRC_UPD_DEL_errmsg').hide();
-        ASRC_UPD_DEL_clear();
-        $('#ASRC_UPD_DEL_btn_del').hide();
-        $('#ASRC_UPD_DEL_div_tablecontainer').hide();
-        $('#ASRC_UPD_DEL_div_header').hide();
-        $('#ASRC_UPD_btn_pdf').hide();
-        $('#ASRC_UPD_DEL_div_headers').hide();
-        $('#ASRC_UPD_btn_od_pdf').hide();
-        $("#ASRC_UPD_DEL_chk_flag").hide();
-        $("#ASRC_UPD_DEL_lbl_flag").hide();
+        if(allmindate=='01-01-1970')
+        {
+            $('#ASRC_UPD_DEL_errmsg').text(err_msg[10]).show();
+        }
+        else
+        {
+            $('#ASRC_UPD_DEL_lbl_reportdte').hide();
+            $('#ASRC_UPD_DEL_ta_reportdate').hide();
+            $('#ASRC_UPD_DEL_lbl_allactveemps').show();
+            $('#ASRC_UPD_DEL_btn_searchupd').hide();
+            $('#ASRC_UPD_DEL_btn_search').hide();
+            $('#ASRC_UPD_DEL_btn_srch').hide();
+            $('#ASRC_UPD_DEL_tb_dte').show();
+            $('#ASRC_UPD_DEL_lbl_dte').show();
+            $('#ASRC_UPD_DEL_tb_dte').val('');
+            $('#ASRC_UPD_DEL_btn_allsearch').show();
+            $("#ASRC_UPD_DEL_btn_allsearch").attr("disabled", "disabled");
+            $('#ASRC_UPD_DEL_lbl_session').hide();
+            $('#ASRC_UPD_DEL_lbl_strtdte').hide();
+            $('#ASRC_UPD_DEL_tb_strtdte').hide();
+            $('#ASRC_UPD_DEL_lbl_enddte').hide();
+            $('#ASRC_UPD_DEL_tb_enddte').hide();
+            $('#ASRC_UPD_DEL_tble_paint').hide();
+            $('#ASRC_UPD_DEL_tbl_htmltable').hide();
+            $('#ASRC_UPD_DEL_errmsg').hide();
+            ASRC_UPD_DEL_clear();
+            $('#ASRC_UPD_DEL_btn_del').hide();
+            $('#ASRC_UPD_DEL_div_tablecontainer').hide();
+            $('#ASRC_UPD_DEL_div_header').hide();
+            $('#ASRC_UPD_btn_pdf').hide();
+            $('#ASRC_UPD_DEL_div_headers').hide();
+            $('#ASRC_UPD_btn_od_pdf').hide();
+            $("#ASRC_UPD_DEL_chk_flag").hide();
+            $("#ASRC_UPD_DEL_lbl_flag").hide();
 //        $('#ASRC_UPD_DEL_banerrmsg').hide();
+        }
     });
     // CHANGE EVENT FOR LOGINID LISTBOX
     $(document).on('change','#ASRC_UPD_DEL_lb_loginid',function(){
@@ -446,14 +451,22 @@ $(document).ready(function(){
     $(document).on('change','#ASRC_UPD_DEL_rd_actveemp',function(){
         if($('#ASRC_UPD_DEL_rd_actveemp').attr('checked',true))
         {
-            var active_employee='<option>SELECT</option>';
-            for (var i=0;i<active_emp.length;i++) {
-                active_employee += '<option value="' + active_emp[i][1] + '">' + active_emp[i][0] + '</option>';
+            if(active_emp.length!=0){
+                var active_employee='<option>SELECT</option>';
+                for (var i=0;i<active_emp.length;i++) {
+                    active_employee += '<option value="' + active_emp[i][1] + '">' + active_emp[i][0] + '</option>';
+                }
+                $('#ASRC_UPD_DEL_lb_loginid').html(active_employee);
+                $('#ASRC_UPD_DEL_lbl_loginid').show();
+                $('#ASRC_UPD_DEL_lb_loginid').val('SELECT').show();
+                $('#ASRC_UPD_DEL_errmsg').hide();
             }
-            $('#ASRC_UPD_DEL_lb_loginid').html(active_employee);
+            else{
+                $('#ASRC_UPD_DEL_errmsg').text(err_msg[10]).show();
+                $('#ASRC_UPD_DEL_lbl_loginid').hide();
+                $('#ASRC_UPD_DEL_lb_loginid').val('SELECT').hide();
+            }
         }
-        $('#ASRC_UPD_DEL_lbl_loginid').show();
-        $('#ASRC_UPD_DEL_lb_loginid').val('SELECT').show();
         $('#ASRC_UPD_DEL_tble_paint').hide();
         $('#ASRC_UPD_DEL_lbl_btwnranges').show();
         ASRC_UPD_DEL_clear()
@@ -466,7 +479,6 @@ $(document).ready(function(){
         $('#ASRC_UPD_DEL_btn_srch').hide();
         $('#ASRC_UPD_DEL_lbl_session').hide();
         $('#ASRC_UPD_DEL_tbl_htmltable').hide();
-        $('#ASRC_UPD_DEL_errmsg').hide();
         $('#ASRC_UPD_DEL_div_tablecontainer').hide();
         $('#ASRC_UPD_DEL_div_header').hide();
         $('#ASRC_UPD_btn_pdf').hide();
@@ -481,14 +493,23 @@ $(document).ready(function(){
     $(document).on('change','#ASRC_UPD_DEL_rd_nonactveemp',function(){
         if($('#ASRC_UPD_DEL_rd_nonactveemp').attr('checked',true))
         {
-            var nonactive_employee='<option>SELECT</option>';
-            for (var i=0;i<nonactive_emp.length;i++) {
-                nonactive_employee += '<option value="' + nonactive_emp[i][1] + '">' + nonactive_emp[i][0] + '</option>';
+            if(nonactive_emp.length!=0){
+                var nonactive_employee='<option>SELECT</option>';
+                for (var i=0;i<nonactive_emp.length;i++) {
+                    nonactive_employee += '<option value="' + nonactive_emp[i][1] + '">' + nonactive_emp[i][0] + '</option>';
+                }
+                $('#ASRC_UPD_DEL_lb_loginid').html(nonactive_employee);
+                $('#ASRC_UPD_DEL_lbl_loginid').show();
+                $('#ASRC_UPD_DEL_lb_loginid').val('SELECT').show();
+                $('#ASRC_UPD_DEL_errmsg').hide();
             }
-            $('#ASRC_UPD_DEL_lb_loginid').html(nonactive_employee);
+            else
+            {
+                $('#ASRC_UPD_DEL_errmsg').text(err_msg[10]).show();
+                $('#ASRC_UPD_DEL_lbl_loginid').hide();
+                $('#ASRC_UPD_DEL_lb_loginid').val('SELECT').hide();
+            }
         }
-        $('#ASRC_UPD_DEL_lbl_loginid').show();
-        $('#ASRC_UPD_DEL_lb_loginid').val('SELECT').show();
         $('#ASRC_UPD_DEL_tble_paint').hide();
         ASRC_UPD_DEL_clear()
         $('#ASRC_UPD_DEL_lbl_btwnranges').show();
@@ -501,7 +522,6 @@ $(document).ready(function(){
         $('#ASRC_UPD_DEL_lbl_session').hide();
         $('#ASRC_UPD_DEL_tbl_htmltable').hide();
         $('#ASRC_UPD_DEL_btn_del').hide();
-        $('#ASRC_UPD_DEL_errmsg').hide();
 //        $('#ASRC_UPD_DEL_banerrmsg').hide();
     });
     //CHANGE EVENT FOR LOGIN ID LISTBX
@@ -1525,7 +1545,9 @@ $(document).ready(function(){
             type: "POST",
             data: formElement+"&choice="+choice+"&string="+imageData,
             success: function(response){
-                var msg_alert=response;
+                var recived=JSON.parse(response);
+                var msg_alert=recived[0];
+                var parnt_foldid=recived[1];
                 $('.preloader', window.parent.document).hide();
                 if(msg_alert==1)
                 {
@@ -1538,7 +1560,7 @@ $(document).ready(function(){
                     $('#ASRC_UPD_DEL_ta_reportdate').hide();
                     $('#ASRC_UPD_DEL_errmsg').hide();
                 }
-                else if(msg_alert==0)
+                if(msg_alert==0)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ADMIN SEARCH AND UPDATE",msgcontent:err_msg[7],position:{top:150,left:500}}});
                     ASRC_UPD_DEL_clear()
@@ -1549,7 +1571,19 @@ $(document).ready(function(){
                     $('#ASRC_UPD_DEL_ta_reportdate').hide();
                     $('#ASRC_UPD_DEL_errmsg').hide();
                 }
-                else
+                if(msg_alert==0 && parnt_foldid!='')
+                {
+                    var foldererrmsg=err_msg[14].replace("[FID]",parnt_foldid);
+                    $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ADMIN SEARCH AND UPDATE",msgcontent:foldererrmsg,position:{top:150,left:500}}});
+                    ASRC_UPD_DEL_clear()
+                    flextablerange()
+                    $("#ASRC_UPD_DEL_btn_del").hide();
+                    $("#ASRC_UPD_DEL_btn_srch").hide();
+                    $('#ASRC_UPD_DEL_lbl_reportdte').hide();
+                    $('#ASRC_UPD_DEL_ta_reportdate').hide();
+                    $('#ASRC_UPD_DEL_errmsg').hide();
+                }
+                if(msg_alert!=0 && msg_alert!=1)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ADMIN SEARCH AND UPDATE",msgcontent:msg_alert,position:{top:150,left:500}}});
                     ASRC_UPD_DEL_clear()
@@ -1614,21 +1648,27 @@ $(document).ready(function(){
         }
         else if($('#option').val()=='ONDUTY REPORT SEARCH UPDATE')
         {
-            $('#ASRC_UPD_DEL_tble_odshow').show();
             $('#ASRC_UPD_DEL_errmsg').hide();
-            $('#ASRC_UPD_DEL_btn_srch').hide();
-            $('#ASRC_UPD_DEL_tbl_htmltable').hide();
-            $('#ASRC_UPD_DEL_btn_del').hide();
-            $('#ASRC_UPD_DEL_tb_sdte').val('');
-            $('#ASRC_UPD_DEL_tb_edte').val('');
-            $('#ASRC_UPD_DEL_errmsg').hide();
-            $("#ASRC_UPD_DEL_od_btn").attr("disabled", "disabled");
             $('#ASRC_UPD_DEL_tbl_entry').hide();
-            ASRC_UPD_DEL_clear()
-            $('#ASRC_UPD_DEL_div_tablecontainer').hide();
-            $('#ASRC_UPD_DEL_lbl_reportdte').hide();
-            $('#ASRC_UPD_DEL_ta_reportdate').hide();
-
+            $('#ASRC_UPD_DEL_tbl_htmltable').hide();
+            if(odmindate=='01-01-1970')
+            {
+                $('#ASRC_UPD_DEL_oderrmsg').text(err_msg[10]).show();
+            }
+            else
+            {
+                $('#ASRC_UPD_DEL_oderrmsg').show();
+                $('#ASRC_UPD_DEL_tble_odshow').show();
+                $('#ASRC_UPD_DEL_btn_srch').hide();
+                $('#ASRC_UPD_DEL_btn_del').hide();
+                $('#ASRC_UPD_DEL_tb_sdte').val('');
+                $('#ASRC_UPD_DEL_tb_edte').val('');
+                $("#ASRC_UPD_DEL_od_btn").attr("disabled", "disabled");
+                ASRC_UPD_DEL_clear()
+                $('#ASRC_UPD_DEL_div_tablecontainer').hide();
+                $('#ASRC_UPD_DEL_lbl_reportdte').hide();
+                $('#ASRC_UPD_DEL_ta_reportdate').hide();
+            }
         }
         else
         {
@@ -1999,8 +2039,8 @@ $(document).ready(function(){
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="radio" name="permission" id="ASRC_UPD_DEL_rd_nopermission" value="NOPERMISSION" class='permissn update_validate'  hidden >
-                        <label name="ASRC_UPD_DEL_nopermission" id="ASRC_UPD_DEL_lbl_nopermission" hiddeen>NO PERMISSION<em>*</em></label></td>
+                    <td nowrap><input type="radio" name="permission" id="ASRC_UPD_DEL_rd_nopermission" value="NOPERMISSION" class='permissn update_validate'  hidden >
+                        <label name="ASRC_UPD_DEL_nopermission" id="ASRC_UPD_DEL_lbl_nopermission" hiddeen nowrap>NO PERMISSION<em>*</em></label></td>
                 </tr>
                 <tr>
                     <td><label name="ASRC_UPD_DEL_lbl_session" id="ASRC_UPD_DEL_lbl_session" hidden >SESSION</label></td>

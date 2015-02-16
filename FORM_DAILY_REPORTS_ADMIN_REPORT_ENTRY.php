@@ -69,6 +69,7 @@ include "HEADER.php";
 $(document).ready(function(){
     ARE_paint();
     $('#wPaint').wPaint({menuOffsetLeft: -2,menuOffsetTop: -45});
+    $('#wPaint').wPaint('clear');
 //    ARE_mulpaint();
 //    $('#wPaint1').wPaint({menuOffsetLeft: -2,menuOffsetTop: -45});
     $('.preloader', window.parent.document).show();
@@ -302,23 +303,23 @@ $(document).ready(function(){
                     $('.preloader', window.parent.document).hide();
                     $("html, body").animate({ scrollTop: 340 }, "1000");
                     var response=JSON.parse(xmlhttp.responseText);
-//                    if((response[0]==1) && (response[1]==0))
-//                    {
-//                        $('#ARE_lbl_checkmsg').text(err_msg[11]).show();
-//                        $('#ARE_lb_timing').hide();
-//                        $('#ARE_rd_permission').hide();
-//                        $('#ARE_lbl_permission').hide();
-//                        $('#ARE_rd_nopermission').hide();
-//                        $('#ARE_lbl_nopermission').hide();
-//                        $('#ARE_lbl_session').hide();
-//                        $('#ARE_lb_ampm').hide();
-//                        $('#ARE_lbl_txtselectproj').hide();
-//                        $('#ARE_tble_projectlistbx').hide();
-//                        $('#ARE_btn_submit').hide();
-//                        $('#ARE_lbl_errmsg').hide();
-//                        $('#ARE_tble_paint').hide();
-//                    }
-//                    else{
+                    if(response==0)
+                    {
+                        $('#ARE_lbl_checkmsg').text(err_msg[10]).show();
+                        $('#ARE_lb_timing').hide();
+                        $('#ARE_rd_permission').hide();
+                        $('#ARE_lbl_permission').hide();
+                        $('#ARE_rd_nopermission').hide();
+                        $('#ARE_lbl_nopermission').hide();
+                        $('#ARE_lbl_session').hide();
+                        $('#ARE_lb_ampm').hide();
+                        $('#ARE_lbl_txtselectproj').hide();
+                        $('#ARE_tble_projectlistbx').hide();
+                        $('#ARE_btn_submit').hide();
+                        $('#ARE_lbl_errmsg').hide();
+                        $('#ARE_tble_paint').hide();
+                    }
+                    else{
                         $('#ARE_tbl_enterthereport,#ARE_ta_reason').html('');
                         $('#ARE_tble_paint').show();
                         $('#ARE_rd_permission').attr('checked',false);
@@ -345,7 +346,7 @@ $(document).ready(function(){
                         $('#ARE_rd_nopermission').removeAttr("disabled");
                         $('#ARE_lbl_errmsg').hide();
                         $('#ARE_lbl_checkmsg').hide();
-//                    }
+                    }
                 }
             }
             var option="PRESENT";
@@ -497,22 +498,22 @@ $(document).ready(function(){
                     $('.preloader', window.parent.document).hide();
                     $("html, body").animate({ scrollTop: $(document).height() }, "1000");
                     var response=JSON.parse(xmlhttp.responseText);
-//                    if((response[0]==1) && (response[1]==0))
-//                    {
-//                        $('#ARE_lbl_checkmsg').text(err_msg[11]).show();
-//                        $('#ARE_btn_submit').hide();
-//                        $('#ARE_rd_permission').hide();
-//                        $('#ARE_lbl_permission').hide();
-//                        $('#ARE_rd_nopermission').hide();
-//                        $('#ARE_lbl_nopermission').hide();
-//                        $('#ARE_lb_timing').hide();
-//                        $('#ARE_tble_projectlistbx').hide();
-//                        $('#ARE_lbl_txtselectproj').hide();
-//                        $('#ARE_lbl_errmsg').hide();
-//                        $('#ARE_tble_paint').hide();
-//                    }
-//                    else
-//                    {
+                    if(response==0)
+                    {
+                        $('#ARE_lbl_checkmsg').text(err_msg[10]).show();
+                        $('#ARE_btn_submit').hide();
+                        $('#ARE_rd_permission').hide();
+                        $('#ARE_lbl_permission').hide();
+                        $('#ARE_rd_nopermission').hide();
+                        $('#ARE_lbl_nopermission').hide();
+                        $('#ARE_lb_timing').hide();
+                        $('#ARE_tble_projectlistbx').hide();
+                        $('#ARE_lbl_txtselectproj').hide();
+                        $('#ARE_lbl_errmsg').hide();
+                        $('#ARE_tble_paint').hide();
+                    }
+                    else
+                    {
                         ARE_reason();
                         $('#ARE_btn_submit').hide();
                         $('#ARE_rd_permission').attr('checked',false);
@@ -532,7 +533,7 @@ $(document).ready(function(){
                         $('#ARE_lbl_errmsg').hide();
                         $('#ARE_lbl_checkmsg').hide();
                         $('#ARE_tble_paint').show();
-//                    }
+                    }
                 }
             }
             var option="HALFDAYABSENT";
@@ -685,7 +686,9 @@ $(document).ready(function(){
             type: "POST",
             data: formElement+"&choice="+choice+"&string="+imageData,
             success: function(response){
-                var msg_alert=response;
+                var recived=JSON.parse(response);
+                var msg_alert=recived[0];
+                var parnt_foldid=recived[1];
                 $('.preloader', window.parent.document).hide();
                 if(msg_alert==1){
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ADMIN REPORT ENTRY",msgcontent:err_msg[0],position:{top:150,left:500}}});
@@ -694,7 +697,7 @@ $(document).ready(function(){
                     ARE_clear();
                     $("#ARE_lb_loginid").val('SELECT').show();
                 }
-                else if(msg_alert==0)
+                if(msg_alert==0)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ADMIN REPORT ENTRY",msgcontent:err_msg[4],position:{top:150,left:500}}});
                     $('#ARE_lbl_dte').hide();
@@ -702,7 +705,16 @@ $(document).ready(function(){
                     ARE_clear();
                     $("#ARE_lb_loginid").val('SELECT').show();
                 }
-                else
+                if(msg_alert==0 && parnt_foldid!='')
+                {
+                    var foldererrmsg=err_msg[11].replace("[FID]",parnt_foldid);
+                    $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ADMIN REPORT ENTRY",msgcontent:foldererrmsg,position:{top:150,left:500}}});
+                    $('#ARE_lbl_dte').hide();
+                    $('#ARE_tb_date').hide();
+                    ARE_clear();
+                    $("#ARE_lb_loginid").val('SELECT').show();
+                }
+                if(msg_alert!=0 && msg_alert!=1)
                 {
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ADMIN REPORT ENTRY",msgcontent:msg_alert,position:{top:150,left:500}}});
                     $('#ARE_lbl_dte').hide();
@@ -1244,8 +1256,8 @@ $(document).ready(function(){
                     </td>
                 </tr>
                 <tr>
-                    <td><input type="radio" name="permission" id="ARE_rd_nopermission" class='permissn' value="NOPERMISSION" hidden >
-                        <label name="ARE_nopermission" id="ARE_lbl_nopermission">NO PERMISSION<em>*</em></label></td>
+                    <td nowrap><input type="radio" name="permission" id="ARE_rd_nopermission" class='permissn' value="NOPERMISSION" hidden >
+                        <label name="ARE_nopermission" id="ARE_lbl_nopermission" nowrap>NO PERMISSION<em>*</em></label></td>
                 </tr>
                 <tr>
                     <td><label name="ARE_lbl_session" id="ARE_lbl_session" hidden >SESSION</label></td>

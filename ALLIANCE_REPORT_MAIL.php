@@ -166,24 +166,31 @@ if($x>0){
                 ->setKeywords("office 2007 openxml php")
                 ->setCategory("Test result file");
             /** Create a new PHPExcel object 1.0 */
-            $objPHPExcel->getActiveSheet()->setTitle('Data')->setCellValue('A1', 'EMPLOYEE NAME')->setCellValue('B1', 'DATE')->setCellValue('C1', 'REPORT')->setCellValue('D1', 'REASON')->setCellValue('E1', 'PROJECT')->setCellValue('F1', 'ATTENDANCE')->setCellValue('G1', 'SESSION')->setCellValue('H1', 'PERMISSION');
+            $sheettitle='ALLIANCE TIME SHEET REPORT '.date("d-m-Y");
+            $objPHPExcel->getActiveSheet()->setTitle('TS REPORT-'.date("d-m-Y"))->setCellValue('A2', 'EMPLOYEE NAME')->setCellValue('B2', 'DATE')->setCellValue('C2', 'REPORT')->setCellValue('D2', 'REASON')->setCellValue('E2', 'PROJECT')->setCellValue('F2', 'ATTENDANCE')->setCellValue('G2', 'SESSION')->setCellValue('H2', 'PERMISSION')->setCellValue('A1', $sheettitle);
             $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
-            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(100);
+            $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
             $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setAutoSize(true);
-            $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getFont()->setBold(true);
-            $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A1:H1');
+            $objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(20);
+            $objPHPExcel->getActiveSheet()->getRowDimension('2')->setRowHeight(18);
+            $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->getFont()->setBold(true);
+            $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objPHPExcel->getActiveSheet()->getStyle('B')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objPHPExcel->getActiveSheet()->getStyle('F')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objPHPExcel->getActiveSheet()->getStyle('G')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objPHPExcel->getActiveSheet()->getStyle('H')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $objPHPExcel->getActiveSheet()->getStyle('A:H')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
-            $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->getFont()->getColor()->setRGB('FFFAFA');
-            $objPHPExcel->getActiveSheet()->getStyle('A1:H1')->applyFromArray(
+            $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->getFont()->getColor()->setRGB('FFFAFA');
+            $objPHPExcel->getActiveSheet()->getStyle('A2:H2')->applyFromArray(
                 array(
                     'fill' => array(
                         'type' => PHPExcel_Style_Fill::FILL_SOLID,
@@ -194,7 +201,7 @@ if($x>0){
         }
         //add data
         /** Loop through the result set 1.0 */
-        $rowNumber = 2; //start in cell 1
+        $rowNumber = 3; //start in cell 1
         while ($row = mysqli_fetch_row($result)) {
             $col = 'A'; // start at column A
             foreach($row as $cell) {
@@ -211,15 +218,15 @@ if($x>0){
         header('Cache-Control: max-age=1');
         $path= $bucket_id.'excel/';
         $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-        $objWriter->save($path."ALLIANCE TS ENTRY REPORT.xls");
+        $objWriter->save($path."ALLIANCE TS REPORT.xls");
     $drop_query="DROP TABLE $temp_table_name ";
     mysqli_query($con,$drop_query);
 //SENDING MAIL OPTIONS
-    $imagefilename='ALLIANCE TS IMAGE REPORT '.date("d-m-Y").'.pdf';
-    $reportfilename='ALLIANCE TS ENTRY REPORT '.date("d-m-Y").'.pdf';
-    $excelfilename='ALLIANCE TS ENTRY REPORT '.date("d-m-Y").'.xls';
-    $imageheader='ALLIANCE TS IMAGE REPORT '.date("d-m-Y");
-    $reportheader='ALLIANCE TS ENTRY REPORT '.date("d-m-Y");
+    $imagefilename='ALLIANCE TIME SHEET IMAGE REPORT '.date("d-m-Y").'.pdf';
+    $reportfilename='ALLIANCE TIME SHEET REPORT '.date("d-m-Y").'.pdf';
+    $excelfilename='ALLIANCE TIME SHEET REPORT '.date("d-m-Y").'.xls';
+    $imageheader='ALLIANCE TIME SHEET IMAGE REPORT '.date("d-m-Y");
+    $reportheader='ALLIANCE TIME SHEET REPORT '.date("d-m-Y");
     $message1 = new Message();
     $message1->setSender($admin);
     $message1->addTo($admin);
@@ -231,19 +238,19 @@ if($x>0){
     $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;">'.$reportheader.'</div></h3>', 'O', true);
     $mpdf->SetHTMLFooter('<div style="text-align: center;">{PAGENO}</div>');
     $mpdf->WriteHTML($message);
-    $reportpdf=$mpdf->Output('ALLIANCE TS ENTRY REPORT ' .date("d-m-Y"). '.pdf','S');
+    $reportpdf=$mpdf->Output('ALLIANCE TIME SHEET REPORT ' .date("d-m-Y"). '.pdf','S');
     $message1->addAttachment($reportfilename,$reportpdf);
     $mpdf=new mPDF('utf-8','A4');
     $mpdf->debug=true;
     $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;">'.$imageheader.'</div></h3>', 'O', true);
     $mpdf->SetHTMLFooter('<div style="text-align: center;">{PAGENO}</div>');
     $mpdf->WriteHTML($html);
-    $imagepdf=$mpdf->Output('ALLIANCE TS IMAGE REPORT '.date("d-m-Y").'.pdf','S');
+    $imagepdf=$mpdf->Output('ALLIANCE TIME SHEET IMAGE REPORT '.date("d-m-Y").'.pdf','S');
     $message1->addAttachment($imagefilename,$imagepdf);
-    $excelreport = file_get_contents($path."ALLIANCE TS ENTRY REPORT.xls");
+    $excelreport = file_get_contents($path."ALLIANCE TS REPORT.xls");
     $message1->addAttachment($excelfilename,$excelreport);
     $message1->send();
-    unlink($path."ALLIANCE TS ENTRY REPORT.xls");
+    unlink($path."ALLIANCE TS REPORT.xls");
 }
 }
 }

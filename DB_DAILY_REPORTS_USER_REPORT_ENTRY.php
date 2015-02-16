@@ -11,7 +11,6 @@ include "COMMON.php";
 date_default_timezone_set('Asia/Singapore');
 $USERSTAMP=$UserStamp;
 $bucket_id=get_appbucket_id();
-$driveparentid=get_parentfolder_id();
 if($_REQUEST["option"]=="DATE")
 {
     $date=$_REQUEST['date_change'];
@@ -66,6 +65,7 @@ if($_POST["option"]=="SINGLE DAY ENTRY")
         while($row=mysqli_fetch_array($logname)){
             $loginid=$row["ULD_ID"];
         }
+        $driveparentid=get_emp_folderid($loginid);
         $daterep=str_replace('-','',$date);
         $filename=$loginid.'_'.$daterep.'_'.date('His');
         $filedesc='USER REPORT ENTRY PAINT IMAGE';
@@ -76,10 +76,13 @@ if($_POST["option"]=="SINGLE DAY ENTRY")
         $options = ['gs' => ['Content-Type' => 'image/png']];
         $ctx = stream_context_create($options);
         file_put_contents($uploadimgname, $data, 0, $ctx);
-        $filesid=insertFile($service,$filename,$filedesc,$driveparentid,'image/png',$uploadimgname);
+        $finalvalue=insertFile($service,$filename,$filedesc,$driveparentid,'image/png',$uploadimgname);
+        $filesid=$finalvalue[0];
+        $fileflg=$finalvalue[1];
     }
     elseif((($attendance=="0") && ($ampm=="FULLDAY")) || (($attendance=="OD") && ($ampm=="FULLDAY"))){
         $filesid='';
+        $fileflg=1;
     }
     if($perm_time=='SELECT')
     {
@@ -231,6 +234,7 @@ if($_POST["option"]=="SINGLE DAY ENTRY")
     }
     $report= $con->real_escape_string($report);
     $reason= $con->real_escape_string($reason);
+    if($fileflg!=0){
     $result = $con->query("CALL SP_TS_DAILY_REPORT_INSERT('$report','$reason','$finaldate',$seconddate,$ure_urc_id,'$USERSTAMP','$perm_time','$ure_attendance','$projectid','$uard_morning_session','$uard_afternoon_session','$filesid','$USERSTAMP',@success_flag)");
     if(!$result) die("CALL failed: (" . $con->errno . ") " . $con->error);
     $select = $con->query('SELECT @success_flag');
@@ -244,7 +248,12 @@ if($_POST["option"]=="SINGLE DAY ENTRY")
         unlink($delpath);
         delete_file($service,$filesid);
     }
-    echo $flag;
+        $flagarry=[$flag];
+    }else{
+        $retnflag=0;
+        $flagarry=[$retnflag,$driveparentid];
+    }
+    echo json_encode($flagarry);
 }
 if($_POST["option"]=="MULTIPLE DAY ENTRY")
 {
@@ -367,43 +376,27 @@ if($_REQUEST['option']=='BETWEEN DATE')
 }
 if($_REQUEST['option']=='PRESENT')
 {
-    $rprtdate=$_REQUEST['reportdate'];
-    $rprtdate = date('Y-m-d',strtotime($rprtdate));
-    $uld_id=mysqli_query($con,"select ULD_ID from USER_LOGIN_DETAILS where ULD_LOGINID='$USERSTAMP'");
-    while($row=mysqli_fetch_array($uld_id)){
-        $ure_uld_id=$row["ULD_ID"];
-    }
-    $sql="SELECT * FROM EMPLOYEE_CHECK_IN_OUT_DETAILS WHERE ULD_ID='$ure_uld_id' AND ECIOD_DATE='$rprtdate'";
-    $sql_result= mysqli_query($con,$sql);
-    $row=mysqli_num_rows($sql_result);
-    if($row>0)
+    $row=get_projectentry();
+    if(count($row)!=0)
     {
-        $flag=0;
+        $flag=1;
     }
     else
     {
-        $flag=1;
+        $flag=0;
     }
     echo $flag;
 }
 if($_REQUEST['option']=='HALFDAYABSENT')
 {
-    $rprtdate=$_REQUEST['reportdate'];
-    $rprtdate = date('Y-m-d',strtotime($rprtdate));
-    $uld_id=mysqli_query($con,"select ULD_ID from USER_LOGIN_DETAILS where ULD_LOGINID='$USERSTAMP'");
-    while($row=mysqli_fetch_array($uld_id)){
-        $ure_uld_id=$row["ULD_ID"];
-    }
-    $sql="SELECT * FROM EMPLOYEE_CHECK_IN_OUT_DETAILS WHERE ULD_ID='$ure_uld_id' AND ECIOD_DATE='$rprtdate'";
-    $sql_result= mysqli_query($con,$sql);
-    $row=mysqli_num_rows($sql_result);
-    if($row>0)
+    $row=get_projectentry();
+    if(count($row)!=0)
     {
-        $flag=0;
+        $flag=1;
     }
     else
     {
-        $flag=1;
+        $flag=0;
     }
     echo $flag;
 }
@@ -428,12 +421,14 @@ function insertFile($service, $title, $description, $parentId,$mimeType,$uploadf
         ));
 
         $fileid = $createdFile->getId();
+        $fileflag=1;
     }
     catch (Exception $e)
     {
-        echo "An error occurred: " . $e->getMessage();
+        $fileflag=0;
     }
-    return $fileid;
+    $finalarry=[$fileid,$fileflag];
+    return $finalarry;
 }
 function delete_file($service,$fileid){
 

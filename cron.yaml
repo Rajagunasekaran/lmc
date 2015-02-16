@@ -1,7 +1,7 @@
 cron:
 - description: scrape xml
   url: /ALLIANCE_REPORT_MAIL
-  schedule: every day 18:30
+  schedule: every day 17:23
   timezone: Asia/Kolkata
 
 #- description: scrape xml

@@ -227,11 +227,11 @@ $(document).ready(function(){
 <body >
 <div class="wrapper" >
     <div  class="preloader MaskPanel"><div class="preloader statusarea" ><div style="padding-top:90px; text-align:center"><img src="image/Loading.gif"  /></div></div></div>
-<!--       <table>-->
-<!--          <tr>-->
-<!--            <td style="width:1300px";><img src="image/SSOMENS_TIME_SHEET.jpg" align="middle"/></td>-->
-<!--         </tr>-->
-<!--       </table>-->
+       <table>
+          <tr>
+            <td style="width:1300px";><h1>ALLIANCE TIME SHEET</h1></td>
+         </tr>
+       </table>
 
       <table>
         <tr>

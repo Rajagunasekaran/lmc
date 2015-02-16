@@ -1301,6 +1301,12 @@ $(document).ready(function(){
                     var finalmsg=msg.replace("[NAME]",name)
                     $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ACCESS RIGHTS:SEARCH/UPDATE",msgcontent:finalmsg ,position:{top:150,left:500}}});
                 }
+                if((success_flag==0)&&ss_flag!=''){
+                    var msg=URSRC_errorAarray[30].replace("[FID]",ss_flag);
+                    $(document).doValidation({rule:'messagebox',prop:{msgtitle:"ACCESS RIGHTS:SEARCH/UPDATE",msgcontent:msg ,position:{top:150,left:500}}});
+
+
+                }
                 if((success_flag==1)&&(ss_flag==0))
                 {
                     var fileid=msg_alert[3];

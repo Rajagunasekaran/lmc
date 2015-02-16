@@ -95,6 +95,14 @@ function get_parentfolder_id(){
     }
     return  $parentfolder_id;
 }
+function get_emp_folderid($ULD_ID){
+    global $con;
+    $select_folderid=mysqli_query($con,"SELECT EMP_FOLDER_ID FROM EMPLOYEE_DETAILS WHERE ULD_ID='$ULD_ID'");
+    if($row=mysqli_fetch_array($select_folderid)){
+        $folder_id=$row["EMP_FOLDER_ID"];
+    }
+    return $folder_id;
+}
 
 if($_REQUEST["option"]=="user_report_entry"){
 //    echo $USERSTAMP;
@@ -103,7 +111,7 @@ if($_REQUEST["option"]=="user_report_entry"){
     $ure_empname=get_empname();
     $get_project_array=get_projectentry();
     $min_date=get_joindate($ure_uld_id);
-    $error='3,4,5,6,7,8,16,17,18,67,115,120';
+    $error='3,4,5,6,7,8,16,17,18,67,115,132';
     $error_array=get_error_msg($error);
     $values_array=array($get_permission_array,$get_project_array,$min_date,$error_array,$ure_empname);
     echo JSON_ENCODE($values_array);
@@ -115,7 +123,7 @@ if($_REQUEST["option"]=="user_search_update"){
     $ure_uld_id=get_uldid();
     $ure_empname=get_empname();
     $get_project_array=get_project($ure_uld_id);
-    $error='3,4,5,6,7,8,16,17,18,67,83,98';
+    $error='3,4,5,6,7,8,16,17,18,67,83,98,132';
     $error_array=get_error_msg($error);
     $min_date=get_joindate($ure_uld_id);
     $user_searchmin_date=mysqli_query($con,"SELECT MIN(UARD_DATE) as UARD_DATE FROM USER_ADMIN_REPORT_DETAILS where ULD_ID='$ure_uld_id' ");
@@ -186,7 +194,7 @@ if($_REQUEST["option"]=="admin_report_entry")
     $get_permission_array=get_permission();
     $ure_uld_id=get_uldid();
     $get_project_array=get_projectentry();
-    $error='3,4,5,6,7,8,16,17,18,67,115,120';
+    $error='3,4,5,6,7,8,16,17,18,67,115,132';
     $error_array=get_error_msg($error);
     $min_date=get_joindate($ure_uld_id);
     $login_array=get_active_emp_id();
@@ -198,7 +206,7 @@ if($_REQUEST["option"]=="admin_search_update")
     $get_permission_array=get_permission();
     $ure_uld_id=get_uldid();
 //    $get_project_array=get_project();
-    $error='3,4,5,6,7,8,16,17,18,67,83,98,109,110';
+    $error='3,4,5,6,7,8,16,17,18,67,83,98,109,110,132';
     $error_array=get_error_msg($error);
 
 //    $min_date=get_joindate($ure_uld_id);
