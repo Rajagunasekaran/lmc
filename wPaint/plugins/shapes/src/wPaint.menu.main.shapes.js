@@ -1,5 +1,8 @@
 (function ($) {
-  var img = 'wPaint/plugins/shapes/img/icons-menu-main-shapes.png';
+    var loc = window.location.pathname;
+    var dir = loc.substring(0, loc.lastIndexOf('/'));
+    var name=loc.substring(1, loc.lastIndexOf('/'));
+  var img = name+'/wPaint/plugins/shapes/img/icons-menu-main-shapes.png';
 
   // extend menu
   $.extend(true, $.fn.wPaint.menus.main.items, {

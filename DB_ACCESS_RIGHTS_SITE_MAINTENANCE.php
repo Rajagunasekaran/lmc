@@ -6,25 +6,25 @@ if(isset($_REQUEST)){
     //TREE VIEW
     if($_REQUEST['option']=="SITE_MAINTENANCE"){
         $USR_SITE_errmsg=get_error_msg_arry();
-        $USR_SITE_select_usermenudetails=mysqli_query($con,"SELECT MP_ID FROM MENU_PROFILE WHERE MP_SCRIPT_FLAG IS NOT NULL");
+        $USR_SITE_select_usermenudetails=mysqli_query($con,"SELECT MP_ID FROM LMC_MENU_PROFILE WHERE MP_SCRIPT_FLAG IS NOT NULL");
         while($row=mysqli_fetch_array($USR_SITE_select_usermenudetails))
         {
             $USR_SITE_usermenudetails_array[]=$row["MP_ID"];
         }
-        $main_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MNAME FROM MENU_PROFILE WHERE MP_ID NOT IN(1,2,3,4) ORDER BY MP_MNAME ASC");
+        $main_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MNAME FROM LMC_MENU_PROFILE WHERE MP_ID NOT IN(1,2,3,4) ORDER BY MP_MNAME ASC");
         $ure_values=array();
         $URSC_Main_menu_array=array();
         $i=0;
         while($row=mysqli_fetch_array($main_menu_data)){
             $URSC_Main_menu_array[]=$row["MP_MNAME"];
-            $sub_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MSUB , MP.MP_ID FROM MENU_PROFILE MP WHERE MP.MP_MNAME='".$URSC_Main_menu_array[$i]."' AND MP.MP_MSUB IS NOT NULL GROUP BY MP_MSUB ORDER BY MP.MP_MSUB ASC");
+            $sub_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MSUB , MP.MP_ID FROM LMC_MENU_PROFILE MP WHERE MP.MP_MNAME='".$URSC_Main_menu_array[$i]."' AND MP.MP_MSUB IS NOT NULL GROUP BY MP_MSUB ORDER BY MP.MP_MSUB ASC");
             $URSC_sub_menu_row=array();
             $URSC_sub_sub_menu_row_col=array();
             $URSC_sub_sub_menu_row_col_data=array();
             $j=0;
             while($row=mysqli_fetch_array($sub_menu_data))  {
                 $URSC_sub_menu_row[]=array($row["MP_ID"],$row["MP_MSUB"]);
-                $sub_sub_menu_data= mysqli_query($con,"SELECT DISTINCT MP.MP_ID,MP_MSUBMENU FROM MENU_PROFILE MP WHERE MP.MP_MNAME='".$URSC_Main_menu_array[$i]."' AND MP.MP_MSUB='".$URSC_sub_menu_row[$j][1]."' AND MP.MP_MSUBMENU IS NOT NULL ORDER BY MP_MSUBMENU ASC");
+                $sub_sub_menu_data= mysqli_query($con,"SELECT DISTINCT MP.MP_ID,MP_MSUBMENU FROM LMC_MENU_PROFILE MP WHERE MP.MP_MNAME='".$URSC_Main_menu_array[$i]."' AND MP.MP_MSUB='".$URSC_sub_menu_row[$j][1]."' AND MP.MP_MSUBMENU IS NOT NULL ORDER BY MP_MSUBMENU ASC");
                 $URSC_sub_sub_menu_row=array();
                 $URSC_sub_sub_menu_row_data=array();
                 while($row=mysqli_fetch_array($sub_sub_menu_data)){
@@ -95,7 +95,7 @@ if(isset($_REQUEST)){
 function get_error_msg_arry(){
     global $con;
     $errormessages=array();
-    $errormsg=mysqli_query($con,"SELECT DISTINCT EMC_DATA FROM ERROR_MESSAGE_CONFIGURATION WHERE EMC_ID IN (64,65)");
+    $errormsg=mysqli_query($con,"SELECT DISTINCT EMC_DATA FROM LMC_ERROR_MESSAGE_CONFIGURATION WHERE EMC_ID IN (64,65)");
     while($row=mysqli_fetch_array($errormsg)){
         $errormessages[]=$row["EMC_DATA"];
     }

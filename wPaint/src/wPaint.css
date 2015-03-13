@@ -252,7 +252,7 @@
 .wPaint-theme-standard .wPaint-menu-icon-group-arrow {
   width: 5px;
   height: 3px;
-  background-image: url('');
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAADCAYAAABbNsX4AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAK6wAACusBgosNWgAAABZ0RVh0Q3JlYXRpb24gVGltZQAwOC8xMS8xMyj8hykAAAAcdEVYdFNvZnR3YXJlAEFkb2JlIEZpcmV3b3JrcyBDUzbovLKMAAAAKElEQVQImV3IwQ0AMAyDQKerspZ3pa9IVXmdGMB8nbbzjrYTNWoA1xeQ3RPyxUyE/gAAAABJRU5ErkJggg==');
 }
 .wPaint-theme-standard .wPaint-menu-select {
   line-height: 10px;

@@ -508,6 +508,31 @@ $.fn.autogrow = function(opts) {
     return that;
 }
 
+function show_msgbox(title,msg,status,confirmation)
+{
+    $( "body" ).remove( ".jconfirm" );
+    $(".msgbox").html("");
+    if(confirmation==true)
+    {
+        $('body').append('<div class="jconfirm white msgbox" hidden="" ><div class="jconfirm-bg"></div><div class="container"><div class="row"><div class="col-md-6 col-md-offset-3 span6 offset3"><div class="jconfirm-box" style="-webkit-transition-duration: 0.4s; transition-duration: 0.4s; margin-top: 157.5px;"><div class="closeIcon"><span class="fa fa-remove"></span></div><div class="msgboxtitle" style="" ></div><span class="divider"></span><div class="msgboxcontent"></div><div class="buttons pull-right"><button class="maxbtn menuconfirm">OK</button><button class="maxbtn msgcancel">CANCEL</button></div><div class="jquery-clear"></div></div></div></div></div></div>');
+    }
+    else
+    {
+        $('body').append('<div class="jconfirm white msgbox" hidden="" ><div class="jconfirm-bg"></div><div class="container"><div class="row"><div class="col-md-6 col-md-offset-3 span6 offset3"><div class="jconfirm-box" style="-webkit-transition-duration: 0.4s; transition-duration: 0.4s; margin-top: 157.5px;"><div class="closeIcon"><span class="fa fa-remove"></span></div><div class="msgboxtitle" style="" ></div><span class="divider"></span><div class="msgboxcontent"></div><div class="buttons pull-right"><button class="maxbtn msgconfirm">OK</button></div><div class="jquery-clear"></div></div></div></div></div></div>');
+    }
+    if(status!="success")
+    {
+        $(".msgboxtitle").html('<i class="fa fa-warning fa-2x" style="color:#ffffff;background-color:#79bbff "></i>'+title);
+    }
+    else{
+        $(".msgboxtitle").html('<i class="fa fa-exclamation-circle fa-2x" style="color:#ffffff;background-color:#79bbff "></i>  '+title);
+    }
+    $(".msgboxcontent").text(msg);
+    $(".msgbox").show();
+}
+$(document).on("click",'.msgcancel,.msgconfirm,.menuconfirm', function (){
+    $(".msgbox").hide();
+});
 function resetPreloader(pos){
     $(".statusarea").css({marginTop:pos.top+'px', marginLeft:pos.left+'px'});
 }
@@ -518,7 +543,7 @@ function adjustPosition(oldPosition,top,left){
 }
 
 $(function() {
-
+    $('.preloaderimg').attr('src','CSS/images/ajax_loading.gif');
     $(document).on('click','.messageclose',function(){
         $('#focustext').focus();
     });

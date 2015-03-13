@@ -1,11 +1,9 @@
 <?php
-use google\appengine\api\users\User;
-use google\appengine\api\users\UserService;
 
-$user = UserService::getCurrentUser();
+session_start();
 
-$UserStamp=$user->getEmail();
-$UserStamp=strtolower($UserStamp);
+if(isset($_SESSION['login_user'])){
+$UserStamp=$_SESSION['login_user'];
+}
 
-//$UserStamp='raja.gunasekaran@ssomens.com';
 ?>

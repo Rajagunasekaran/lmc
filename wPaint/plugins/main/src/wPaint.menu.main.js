@@ -1,8 +1,10 @@
 (function ($) {
-
+    var loc = window.location.pathname;
+    var dir = loc.substring(0, loc.lastIndexOf('/'));
+    var name=loc.substring(1, loc.lastIndexOf('/'));
   // setup menu
   $.fn.wPaint.menus.main = {
-    img: 'wPaint/plugins/main/img/icons-menu-main.png',
+    img: name+'/wPaint/plugins/main/img/icons-menu-main.png',
     items: {
       undo: {
         icon: 'generic',
@@ -40,60 +42,60 @@
         index: 5,
         callback: function () { this.setMode('line'); }
       },
-        fillStyle: {
-            title: 'Fill Color',
-            icon: 'colorPicker',
-            callback: function (color) { this.setFillStyle(color); }
-        },
-        bucket: {
-            icon: 'activate',
-            title: 'Bucket',
-            index: 9,
-            callback: function () { this.setMode('bucket'); }
-        },
-        pencil: {
-            icon: 'activate',
-            title: 'Pencil',
-            index: 6,
-            callback: function () { this.setMode('pencil'); }
-        },
-        strokeStyle: {
-            icon: 'colorPicker',
-            title: 'Stroke Color',
-            callback: function (color) { this.setStrokeStyle(color); }
-        },
-        lineWidth: {
-            icon: 'select',
-            title: 'Stroke Width',
-            range: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            value: 2,
-            callback: function (width) { this.setLineWidth(width); }
-        },
+      pencil: {
+        icon: 'activate',
+        title: 'Pencil',
+        index: 6,
+        callback: function () { this.setMode('pencil'); }
+      },
       eraser: {
         icon: 'activate',
         title: 'Eraser',
         index: 8,
         callback: function () { this.setMode('eraser'); }
-      }
+      },
+      bucket: {
+        icon: 'activate',
+        title: 'Bucket',
+        index: 9,
+        callback: function () { this.setMode('bucket'); }
+      },
+      fillStyle: {
+        title: 'Fill Color',
+        icon: 'colorPicker',
+        callback: function (color) { this.setFillStyle(color); }
+      },
+      lineWidth: {
+        icon: 'select',
+        title: 'Stroke Width',
+        range: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        value: 2,
+        callback: function (width) { this.setLineWidth(width); }
+      },
+      strokeStyle: {
+        icon: 'colorPicker',
+        title: 'Stroke Color',
+        callback: function (color) { this.setStrokeStyle(color); }
+      }      
     }
   };
 
   // extend cursors
   $.extend($.fn.wPaint.cursors, {
-    'default': {path: 'wPaint/plugins/main/img/cursor-crosshair.png', left: 7, top: 7},
-    dropper:   {path: 'wPaint/plugins/main/img/cursor-dropper.png', left: 0, top: 12},
-    pencil:    {path: 'wPaint/plugins/main/img/cursor-pencil.png', left: 0, top: 11.99},
-    bucket:    {path: 'wPaint/plugins/main/img/cursor-bucket.png', left: 0, top: 10},
-    eraser1:   {path: 'wPaint/plugins/main/img/cursor-eraser1.png', left: 1, top: 1},
-    eraser2:   {path: 'wPaint/plugins/main/img/cursor-eraser2.png', left: 2, top: 2},
-    eraser3:   {path: 'wPaint/plugins/main/img/cursor-eraser3.png', left: 2, top: 2},
-    eraser4:   {path: 'wPaint/plugins/main/img/cursor-eraser4.png', left: 3, top: 3},
-    eraser5:   {path: 'wPaint/plugins/main/img/cursor-eraser5.png', left: 3, top: 3},
-    eraser6:   {path: 'wPaint/plugins/main/img/cursor-eraser6.png', left: 4, top: 4},
-    eraser7:   {path: 'wPaint/plugins/main/img/cursor-eraser7.png', left: 4, top: 4},
-    eraser8:   {path: 'wPaint/plugins/main/img/cursor-eraser8.png', left: 5, top: 5 },
-    eraser9:   {path: 'wPaint/plugins/main/img/cursor-eraser9.png', left: 5, top: 5},
-    eraser10:  {path: 'wPaint/plugins/main/img/cursor-eraser10.png', left: 6, top: 6}
+    'default': {path: './wPaint/plugins/main/img/cursor-crosshair.png', left: 7, top: 7},
+    dropper:   {path: './wPaint/plugins/main/img/cursor-dropper.png', left: 0, top: 12},
+    pencil:    {path: './wPaint/plugins/main/img/cursor-pencil.png', left: 0, top: 11.99},
+    bucket:    {path: './wPaint/plugins/main/img/cursor-bucket.png', left: 0, top: 10},
+    eraser1:   {path: './wPaint/plugins/main/img/cursor-eraser1.png', left: 1, top: 1},
+    eraser2:   {path: './wPaint/plugins/main/img/cursor-eraser2.png', left: 2, top: 2},
+    eraser3:   {path: './wPaint/plugins/main/img/cursor-eraser3.png', left: 2, top: 2},
+    eraser4:   {path: './wPaint/plugins/main/img/cursor-eraser4.png', left: 3, top: 3},
+    eraser5:   {path: './wPaint/plugins/main/img/cursor-eraser5.png', left: 3, top: 3},
+    eraser6:   {path: './wPaint/plugins/main/img/cursor-eraser6.png', left: 4, top: 4},
+    eraser7:   {path: './wPaint/plugins/main/img/cursor-eraser7.png', left: 4, top: 4},
+    eraser8:   {path: './wPaint/plugins/main/img/cursor-eraser8.png', left: 5, top: 5 },
+    eraser9:   {path: './wPaint/plugins/main/img/cursor-eraser9.png', left: 5, top: 5},
+    eraser10:  {path: './wPaint/plugins/main/img/cursor-eraser10.png', left: 6, top: 6}
   });
 
   // extend defaults

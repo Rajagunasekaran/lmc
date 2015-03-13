@@ -1,8 +1,10 @@
 (function ($) {
-
+    var loc = window.location.pathname;
+    var dir = loc.substring(0, loc.lastIndexOf('/'));
+    var name=loc.substring(1, loc.lastIndexOf('/'));
   // setup menu
   $.fn.wPaint.menus.text = {
-    img: 'wPaint/plugins/text/img/icons-menu-text.png',
+    img: name+'/wPaint/plugins/text/img/icons-menu-text.png',
     items: {
       bold: {
         icon: 'toggle',
@@ -43,7 +45,7 @@
   // add icon to main menu
   $.fn.wPaint.menus.main.items.text = {
     icon: 'menu',
-    after: 'line',
+    after: 'pencil',
     title: 'Text',
     index: 7,
     callback: function () { this.setMode('text'); }

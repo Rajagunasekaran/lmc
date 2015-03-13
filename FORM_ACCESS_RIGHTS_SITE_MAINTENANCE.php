@@ -1,11 +1,12 @@
 <!--//*******************************************FILE DESCRIPTION*********************************************//
 //*******************************************SITE MAINTENANCE*********************************************//
 //DONE BY:LALITHA
+//VER 0.03-SD:/16/02/2015 ED:16/02/2015,DESC:Updated Responsive process nd title also
 //VER 0.02-SD:01/12/2014 ED:01/12/2014,TRACKER NO:74,Changed Preloder funct
 //VER 0.01-INITIAL VERSION, SD:24/09/2014 ED:29/09/2014,TRACKER NO:79
 //*********************************************************************************************************//
 <?php
-include "HEADER.php";
+include "NEW_MENU.php";
 ?>
 <!--SCRIPT TAG START-->
 <script>
@@ -15,8 +16,7 @@ var USR_SITE_checked_mpid=[];
 var USR_SITE_errorAarray=[];
 //START DOCUMENT READY FUNCTION
 $(document).ready(function(){
-    $('#USR_SITE_btn_submitbutton').attr("disabled", "disabled");
-    $('.preloader', window.parent.document).show();
+    $('.preloader').show();
     var USR_SITE_menuname=[];
     var USR_SITE_submenu=[];
     var USR_SITE_subsubmenu=[];
@@ -27,17 +27,20 @@ $(document).ready(function(){
     var xmlhttp=new XMLHttpRequest();
     xmlhttp.onreadystatechange=function() {
         if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-            $('.preloader', window.parent.document).hide();
+            $('.preloader').hide();
+            $('#RPT').hide();
+            $('#AE').hide();
             value_array=JSON.parse(xmlhttp.responseText);
             USR_SITE_tree_view(value_array)
         }
     }
     var option="SITE_MAINTENANCE";
-    xmlhttp.open("GET","DB_ACCESS_RIGHTS_SITE_MAINTENANCE.do?option="+option);
+    xmlhttp.open("GET","DB_ACCESS_RIGHTS_SITE_MAINTENANCE.php?option="+option);
     xmlhttp.send();
     //COMMON TREE VIEW FUNCTION
     function USR_SITE_tree_view(value_array){
-        $('.preloader', window.parent.document).hide();
+        $('.preloader').hide();
+
         $('#USR_SITE_tble_menu').replaceWith('<table id="USR_SITE_tble_menu"  ></table>')
         var count=0;
         var menus=[];
@@ -60,7 +63,7 @@ $(document).ready(function(){
             var menu_value=USR_SITE_main_menu[i].replace(/ /g,"&");
             var id_menu=i+'m'
             var mainmenuid=i;
-            USR_SITE_menu= '<div ><ul style="list-style: none;" ><li style="list-style: none;" ><tr ><td>&nbsp;&nbsp;&nbsp;<input value="+" type="button"  id='+USR_SITE_menu_button_id+' height="1" width="1" class="exp" /><input type="checkbox" name="menu" id='+id_menu+' value='+menu_value+' level="parent" class="tree USR_SITE_submit_validate Parent"  />' + USR_SITE_main_menu[i] + '</td></tr>';
+            USR_SITE_menu= '<div ><ul style="list-style: none;" ><li style="list-style: none;" ><tr ><td>&nbsp;&nbsp;&nbsp;<input value="+" type="button"  id='+USR_SITE_menu_button_id+' height="1" width="1" class="exp" /><input type="checkbox"  name="menu" id='+id_menu+' value='+menu_value+' level="parent" class="tree USR_SITE_submit_validate Parent"  />' + USR_SITE_main_menu[i] + '</td></tr>';
             USR_SITE_menu+='<div id='+USR_SITE_submenu_div_id+' hidden ><tr><td><table id='+USR_SITE_submenu_table_id+' class="USR_SITE_class_submenu"  ></table></tr></div></li></ul></div>';
             $('#USR_SITE_tble_menu').append(USR_SITE_menu);
             var USR_SITE_submenu='';
@@ -82,7 +85,7 @@ $(document).ready(function(){
                         var idsubmenu=k+j;
                         if(USR_SITE_sub_menu1[count].length>0)
                         {
-                            USR_SITE_submenu = '<div ><ul style="list-style: none;"><li style="list-style: none;" ><tr ><td>&nbsp;&nbsp;&nbsp;<input value="+" type="button"  id='+USR_SITE_submenu_button_id+' height="1" width="1" class="exp1" /><input type="checkbox" name="Sub_menu[]" id='+submenuids+' value='+sub_menu_id+'&&'+' level="child" class="tree submenucheck USR_SITE_submit_validate Child"  />' + sub_menu_values + '</td></tr>';
+                            USR_SITE_submenu = '<div ><ul style="list-style: none;"><li style="list-style: none;" ><tr ><td>&nbsp;&nbsp;&nbsp;<input value="+" type="button"  id='+USR_SITE_submenu_button_id+' height="1" width="1" class="exp1" /><input type="checkbox" name="Sub_menu[]" id='+submenuids+' value='+sub_menu_id+'&&'+' level="child" class="tree submenucheck USR_SITE_submit_validate Child"  /><b>' + sub_menu_values + '</b></td></tr>';
                             USR_SITE_submenu+='<div id='+USR_SITE_submenu1_div_id+'  ><tr><td><table id='+USR_SITE_submenu1_table_id+' hidden ></table></tr></div></li></ul></div>';//CHANGED BEC THS LINE USED FOR ONLY IN SUBSUB MENU VAL
                         }
                         else
@@ -154,14 +157,14 @@ $(document).ready(function(){
             $('#USR_SITE_btn_submitbutton').removeAttr("disabled", "disabled");
         }
     });
-
     //TREE VIEW EXPANDING
     $(document).on("click",'.exp,.collapse', function (){
         var button_id=$(this).attr("id")
         var btnid=button_id.split("_");
         var menu_btnid=btnid[1]
         if($(this).val()=='+'){
-            $(this).replaceWith('<input type="button"   value="-" id='+button_id+'  height="3" width="3" class="collapse" />');
+            $(this).val('-')
+//            $(this).replaceWith('<input type="button"   value="-" id='+button_id+'  height="3" width="3" class="collapse" />');
             if(btnid[0]=='folder'){
                 $('#subf'+menu_btnid).toggle("fold",100);
             }
@@ -277,8 +280,7 @@ $(document).ready(function(){
     });
     //CLICK FUNCTON FOR SUBMIT BUTTON
     $(document).on('click','#USR_SITE_btn_submitbutton',function(){
-        $('.preloader', window.parent.document).show();
-
+        $('.preloader').show();
         var formElement = document.getElementById("USR_SITE_form_user");
         var xmlhttp=new XMLHttpRequest();
         xmlhttp.onreadystatechange=function() {
@@ -288,38 +290,40 @@ $(document).ready(function(){
                 {
                     if($('#USR_SITE_btn_submitbutton').val()=='REVOKE ACCESS')
                     {
-                        $(document).doValidation({rule:'messagebox',prop:{msgtitle:"SITE MAINTENANCE",msgcontent:USR_SITE_errorAarray[0],position:{top:150,left:500}}});
-                        $('.preloader', window.parent.document).hide();
-
+//                        show_msgbox("SITE MAINTENANCE",USR_SITE_errorAarray[0],150,500,false)
+//                        $(document).doValidation({rule:'messagebox',prop:{msgtitle:"SITE MAINTENANCE",msgcontent:USR_SITE_errorAarray[0],position:{top:150,left:500}}});
+                        show_msgbox("SITE MAINTENANCE",USR_SITE_errorAarray[0],"success",false)
+                        $('.preloader').hide();
                         USR_SITE_clear()
                     }
                     else
                     {
-                        $(document).doValidation({rule:'messagebox',prop:{msgtitle:"SITE MAINTENANCE",msgcontent:USR_SITE_errorAarray[1],position:{top:150,left:500}}});
-                        $('.preloader', window.parent.document).hide();
-
+//                        show_msgbox("SITE MAINTENANCE",USR_SITE_errorAarray[1],150,500,false)
+//                        $(document).doValidation({rule:'messagebox',prop:{msgtitle:"SITE MAINTENANCE",msgcontent:USR_SITE_errorAarray[1],position:{top:150,left:500}}});
+                        show_msgbox("SITE MAINTENANCE",USR_SITE_errorAarray[1],"error",false)
+                        $('.preloader').hide();
                         USR_SITE_clear()
                     }
                 }
             }
         }
         var choice="USR_SITE_update"
-        xmlhttp.open("POST","DB_ACCESS_RIGHTS_SITE_MAINTENANCE.do?option="+choice,true);
+        xmlhttp.open("POST","DB_ACCESS_RIGHTS_SITE_MAINTENANCE.php?option="+choice,true);
         xmlhttp.send(new FormData(formElement));
     });
 //SUCCESS FUNCTION FOR UPDATING
     function USR_SITE_clear(){
-        $('.preloader', window.parent.document).hide();
+        $('.preloader').hide();
         var xmlhttp=new XMLHttpRequest();
         xmlhttp.onreadystatechange=function() {
             if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                $('.preloader', window.parent.document).hide();
+                $('.preloader').hide();
                 value_array=JSON.parse(xmlhttp.responseText);
                 USR_SITE_tree_view(value_array)
             }
         }
         var option="SITE_MAINTENANCE";
-        xmlhttp.open("GET","DB_ACCESS_RIGHTS_SITE_MAINTENANCE.do?option="+option);
+        xmlhttp.open("GET","DB_ACCESS_RIGHTS_SITE_MAINTENANCE.php?option="+option);
         xmlhttp.send();
     }
 });
@@ -330,14 +334,22 @@ $(document).ready(function(){
 <!--HEAD TAG END-->
 <!--BODY TAG START-->
 <body>
-<div class="wrapper">
-    <div  class="preloader MaskPanel"><div class="preloader statusarea" ><div style="padding-top:90px; text-align:center"><img src="image/Loading.gif"  /></div></div></div>
-    <div class="title" id="fhead" ><div style="padding-left:500px; text-align:left;"><p><h3>SITE MAINTENANCE</h3><p></div></div>
-    <form class="content" name="USR_SITE_form_user" id="USR_SITE_form_user">
-        <table id="USR_SITE_tble_menu" hidden>
-        </table>
-        <input align="right" type="button" class="maxbtn" name="USR_SITE_btn_submitbutton" id="USR_SITE_btn_submitbutton" disabled style="width:190px">
-    </form>
+<div class="preloader"><span class="Centerer"></span><img class="preloaderimg"/> </div>
+<div class="container">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h2 class="panel-title">SITE MAINTENANCE</h2>
+        </div>
+        <div class="panel-body">
+            <form id="USR_SITE_form_user" name="USR_SITE_form_user" class="form-horizontal" role="form">
+                <div class="table-responsive">
+                    <table id="USR_SITE_tble_menu" hidden>
+                    </table>
+                </div>
+                <input align="right" type="button" class="btn  btn-info" style="width:140px;" name="USR_SITE_btn_submitbutton" id="USR_SITE_btn_submitbutton" disabled>
+            </form>
+        </div>
+    </div>
 </div>
 </body>
 <!--BODY TAG END-->

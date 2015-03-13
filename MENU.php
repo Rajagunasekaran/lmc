@@ -6,8 +6,13 @@
 <?php
 include "GET_USERSTAMP.php";
 include "HEADER.php";
+include('SESSION.php');
 $Userstamp=json_encode($UserStamp);
 ?>
+<html>
+<head>
+</head>
+</html>
 <script>
 var ErrorControl ={MsgBox:'false'}
 var MenuPage=1;
@@ -42,63 +47,26 @@ function updateClock ( )
     $("#clock").html(currentTime);
 }
 $(document).ready(function(){
+
     $(".preloader").show();
     $('#checkin').attr("disabled","disabled");
-//    function displayLocation(latitude,longitude){
-//        var request = new XMLHttpRequest();
-//        var method = 'GET';
-//        var url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng='+latitude+','+longitude+'&sensor=true';
-//        var async = true;
-//        request.open(method, url, async);
-//        request.onreadystatechange = function(){
-//            if(request.readyState == 4 && request.status == 200){
-//                var data = JSON.parse(request.responseText);
-//                address = data.results[0];
-//                $('#location').text(address.formatted_address);
-//                $('#checkin').removeAttr("disabled");
-//                $('#errmsg').hide();
-//            }
-//        };
-//        request.send();
-//    };
-//    var successCallback = function(position){
-//        var x = position.coords.latitude;
-//        var y = position.coords.longitude;
-//        displayLocation(x,y);
-//    };
-//    var errorCallback = function(error){
-//        var errorMessage = 'Unknown error';
-//        switch(error.code) {
-//            case 1:
-//                errorMessage = 'Permission denied';
-//                break;
-//            case 2:
-//                errorMessage = 'Position unavailable';
-//                break;
-//            case 3:
-//                errorMessage = 'Timeout';
-//                break;
-//        }
-//        document.write(errorMessage);
-//    };
-//    var options = {
-//        enableHighAccuracy: true,
-//        timeout: 60000,
-//        maximumAge: 0
-//    };
-//    navigator.geolocation.getCurrentPosition(successCallback,errorCallback,options);
+
     <?php echo  "var Userstamp = ". $Userstamp.PHP_EOL;?>
     setInterval('updateClock()', 1000);
     var Page_url;
     $(document).on("click",'.btnclass', function (){
-        Page_url =$(this).data('pageurl');
-        $(document).doValidation({rule:'messagebox',prop:{msgtitle:"MENU CONFIRMATION",msgcontent:"Do You Want to Open "+$(this).attr("id")+" "+$(this).text()+" ?",confirmation:true,position:{top:150,left:480}}});
+        Page_url =$(this).attr('page');
+        var attr_id=$(this).attr("id");
+        if(attr_id==undefined){
+            attr_id='';
+        }
+        show_msgbox("MENU CONFIRMATION","Do You Want to Open "+attr_id+" "+$(this).text()+" ?","success",true);
         return false;
     });
     function init () {
-        document.getElementById('menu_frame').onload = function () {
-            $(".preloader").hide();
-        }
+//        document.getElementById('menu_frame').onload = function () {
+//            $(".preloader").hide();
+//        }
     }
     var all_menu_array=[];
     var checkintime;
@@ -111,13 +79,10 @@ $(document).ready(function(){
             var value_array=JSON.parse(xmlhttp.responseText);
             all_menu_array= value_array;
             checkinerrormsg=value_array[1];
-//            if($('#location').text()==""){
-//                $('#errmsg').text(checkinerrormsg[2]).show();
-//            }
-//            else{
-//                $('#errmsg').hide();
-//            }
             if(all_menu_array[0]!=''){
+                $('#menu_nav').show();
+                $('#RPT').show();
+                $('#AE').show();
                 ACRMENU_getallmenu_result(all_menu_array)
             }
             else{
@@ -126,20 +91,23 @@ $(document).ready(function(){
                 $('#ACRMENU_lbl_errormsg').text(error_msg);
                 $('#ACRMENU_lbl_errormsg').show();
                 $(".preloader").hide();
-                $('#buttondiv').css('display','none');
-                $('#liveclock').hide();
-                $('#checkin').hide();
-                $('#clockmsg').hide();
+                $('#menu_nav').hide();
+                $('#RPT').hide();
+                $('#AE').hide();
             }
         }
     }
     var option="MENU";
-    xmlhttp.open("POST","DB_MENU.do?option="+option,true);
+    xmlhttp.open("POST","DB_MENU.php?option="+option,true);
     xmlhttp.send();
-    $(document).on('click','.messageconfirm',function(){
+    $(document).on('click','.menuconfirm',function(){
         $(".preloader").show();
         if(Page_url){
-            $('#menu_frame').attr('src', Page_url)
+            $('#RPT').hide();
+            $('#AE').hide();
+//            $('#menu_frame').replaceWith( '<div id="menu_frame" name="iframe_a" ></div>');
+//            $('#menu_frame').load(Page_url);
+            window.location.href=Page_url;
             init();
         }
     });
@@ -147,6 +115,7 @@ $(document).ready(function(){
 //FUNCTION TO SET ALL MENUS
     function ACRMENU_getallmenu_result(all_menu_array)
     {
+
         var ACRMENU_mainmenu=all_menu_array[0];//['ACCESS RIGHTS','DAILY REPORTS','PROJECT','REPORT']//main menu
         var ARCMENU_first_submenu=all_menu_array[1];
         //[['ACCESS RIGHTS-SEARCH/UPDATE','TERMINATE-SEARCH/UPDATE','USER SEARCH DETAILS'],['ADMIN ','USER '],['PROJECT ENTRY','PROJECT SEARCH/UPDATE'],['ATTENDANCE','REVENUE']]//submenu
@@ -162,17 +131,17 @@ $(document).ready(function(){
         {
             var main='mainmenu'+i
             var submen='submenu'+i;
-            var filename=filelist[count]+'.do';
+            var filename=filelist[count]+'.php';
             if(ARCMENU_first_submenu.length==0)
             {
-                mainmenuItem='<li class="active"><a data-pageurl="'+filename+' href="'+filename+'" id="'+ACRMENU_mainmenu[i]+'" target="iframe_a"  >'+ACRMENU_mainmenu[i]+'</a></li>'
+                mainmenuItem='<li><a page="'+filename+'" href="#"  id="'+ACRMENU_mainmenu[i]+'" >'+ACRMENU_mainmenu[i]+'</a></li>'
+
             }
             else
             {
-                mainmenuItem='<li class="has-sub"><a href="#" >'+ACRMENU_mainmenu[i]+'</a><ul class='+submen+'>'
+                mainmenuItem='<li class="dropdown"><a tabindex="0" href="#" data-toggle="dropdown">'+ACRMENU_mainmenu[i]+'<b class="caret"></b></a><ul class="dropdown-menu fa-ul '+submen+'">'
             }
             $("#ACRMENU_ulclass_mainmenu").append(mainmenuItem);
-
             for(var j=0;j<ARCMENU_first_submenu.length;j++)
             {
                 if(i==j)
@@ -183,29 +152,33 @@ $(document).ready(function(){
                         if(ARCMENU_second_submenu[count].length==0)
                         {
                             if(script_flag[count]!='X'){
-                                var file_name=filelist[count]+'.do';
+                                var file_name=filelist[count]+'.php';
+
                             }
                             else{
 
-                                var file_name='ERROR_PAGE.do'
+                                var file_name='ERROR_PAGE.php'
                             }
-                            submenuItem='<li class="active"><a data-pageurl="'+file_name+'" href="'+file_name+'"   id="'+ACRMENU_mainmenu[i]+'" class=" btnclass"   >'+ARCMENU_first_submenu[j][k]+'</a></li></ul>'
+                            submenuItem='<li class=""><a class="btnclass" page="'+file_name+'" href="#"   id="'+ACRMENU_mainmenu[i]+'" >'+ARCMENU_first_submenu[j][k]+'</a></li></ul>'
                         }
                         else
                         {
-                            submenuItem='<li class="has-sub"><a href="#" >'+ARCMENU_first_submenu[j][k]+'</a><ul class='+sub_submenu+'>'
+                            submenuItem='<li class="dropdown-submenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown">'+ARCMENU_first_submenu[j][k]+'</a><ul class="dropdown-menu '+sub_submenu+'" role="menu">'
                         }
                         $("."+submen).append(submenuItem);
                         for(var m=0;m<ARCMENU_second_submenu[count].length;m++)//add submenu2
                         {
                             if(script_flag[count][m]!='X'){
-                                var file_name=filelist[count][m]+'.do';
+//                                    var file_name=filelist[count][m]
+                                var file_name=filelist[count][m]+'.php';
 
                             }
                             else{
-                                var file_name='ERROR_PAGE.do'
+                                var file_name='ERROR_PAGE.php'
                             }
-                            sub_submenuItem='<li class="active"><a data-pageurl="'+file_name+'" href="'+file_name+'"   id="'+ARCMENU_first_submenu[j][k]+'" class=" btnclass"     >'+ARCMENU_second_submenu[count][m]+'</a></li>'
+//                            alert(ARCMENU_second_submenu[count].length+"ARCMENU_second_submenu[count].length"+file_name)
+
+                            sub_submenuItem='<li class=""><a class="btnclass" page="'+file_name+'" href="#"   id="'+ARCMENU_first_submenu[j][k]+'" >'+ARCMENU_second_submenu[count][m]+'</a></li>'
                             $("."+sub_submenu).append(sub_submenuItem);
                         }
                         count++;
@@ -215,38 +188,61 @@ $(document).ready(function(){
             }
             $("#ACRMENU_ulclass_mainmenu").append('</li>');
         }
-        $("#cssmenu").show()
+
         $(".preloader").hide();
         MenuPage=0;
         CheckPageStatus();
     }
 });
 </script>
-<title>SSOMENS TIME SHEET</title>
+<title>LMC TIME SHEET</title>
 </head>
 <body >
-<div class="wrapper" >
-    <div  class="preloader MaskPanel"><div class="preloader statusarea" ><div style="padding-top:90px; text-align:center"><img src="image/Loading.gif"  /></div></div></div>
-       <table>
-          <tr>
-            <td style="width:1300px";><h1>ALLIANCE TIME SHEET</h1></td>
-         </tr>
-       </table>
 
-      <table>
-        <tr>
-            <td style="width:1000px";><b><h4><span id="clock" ></span></h4></b></td><td><b><?php echo $UserStamp ?></b></td>
-        </tr>
-        <tr>
-            <td><b><label id="clockmsg" name="clockmsg" ></label></b> </td>
-        </tr>
-      </table>
-       <div id='cssmenu' width="1500">
-           <ul class="nav" id="ACRMENU_ulclass_mainmenu">
-          </ul>
-       </div>
+<div class="container-fluid">
+    <div class="wrapper" >
+        <div class="preloader"><span class="Centerer"></span><img class="preloaderimg"   /> </div>
+<!--        <table>-->
+<!--            <tr>-->
+                <!--            <td style="width:1300px";><h1>LIH MING CONSTRUCTION PTE LTD</h1></td>-->
+        <img src="image/LOGO.png" align="middle"/>
+<!--                <td style="width:1300px";><img src="image/LOGO.png" align="middle"/></td>-->
+<!--            </tr>-->
+<!--        </table>-->
+
+        <table>
+            <tr>
+                <td style="width:1000px";><b><h4><span style="font-family:Helvetica Neue" id="clock" ></span></h4></b></td><td style="width:100px" style="font-family:Helvetica Neue";><b><i class="fa fa-user fa-2x"></i>  <?php echo $UserStamp ?></b></td><td></td><td><b><a href="logout.php">Logout<i class="fa fa-power-off fa-2x"></i></b>  </a></td>
+            </tr>
+            <tr>
+                <td><b><label id="clockmsg" name="clockmsg" ></label></b> </td>
+            </tr>
+        </table>
+        <nav class="navbar navbar-default" id="menu_nav">
+            <div class="navbar-header">
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+
+            </div>
+            <div class="collapse navbar-collapse" >
+                <ul class="nav navbar-nav" id="ACRMENU_ulclass_mainmenu">
+                </ul>
+            </div>
+        </nav>
+
+
+    <div  id="buttondiv"  >
+        <button type="button" class="btn  btn-info" name="AE" id="AE"  value="ACCIDENT ENTRY"><a page="FORM_ACCIDENT_ENTRY.php" href="#" class="btnclass" style="color:white">ACCIDENT ENTRY</a></button>
+        <button id="RPT" class="btn btn-info" name="RPT" value="REPORT PERMISSION ENTRY"  ><a page="FORM_PERMITS_ENTRY.php" href="#" class="btnclass" style="color:white">REPORT SUBMISSION ENTRY</a></button>
+
+    </div>
     <br><label id="ACRMENU_lbl_errormsg" class="errormsg" hidden ></label>
-    <iframe id="menu_frame" name="iframe_a" width="100%" height="100%"  frameborder="0"></iframe>
+    <div id="menu_frame" name="iframe_a" ></div>
+</div>
 </div>
 </body>
 </html>
