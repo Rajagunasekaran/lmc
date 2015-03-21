@@ -16,7 +16,7 @@ var USR_SITE_checked_mpid=[];
 var USR_SITE_errorAarray=[];
 //START DOCUMENT READY FUNCTION
 $(document).ready(function(){
-    $('.preloader').show();
+//    $('.preloader').show();
     var USR_SITE_menuname=[];
     var USR_SITE_submenu=[];
     var USR_SITE_subsubmenu=[];

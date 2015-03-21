@@ -177,7 +177,7 @@ $(document).ready(function(){
                     $('#attachafile').text('Attach a file');
                 }
                 if(success_flag==0){
-                    show_msgbox("ACCESS RIGHTS:TERMINATE SEARCH/UPDATE",js_errormsg_array[6],"error",false)
+                    show_msgbox("ACCESS RIGHTS:TERMINATE SEARCH/UPDATE",js_errormsg_array[7],"error",false)
                     $("#URT_SRC_lbl_datepickertermination").hide();
                     $("#URT_SRC_lb_loginterminate").hide();
                     $("#URT_SRC_lbl_loginterminate").hide();
@@ -290,7 +290,7 @@ $(document).ready(function(){
                     $('#attachafile').text('Attach a file');
                 }
                 else {
-                    show_msgbox("ACCESS RIGHTS:TERMINATE SEARCH/UPDATE",js_errormsg_array[6],"error",false)
+                    show_msgbox("ACCESS RIGHTS:TERMINATE SEARCH/UPDATE",js_errormsg_array[7],"error",false)
                     $("#URT_SRC_lbl_datepickerrejoin").hide();
                     $("#URT_SRC_lbl_loginrejoin").show();
                     $("#URT_SRC_tble_roles").hide();
@@ -666,6 +666,7 @@ $(document).ready(function(){
                         var branchaddr=values_array[0][0].branchaddress;
                         var comments=values_array[0][0].URSRC_comments;
                         var username=values_array[0][0].username;
+                        var emailid=values_array[0][0].URSRC_emailid;
                         var mindate=min_date.toString().split('-');
                         var month=mindate[1]-1;
                         var year=mindate[2];
@@ -702,8 +703,9 @@ $(document).ready(function(){
                         $('#URSRC_tb_accntyp').val(accountype).attr("size",emp_accountype+2);
                         $('#URSRC_ta_brnchaddr').val(branchaddr);
                         $('#URSRC_ta_comments').val(comments);
+                        $('#URSRC_tb_emailid').val(emailid);
                         $('#URT_SRC_tb_uname').val(username);//
-                        $('#URSRC_lb_selectteam').replaceWith('<select id="URSRC_lb_selectteam" name="URSRC_lb_selectteam"  maxlength="40" class="login_submitvalidate form-control upper"   ></select>')
+                        $('#URSRC_lb_selectteam').replaceWith('<select id="URSRC_lb_selectteam" name="URSRC_lb_selectteam"  maxlength="25" class="login_submitvalidate form-control upper"   ></select>')
                         var team='<option value="SELECT">SELECT</option>';
                         for(var k=0;k<URSRC_team_array.length;k++){
                             team += '<option value="' + URSRC_team_array[k] + '">' + URSRC_team_array[k] + '</option>';
@@ -969,6 +971,7 @@ $(document).ready(function(){
 //CHNAGE FUNCTION FOR RADIO OF LOGIN SEARCH ND UPDATE BTN
     $('#URT_SRC_radio_loginsearchupdate').change(function(){
         err_flag=0;
+        email_flag=0;
         $("#URT_SRC_lbl_selectoption").show();
         $('#URT_SRC_errdate').hide();
         $("#URT_SRC_radio_selectrejoin").show();
@@ -1098,9 +1101,10 @@ $(document).ready(function(){
             var passwrd=$('#URT_SRC_tb_pword').val();
             var confrmpasswrd=$('#URT_SRC_tb_confirmpword').val();
             var teamlb_txtbx=$('#URSRC_lb_selectteam').val();
+            var URSRC_emailid=$('#URSRC_tb_emailid').val();
             if(Selectedsearchradiooption=='URT_SRC_radio_valuerejoin')
             {
-                if(((teamlb_txtbx!='SELECT' && $('#URSRC_btn_add').val()=='ADD')||(teamlb_txtbx!="" && $('#URSRC_btn_add').val()=='CLEAR') )&&($('#URSRC_lb_selectemptype').val()!='SELECT') && ($("#URT_SRC_tb_datepickerrejoin").val()!="")&& ($("input[name=URT_SRC_radio_nrole]").is(":checked")==true)&&(URSRC_Firstname!='') && (URSRC_Lastname!='' ) && (URSRC_tb_dob!='' ) && (URSRC_empdesig!='' )&&( URSRC_Mobileno!='' && (parseInt($('#URSRC_tb_permobile').val())!=0)) && (URSRC_kinname!='')&& (URSRC_relationhd!='' )&& (URSRC_Mobileno.length>=8)&&(URSRC_mobile.length>=8 )&&(URSRC_brnchaddr!="")&&(URSRC_accttyp!="")&&(URSRC_ifsc!="")&&(URSRC_acctno!="")&&(URSRC_accname!="")&&(URSRC_tb_brnname!="")&&(URSRC_bnkname!="") &&(new_address!="")&&(passwrd!="")&&(confrmpasswrd!=""))
+                if((URSRC_emailid!='')&&(email_flag==0)&&((teamlb_txtbx!='SELECT' && $('#URSRC_btn_add').val()=='ADD')||(teamlb_txtbx!="" && $('#URSRC_btn_add').val()=='CLEAR') )&&($('#URSRC_lb_selectemptype').val()!='SELECT') && ($("#URT_SRC_tb_datepickerrejoin").val()!="")&& ($("input[name=URT_SRC_radio_nrole]").is(":checked")==true)&&(URSRC_Firstname!='') && (URSRC_Lastname!='' ) && (URSRC_tb_dob!='' ) && (URSRC_empdesig!='' )&&( URSRC_Mobileno!='' && (parseInt($('#URSRC_tb_permobile').val())!=0)) && (URSRC_kinname!='')&& (URSRC_relationhd!='' )&& (URSRC_Mobileno.length>=8)&&(URSRC_mobile.length>=8 )&&(URSRC_brnchaddr!="")&&(URSRC_accttyp!="")&&(URSRC_ifsc!="")&&(URSRC_acctno!="")&&(URSRC_accname!="")&&(URSRC_tb_brnname!="")&&(URSRC_bnkname!="") &&(new_address!="")&&(passwrd!="")&&(confrmpasswrd!=""))
                 {
                     $("#URT_SRC_btn_rejoin").removeAttr("disabled");
                 }
@@ -1136,9 +1140,9 @@ $(document).ready(function(){
         else
         {
             if(URSRC_Mobileno=='URSRC_tb_permobile')
-                $('#URSRC_lbl_validnumber').text(js_errormsg_array[7]).show();
+                $('#URSRC_lbl_validnumber').text(js_errormsg_array[8]).show();
             else
-                $('#URSRC_lbl_validnumber1').text(js_errormsg_array[7]).show();
+                $('#URSRC_lbl_validnumber1').text(js_errormsg_array[8]).show();
         }
     });
     //CLICK FUNCTION FOR TEAM ADD BTN
@@ -1150,7 +1154,7 @@ $(document).ready(function(){
             URT_SRC_validation();
         }
         else{
-            $('#URSRC_lb_selectteam').replaceWith('<select id="URSRC_lb_selectteam" name="URSRC_lb_selectteam"  maxlength="40" class="login_submitvalidate form-control upper" hidden  ></select>')
+            $('#URSRC_lb_selectteam').replaceWith('<select id="URSRC_lb_selectteam" name="URSRC_lb_selectteam"  maxlength="25" class="login_submitvalidate form-control upper" hidden  ></select>')
             var team='<option value="SELECT">SELECT</option>';
             for(var k=0;k<URSRC_team_array.length;k++){
                 team += '<option value="' + URSRC_team_array[k] + '">' + URSRC_team_array[k] + '</option>';
@@ -1164,7 +1168,7 @@ $(document).ready(function(){
     $(document).on('change','.chk_password',function(){
         var URSRC_pass_length=($('#URT_SRC_tb_pword').val()).length;
         if(URSRC_pass_length<8){
-            $('#URSRC_lbl_passwrd_errupd').text(js_errormsg_array[14]).show();
+            $('#URSRC_lbl_passwrd_errupd').text(js_errormsg_array[15]).show();
             pass_flag=0;
         }
         else{
@@ -1180,7 +1184,7 @@ $(document).ready(function(){
         if(confirmpassword!=''){
             if(password!=confirmpassword)
             {
-                $('#URSRC_lbl_confirmpasswrd_errupd').text(js_errormsg_array[13]).show();
+                $('#URSRC_lbl_confirmpasswrd_errupd').text(js_errormsg_array[14]).show();
                 incorrectflag=0;
             }
             else
@@ -1212,7 +1216,7 @@ $(document).ready(function(){
                     team_flag=1;
                 }
                 else{
-                    var msg=js_errormsg_array[6].replace('RECORD NOT UPDATED','ROLE :[NAME] ALREADY EXISTS')
+                    var msg=js_errormsg_array[7].replace('RECORD NOT UPDATED','ROLE :[NAME] ALREADY EXISTS')
                     var finalmsg=msg.replace("[NAME]",$('#URSRC_lb_selectteam').val())
                     var fnlmsg=finalmsg.replace("ROLE",'TEAM')
                     $('#URSRC_lbl_team_err').text(fnlmsg).show()
@@ -1224,6 +1228,33 @@ $(document).ready(function(){
         xmlhttp.open("GET","DB_ACCESS_RIGHTS_TERMINATE-SEARCH_UPDATE.php?URSRC_team_name="+team_name+"&option="+choice,true);
         xmlhttp.send();
     });
+
+    var email_flag=0;
+    $(document).on("blur change",'#URSRC_tb_emailid', function (){
+
+        var emailid=($('#URSRC_tb_emailid').val().toLowerCase());
+        $('#URSRC_tb_emailid').val(emailid)
+        var atpos=emailid.indexOf("@");
+        var dotpos=emailid.lastIndexOf(".");
+        if ((atpos<1 || dotpos<atpos+2 || dotpos+2>=emailid.length)||(/^[@a-zA-Z0-9-\\.]*$/.test(emailid) == false))
+        {
+            email_flag=1;
+            $("#URSRC_lbl_email_error").text(js_errormsg_array[6]).show();
+            $('#URSRC_tb_emailid').addClass("invalid")
+
+        }
+        else{
+            email_flag=0;
+            $("#URSRC_lbl_email_error").hide();
+            $('#URSRC_tb_emailid').removeClass("invalid")
+
+        }
+
+
+
+    });
+
+
 });
 </script>
 <div class="container">
@@ -1309,7 +1340,7 @@ $(document).ready(function(){
     <label name="URT_SRC_lbl_uname" id="URT_SRC_lbl_uname" class="col-sm-2" hidden>
         USERNAME
     </label>
-    <div class="col-sm-4">
+    <div class="col-sm-3">
         <input type="text" name="URT_SRC_tb_uname" id="URT_SRC_tb_uname" placeholder="UserName" maxlength='30' class="sizefix title_alpha login_submitvalidate form-control " readonly hidden>
     </div>
     <label id="URSRC_lbl_email_err" class="errormsg"></label>
@@ -1318,8 +1349,8 @@ $(document).ready(function(){
     <label name="URT_SRC_lbl_pword" id="URT_SRC_lbl_pword" class="col-sm-2" hidden>
         PASSWORD <em>*</em>
     </label>
-    <div class="col-sm-4">
-        <input type="password" name="URT_SRC_tb_pword" placeholder="PassWord" id="URT_SRC_tb_pword" maxlength='30' class="sizefix   login_submitvalidate form-control chk_password" hidden>
+    <div class="col-sm-3">
+        <input type="password" name="URT_SRC_tb_pword" placeholder="PassWord" id="URT_SRC_tb_pword" maxlength='30' class="login_submitvalidate form-control chk_password" hidden>
     </div>
     <label id="URSRC_lbl_passwrd_errupd" class="errormsg  col-sm-2"></label>
 </div>
@@ -1327,8 +1358,8 @@ $(document).ready(function(){
     <label name="URT_SRC_lbl_confirmpword" id="URT_SRC_lbl_confirmpword" class="col-sm-2" hidden>
         CONFIRM PASSWORD <em>*</em>
     </label>
-    <div class="col-sm-4">
-        <input type="text" name="URT_SRC_tb_confirmpword" placeholder="Confirm PassWord" id="URT_SRC_tb_confirmpword" maxlength='30' class="sizefix  autosize login_submitvalidate form-control chk_password" hidden>
+    <div class="col-sm-3">
+        <input type="text" name="URT_SRC_tb_confirmpword" placeholder="Confirm PassWord" id="URT_SRC_tb_confirmpword" maxlength='30' class="login_submitvalidate form-control chk_password" hidden>
     </div>
     <label id="URSRC_lbl_confirmpasswrd_errupd" class="errormsg  col-sm-2"></label>
 </div>
@@ -1371,7 +1402,7 @@ $(document).ready(function(){
         <label name="URSRC_lbl_firstname" id="URSRC_lbl_firstname" class="col-sm-2">
             FIRST NAME <em>*</em>
         </label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_firstname" id="URSRC_tb_firstname" maxlength='30' class="autosizealph sizefix title_alpha login_submitvalidate form-control" >
         </div>
     </div>
@@ -1379,7 +1410,7 @@ $(document).ready(function(){
         <label name="URSRC_lbl_lastname" id="URSRC_lbl_lastname" class="col-sm-2">
             LAST NAME <em>*</em>
         </label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_lastname" id="URSRC_tb_lastname" maxlength='30' class="autosizealph sizefix title_alpha login_submitvalidate form-control">
         </div>
     </div>
@@ -1400,14 +1431,19 @@ $(document).ready(function(){
     </div>
     <div class="form-group">
         <label name="URSRC_lbl_nric" id="URSRC_lbl_nric" class="col-sm-2">NRIC NO<em>*</em></label>
-        <div class="col-sm-4"><input type="text" name="URSRC_tb_nric" id="URSRC_tb_nric" maxlength='10' class="alphanumericuppercse sizefix login_submitvalidate form-control check_nric" style="width:120px"></div>
+        <div class="col-sm-3"><input type="text" name="URSRC_tb_nric" id="URSRC_tb_nric" maxlength='10' class="alphanumericuppercse sizefix login_submitvalidate form-control check_nric" style="width:120px"></div>
         <!--        <label id="URSRC_lbl_invalidnric" name="URSRC_lbl_invalidnric" class="errormsg"></label>-->
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_designation" id="URSRC_lbl_designation" style="white-space: nowrap!important;">DESIGNATION<em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_designation" id="URSRC_tb_designation" maxlength='50' class="alphanumericuppercse sizefix login_submitvalidate form-control">
         </div>
+    </div>
+    <div class="form-group">
+        <label name="URSRC_lbl_emailid" id="URSRC_lbl_emailid" class="col-sm-2">EMAIL ID<em>*</em></label>
+        <div class="col-sm-3"><input type="text" name="URSRC_tb_emailid" id="URSRC_tb_emailid" maxlength='50' placeholder="Email Id" class="login_submitvalidate form-control"></div>
+        <div><label id="URSRC_lbl_email_error" class="errormsg"></label></div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_permobile" id="URSRC_lbl_permobile" style="white-space: nowrap!important;">PERSONAL MOBILE<em>*</em></label>
@@ -1418,19 +1454,19 @@ $(document).ready(function(){
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_kinname" id="URSRC_lbl_kinname" style="white-space: nowrap!important;">NEXT KIN NAME<em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_kinname" id="URSRC_tb_kinname" maxlength='30' class="autosizealph sizefix title_alpha login_submitvalidate form-control">
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_relationhd" id="URSRC_lbl_relationhd">RELATION HOOD<em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_relationhd" id="URSRC_tb_relationhd" maxlength='30' class="autosizealph sizefix title_alpha login_submitvalidate form-control" >
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_mobile" id="URSRC_lbl_mobile">MOBILE NO<em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_mobile" id="URSRC_tb_mobile" class="mobileno title_nos valid login_submitvalidate form-control" maxlength='8' style="width:90px">
         </div>
         <label id="URSRC_lbl_validnumber1" name="URSRC_lbl_validnumber1" class="errormsg">
@@ -1446,37 +1482,37 @@ $(document).ready(function(){
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_bnkname" id="URSRC_lbl_bnkname" style="white-space: nowrap!important;">BANK NAME <em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_bnkname" id="URSRC_tb_bnkname" maxlength='50' class="alphanumericuppercse sizefix login_submitvalidate form-control" >
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_brnchname" id="URSRC_lbl_brnchname" style="white-space: nowrap!important;">BRANCH NAME <em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_brnchname" id="URSRC_tb_brnchname" maxlength='50' class="alphanumericuppercse sizefix login_submitvalidate form-control" >
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_accntname" id="URSRC_lbl_accntname" style="white-space: nowrap!important;">ACCOUNT NAME <em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_accntname" id="URSRC_tb_accntname" maxlength='50' class="alphanumericuppercse sizefix login_submitvalidate form-control" >
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_accntno" id="URSRC_lbl_accntno" style="white-space: nowrap!important;">ACCOUNT NUMBER <em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_accntno" id="URSRC_tb_accntno" maxlength='50' class=" sizefix accntno login_submitvalidate form-control" >
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_ifsccode" id="URSRC_lbl_ifsccode" style="white-space: nowrap!important;">IFSC CODE<em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_ifsccode" id="URSRC_tb_ifsccode" maxlength='50' class="alphanumericuppercse sizefix login_submitvalidate form-control" >
         </div>
     </div>
     <div class="form-group row">
         <label class="col-sm-2" name="URSRC_lbl_accntyp" id="URSRC_lbl_accntyp" style="white-space: nowrap!important;">ACCOUNT TYPE<em>*</em></label>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <input type="text" name="URSRC_tb_accntyp" id="URSRC_tb_accntyp" maxlength='15' class="alphanumericuppercse sizefix login_submitvalidate form-control" >
         </div>
     </div>
@@ -1493,15 +1529,15 @@ $(document).ready(function(){
             <textarea rows="4" cols="50" name="URSRC_ta_comments" id="URSRC_ta_comments" class="maxlength login_submitvalidate textareaupd form-control"></textarea>
         </div>
     </div>
-    <div>
-        <div ID="filetableuploads" class="form-group row">
-        </div>
-    </div>
-    <div class="">
-        <div id="attachprompt" class="col-sm-offset-2 col-sm-10"><img width="15" height="15" src="image/paperclip.gif" border="0" >
-            <a href="javascript:_addAttachmentFields('attachmentarea')" id="attachafile">Attach a file</a>
-        </div>
-    </div>
+<!--    <div>-->
+<!--        <div ID="filetableuploads" class="form-group row">-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="">-->
+<!--        <div id="attachprompt" class="col-sm-offset-2 col-sm-10"><img width="15" height="15" src="image/paperclip.gif" border="0" >-->
+<!--            <a href="javascript:_addAttachmentFields('attachmentarea')" id="attachafile">Attach a file</a>-->
+<!--        </div>-->
+<!--    </div>-->
 </div>
 <!--    EMPL DETAILS-->
 <div>

@@ -18,7 +18,7 @@ include "NEW_MENU.php";
             var url=document.location.href='COMMON_PDF.php?flag=1&title='+title;
         });
         $('#URSRC_btn_pdf').hide();
-        $('.preloader').show();
+//        $('.preloader').show();
         var title;
         var values_arraystotal=[];
         var values_array=[];

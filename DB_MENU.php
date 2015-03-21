@@ -17,7 +17,7 @@ if($_REQUEST['option']=="MENU")
             $login_id_role=$row["URC_DATA"];
         }
 
-        $main_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MNAME FROM LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp' and UA.ULD_ID=ULD.ULD_ID and UA.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID AND UA.UA_TERMINATE IS NULL ORDER BY MP_MNAME ASC");
+        $main_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MNAME FROM LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp' and UA.ULD_ID=ULD.ULD_ID and UA.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID AND UA.UA_TERMINATE IS NULL ORDER BY MP.MP_ID ASC");
 
         $ure_values=array();
         $URSC_Main_menu_array=array();

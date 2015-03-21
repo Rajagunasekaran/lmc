@@ -2,8 +2,9 @@
 include "NEW_MENU.php";
 ?>
 <script>
+
     $(document).ready(function(){
-        $('.preloader').show();
+        $(".titlecase").Setcase({caseValue : 'title'});
         var errormessage=[];
         var xmlhttp=new XMLHttpRequest();
         xmlhttp.onreadystatechange=function(){
@@ -94,7 +95,10 @@ include "NEW_MENU.php";
                         show_msgbox("ACCIDENT ENTRY",errormessage[0],"success",false)
                         $("#reportaccident").find('input:text, input:password, input:file, select, textarea').val('');
                         $("#reportaccident").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
-                        ('#acc_btn_save$').hide();
+                        $('#acc_btn_save').attr('disabled','disabled');
+                        $('#acc_ta_adrs').height('22');
+                        $('#acc_ta_description').height('214');
+
                     }
                     else if(msg_alert==0)
                     {
@@ -182,26 +186,26 @@ include "NEW_MENU.php";
 
                                 <div class="col-md-4">
                                     <label>PLACE OF ACCIDENT<em>*</em></label>
-                                    <input type="text" class="form-control txtlen" id="acc_tb_placeofacc"  name="acc_tb_placeofacc" placeholder="Place of Accident">
+                                    <input type="text" class="form-control txtlen titlecase" id="acc_tb_placeofacc"  name="acc_tb_placeofacc" placeholder="Place of Accident">
                                 </div>
                                 <div class="col-md-4">
                                     <label>LOCATION OF ACCIDENT<em>*</em></label>
-                                    <input type="text" class="form-control txtlen" id="acc_tb_locofacc"  name="acc_tb_locofacc" placeholder="Location of Accident">
+                                    <input type="text" class="form-control txtlen titlecase" id="acc_tb_locofacc"  name="acc_tb_locofacc" placeholder="Location of Accident">
                                 </div>
                             </div>
                             <div class="row form-group">
                                 <div class="col-md-4">
                                     <label>TYPE OF INJURY<em>*</em></label>
-                                    <input type="text" class="form-control txtlen" id="acc_tb_typeofinju" name="acc_tb_typeofinju" placeholder="Type of Injury">
+                                    <input type="text" class="form-control txtlen titlecase" id="acc_tb_typeofinju" name="acc_tb_typeofinju" placeholder="Type of Injury">
                                 </div>
                                 <div class="col-md-4">
                                     <label>NATURE OF INJURY<em>*</em></label>
-                                    <input type="text" class="form-control txtlen" id="acc_tb_natureofinju" name="acc_tb_natureofinju" placeholder="Nature of Injury">
+                                    <input type="text" class="form-control txtlen titlecase" id="acc_tb_natureofinju" name="acc_tb_natureofinju" placeholder="Nature of Injury">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label>PARTS OF BODY INJURED<em>*</em></label>
-                                    <input type="text" class="form-control txtlen" id="acc_tb_partsofbody"  name="acc_tb_partsofbody" placeholder="Parts of Body Injured">
+                                    <input type="text" class="form-control txtlen titlecase" id="acc_tb_partsofbody"  name="acc_tb_partsofbody" placeholder="Parts of Body Injured">
                                 </div>
 
                             </div>
@@ -217,7 +221,7 @@ include "NEW_MENU.php";
                             <div class="row form-group">
                                 <div class="col-md-4">
                                     <label>TYPE OF MACHINERY</label>
-                                    <input type="text" class="form-control txtlen" id="acc_tb_typeofmachinery" name="acc_tb_typeofmachinery" placeholder="Type of Machinery">
+                                    <input type="text" class="form-control txtlen titlecase" id="acc_tb_typeofmachinery" name="acc_tb_typeofmachinery" placeholder="Type of Machinery">
                                 </div>
                                 <div class="col-md-4">
                                     <label>LM NO</label>
@@ -251,7 +255,7 @@ include "NEW_MENU.php";
 
                                 <div class="col-md-4">
                                     <label>ADDRESS OF INJURED<em>*</em></label>
-                                    <textarea class="form-control" id="acc_ta_adrs" rows="1" name="acc_ta_adrs" placeholder="Address"></textarea>
+                                    <textarea class="form-control titlecase" id="acc_ta_adrs" rows="1" name="acc_ta_adrs" maxlength="200" placeholder="Address"></textarea>
                                 </div>
                                 <div class="col-md-3">
                                     <label>NRIC NO<em>*</em></label>
@@ -274,7 +278,7 @@ include "NEW_MENU.php";
 
                                 <div class="col-md-3">
                                     <label>NATIONALITY<em>*</em></label>
-                                    <input type="text" class="form-control charlen autosizealph" id="acc_tb_nationality" name="acc_tb_nationality" placeholder="Nationality">
+                                    <input type="text" class="form-control charlen autosizealph titlecase" id="acc_tb_nationality" name="acc_tb_nationality" placeholder="Nationality">
                                 </div>
                             </div>
                             <div class="row form-group">
@@ -294,11 +298,11 @@ include "NEW_MENU.php";
                                 </div>
                                 <div class="col-md-3">
                                     <label>MARITAL STATUS<em>*</em></label>
-                                    <input type="text" class="form-control charlen" id="acc_tb_maritalstatus" name="acc_tb_maritalstatus" placeholder="Marital Status">
+                                    <input type="text" class="form-control charlen titlecase" id="acc_tb_maritalstatus" name="acc_tb_maritalstatus" placeholder="Marital Status">
                                 </div>
                                 <div class="col-md-3">
                                     <label>DESIGNATION<em>*</em></label>
-                                    <input type="text" class="form-control txtlen" id="acc_tb_des" name="acc_tb_des" placeholder="Designation">
+                                    <input type="text" class="form-control txtlen titlecase" id="acc_tb_des" name="acc_tb_des" placeholder="Designation">
                                 </div>
                             </div>
                             <div class="row form-group">
@@ -328,7 +332,7 @@ include "NEW_MENU.php";
                             <div class="row form-group">
                                 <div class="col-md-10">
                                     <label>DESCRIPTION OF ACCIDENT<em>*</em></label>
-                                    <textarea class="form-control" id="acc_ta_description" rows="10" name="acc_ta_description" placeholder="Description"></textarea>
+                                    <textarea class="form-control" id="acc_ta_description" rows="10" maxlength="3000" name="acc_ta_description" placeholder="Description"></textarea>
                                 </div>
                             </div>
                         </fieldset>

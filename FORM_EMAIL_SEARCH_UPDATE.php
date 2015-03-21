@@ -17,7 +17,7 @@ var ET_SRC_UPD_DEL_emailtemplate_list=[];
 //READY FUNCTION START
 $(document).ready(function(){
 //    $('.preloader', window.parent.document).show();
-    $('.preloader').show();
+//    $('.preloader').show();
     $('#ET_SRC_UPD_DEL_btn_search').hide();
     var xmlhttp=new XMLHttpRequest();
     xmlhttp.onreadystatechange=function() {

@@ -543,7 +543,7 @@ function adjustPosition(oldPosition,top,left){
 }
 
 $(function() {
-    $('.preloaderimg').attr('src','CSS/images/ajax_loading.gif');
+    $('.preloaderimg').attr('src','CSS/images/preloader.gif');
     $(document).on('click','.messageclose',function(){
         $('#focustext').focus();
     });

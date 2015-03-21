@@ -2,130 +2,11 @@
 include "NEW_MENU.php";
 ?>
 <script>
-var stime='';
-var etime='';
 var upload_count=0;
 $(document).ready(function(){
-    $('.preloader').show();
-    //reomve file upload row
-    $(document).on('click', 'button.removebutton', function () {
-
-        $(this).closest('div').remove();
-        var rowCount = $('#filetableuploads > div').length;
-        if(rowCount!=0)
-        {
-            $('#attachafile').text('Attach another file');
-        }
-        else
-        {
-            $('#attachafile').text('Attach a file');
-        }
-        return false;
-    });
-    //file extension validation
-    $(document).on("change",'.fileextensionchk', function (){
-        for(var i=0;i<25;i++)
-        {
-            var data= $('#upload_filename'+i).val();
-            var datasplit=data.split('.');
-            var old_loginid=$('#URSRCH_lb_selectloginid').val();
-            var ext=datasplit[1].toUpperCase();
-            if(ext!='PDF' || data==undefined || data=="")
-            {
-                show_msgbox("PROJECT PERMITS ENTRY",'PDF FILES ONLY ALLOWED!!!',"error",false)
-                reset_field($('#upload_filename'+i));
-            }
-
-        }
-    });
-    //file upload reset
-    function reset_field(e) {
-        e.wrap('<form>').parent('form').trigger('reset');
-        e.unwrap();
-    }
-    //add file upload row
-    $(document).on("click",'#attachprompt', function (){
-        var tablerowCount = $('#filetableuploads > div').length;
-        var uploadfileid="upload_filename"+tablerowCount;
-        var appendfile='<div class="col-sm-12"><label class="inline"><input type="file" style="max-width:250px " class="fileextensionchk form-control" id='+uploadfileid+' name='+uploadfileid+'></label><label class="inline" ><button  class="removebutton" value="-" title="Remove this row" style="background-color:red;color:white;font-size:10;font-weight: bold;"></button></label></div>';
-        $('#filetableuploads').append(appendfile);
-        upload_count++;
-        var rowCount =$("#filetableuploads > div").length// $('#filetableuploads tr').length;//
-        if(rowCount!=0)
-        {
-            $('#attachafile').text('Attach another file');
-        }
-        else
-        {
-            $('#attachafile').text('Attach a file');
-        }
-    });
+//    $('.preloader').show();
     $('#backtotop').hide();
     var error_message=[];
-    //TIME PICKER VALIDATION
-    // start time end time validation
-    function time_validation(start,end){
-        var dtStart = new Date("1/1/2015 " + start);
-        var dtEnd = new Date("1/1/2015 " + end);
-        var difference_in_milliseconds = dtEnd - dtStart;
-        if (difference_in_milliseconds <=0)
-        {
-            show_msgbox("REPORT SUBMISSION SEARCH",error_message[4],"error",false)
-            return true;
-        }
-    }
-    $('.time-picker').on("change blur", function(){
-        var tr_wstart = $("#SRCH_tr_txt_wftime").val();
-        var tr_wend = $("#SRCH_tr_txt_wttime").val();
-        var tr_start = $("#SRCH_tr_txt_reachsite").val();
-        var tr_end = $("#SRCH_tr_txt_leavesite").val();
-        var sv_start = $("#SRCH_sv_txt_start").val();
-        var sv_end = $("#SRCH_sv_txt_end").val();
-        var mu_start = $("#SRCH_machinery_start").val();
-        var mu_end = $("#SRCH_machinery_end").val();
-        var rm_start = $("#SRCH_rental_start").val();
-        var rm_end = $("#SRCH_rental_end").val();
-        var eu_start = $("#SRCH_equipment_start").val();
-        var eu_end = $("#SRCH_equipment_end").val();
-
-        if((tr_wstart!='' && tr_wend!='' && $(this).attr('id')=='SRCH_tr_txt_wftime') || (tr_wstart!='' && tr_wend!='' && $(this).attr('id')=='SRCH_tr_txt_wttime')){
-            var valid=time_validation(tr_wstart,tr_wend);
-            if(valid==true){
-                $("#SRCH_tr_txt_wttime").val('');
-            }
-        }
-        if((tr_start!='' && tr_end!='' && $(this).attr('id')=='SRCH_tr_txt_reachsite') || (tr_start!='' && tr_end!='' && $(this).attr('id')=='SRCH_tr_txt_leavesite')){
-            var valid=time_validation(tr_start,tr_end);
-            if(valid==true){
-                $("#SRCH_tr_txt_leavesite").val('');
-            }
-        }
-        if((sv_start!='' && sv_end!='' && $(this).attr('id')=='SRCH_sv_txt_start') || (sv_start!='' && sv_end!='' && $(this).attr('id')=='SRCH_sv_txt_end')){
-            var valid=time_validation(sv_start,sv_end);
-            if(valid==true){
-                $("#SRCH_sv_txt_end").val('');
-            }
-        }
-        if((mu_start!='' && mu_end!='' && $(this).attr('id')=='SRCH_machinery_start') || (mu_start!='' && mu_end!='' && $(this).attr('id')=='SRCH_machinery_end')){
-            var valid=time_validation(mu_start,mu_end);
-            if(valid==true){
-                $("#SRCH_machinery_end").val('');
-            }
-        }
-        if((rm_start!='' && rm_end!='' && $(this).attr('id')=='SRCH_rental_start') || (rm_start!='' && rm_end!='' && $(this).attr('id')=='SRCH_rental_end')){
-            var valid=time_validation(rm_start,rm_end);
-            if(valid==true){
-                $("#SRCH_rental_end").val('');
-            }
-        }
-        if((eu_start!='' && eu_end!='' && $(this).attr('id')=='SRCH_equipment_start') || (eu_start!='' && eu_end!='' && $(this).attr('id')=='SRCH_equipment_end')){
-            var valid=time_validation(eu_start,eu_end);
-            if(valid==true){
-                $("#SRCH_equipment_end").val('');
-            }
-        }
-
-    });
 
     //END OF VALIDATION
     $('#SRCH_entryform').hide();
@@ -186,7 +67,6 @@ $(document).ready(function(){
     //End validation
 
     var employee_id;
-    var docfilename;
     var imagefolderid;
     $(document).on("click",'#SRCH_searchbtn', function (){
         $('.preloader').show();
@@ -230,13 +110,17 @@ $(document).ready(function(){
                 var jobdone_size=((value_array[13]).toString()).split(',');
                 var jobdone_length=((value_array[14]).toString()).split(',');
                 var imgdata=value_array[15];
-                    imagefolderid=value_array[17];
+                imagefolderid=value_array[17];
+                var meeting_details=value_array[18];
                     $('#SRCH_tr_txt_wftime').val('');
                     $('#SRCH_tr_txt_wttime').val('');
                     $('#SRCH_tr_txt_weather').val('');
-                    if(imgdata!=null)
+                    if(imgdata!='data:image/png;base64,')
                     {
                         $('<div><img src="'+imgdata+'" width="500" height="400" alt="embedded folder icon"></div>').appendTo($("#appendimg"));
+                    }
+                    else{
+                        $('<div>No Image Available</div>').appendTo($("#appendimg"));
                     }
 
                 if(jobdone_pipilaid[0]=='ROAD' || jobdone_pipilaid[1]=='ROAD' || jobdone_pipilaid[2]=='ROAD')
@@ -317,18 +201,12 @@ $(document).ready(function(){
                     $('#SRCH_jd_txt_end').val(teamreport_details[a][11]);
                     $('#SRCH_jd_ta_remark').val(teamreport_details[a][12]);
                     $('#SRCH_tr_txt_weather').val(teamreport_details[a][13]);
-                    docfilename=teamreport_details[a][14];
-                }
-                    if(docfilename!=null){
-                        var filenameinarray=docfilename.split('/');
-                        for(var j=0;j<filenameinarray.length;j++){
-                            var name=imagefolderid+"/"+filenameinarray[j];
-                            var appendfile=' <div class="col-sm-12"><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a></div></br>';
-
-                            $('#SRCH_exsistingfiletable').append(appendfile);
+ 			if(teamreport_details[a][13]=='')
+                        {
+                            $("#SRCH_tr_txt_wftime").val('');
+                            $("#SRCH_tr_txt_wttime").val('');
                         }
-
-                    }
+                }
                 //EMPLOYEE DETAILS
                 $('#SRCH_Employee_table tr:not(:first)').remove();
                 for(var i=0;i<empname.length;i++)
@@ -359,26 +237,31 @@ $(document).ready(function(){
                     });
                     $('#SRCH_entryform').show();
                     $( "textarea" ).autogrow( { vertical : true, horizontal : true } );
-                    // emp table start end time validation
-                    $(document).on('click','.stime',function(){
-                        stime=$(this).attr('id');
-                    });
-                    $(document).on('click','.etime',function(){
-                        etime=$(this).attr('id');
-                    });
-                    $(document).on('change blur','.etime,.stime',function(){
-                        var s_time=$('#'+stime).val();
-                        var e_time=$('#'+etime).val();
-                        if((s_time!='' && e_time!='' && $(this).attr('id')==stime) || (s_time!='' && e_time!='' && $(this).attr('id')==etime)){
-                            var valid=time_validation(s_time,e_time);
-                            if(valid==true){
-                                $('#'+etime).val('');
-                            }
-                        }
-                    });
 
                 }
-
+                //MEETING DETAILS
+                    $('#SRCH_meeting_table tr:not(:first)').remove();
+                    if(meeting_details!=null)
+                    {
+                        for(var v=0;v<meeting_details.length;v++)
+                        {
+                            var mt_tablerowcount=$('#SRCH_meeting_table tr').length;
+                            var mt_editid='SRCH_mt_editrow/'+mt_tablerowcount;
+                            var mt_deleterowid='SRCH_mt_deleterow/'+mt_tablerowcount;
+                            var mt_row_id="SRCH_mt_tr_"+mt_tablerowcount;
+                            var temp_textbox_id="SRCH_mttemp_id"+mt_tablerowcount;
+                            var mt_remark;
+                            if(meeting_details[v][2]==null){
+                                mt_remark="";
+                            }
+                            else
+                            {
+                                mt_remark=meeting_details[v][2];
+                            }
+                            var appendrow='<tr class="active" id='+mt_row_id+'><td style="max-width: 450px">'+meeting_details[v][1]+'</td><td style="max-width: 300px">'+mt_remark+'</td></tr>';
+                            $('#SRCH_meeting_table tr:last').after(appendrow);
+                        }
+                    }
                 //SITE VISIT DETAILS
                 $('#SRCH_sv_tbl tr:not(:first)').remove();
                 if(sitevisit!=null)
@@ -399,7 +282,7 @@ $(document).ready(function(){
                             siteremarks=sitevisit[j][5];
                         }
 
-                        var appendrow='<tr class="active" id='+sv_row_id+'><td style="max-width: 250px">'+sitevisit[j][1]+'</td><td style="max-width: 250px">'+sitevisit[j][2]+'</td><td style="max-width: 250px">'+sitevisit[j][3]+'</td><td style="max-width: 250px">'+sitevisit[j][4]+'</td><td style="max-width: 250px">'+siteremarks+'</td></tr>';
+                        var appendrow='<tr class="active" id='+sv_row_id+'><td style="max-width: 250px">'+sitevisit[j][2]+'</td><td style="max-width: 250px">'+sitevisit[j][1]+'</td><td style="max-width: 250px">'+sitevisit[j][3]+'</td><td style="max-width: 250px">'+sitevisit[j][4]+'</td><td style="max-width: 250px">'+siteremarks+'</td></tr>';
                         $('#SRCH_sv_tbl tr:last').after(appendrow);
                     }
                 }
@@ -511,15 +394,15 @@ $(document).ready(function(){
                         var row_id="SRCH_fitting_tr_"+tablerowCount;
                         var temp_textbox_id="SRCH_fittingtemp_id"+tablerowCount;
                         var fittingremarks;
-                        if(fittingusage_details[o][3]==null)
+                        if(fittingusage_details[o][4]==null)
                         {
                             fittingremarks='';
                         }
                         else
                         {
-                            fittingremarks=fittingusage_details[o][3];
+                            fittingremarks=fittingusage_details[o][4];
                         }
-                        var appendrow='<tr  class="active" id='+row_id+'><td style="max-width: 250px">'+fittingusage_details[o][1]+'</td><td style="max-width: 250px">'+fittingusage_details[o][2]+'</td><td style="max-width: 250px">'+fittingusage_details[o][2]+'</td><td style="max-width: 250px">'+fittingremarks+'</td></tr>';
+                        var appendrow='<tr  class="active" id='+row_id+'><td style="max-width: 250px">'+fittingusage_details[o][1]+'</td><td style="max-width: 250px">'+fittingusage_details[o][2]+'</td><td style="max-width: 250px">'+fittingusage_details[o][3]+'</td><td style="max-width: 250px">'+fittingremarks+'</td></tr>';
                         $('#SRCH_fitting_table tr:last').after(appendrow);
                     }
                 }
@@ -1149,10 +1032,6 @@ $(document).ready(function(){
             $("#SRCH_fitting_addrow").attr("disabled", "disabled");
             fittingformclear();
         }
-        else{
-            alert('Enter Fields')
-        }
-
     });
     //**********DELETE ROW*************//
     $(document).on("click",'.SRCH_fitting_removebutton', function (){
@@ -1520,7 +1399,7 @@ $(document).ready(function(){
 <form id="SRCH_entryform" class="form-horizontal">
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">TEAM REPORT</h3>
+        <h3 class="panel-title">TEAM REPORT<em>*</em></h3>
     </div>
     <div class="panel-body">
         <!--        <form id="teamreport" class="form-horizontal">-->
@@ -1583,7 +1462,53 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">JOB DONE</h3>
+        <h3 class="panel-title">MEETING</h3>
+    </div>
+    <div class="panel-body">
+        <!--        <form>-->
+        <fieldset disabled hidden>
+            <div class="row form-group">
+                <div class="col-md-4">
+                    <label for="SRCH_mt_lbl_topic" id="SRCH_mt_lbl_topic">TOPIC<em>*</em></label>
+                    <input type="text" class="form-control meetingform-validation" id="SRCH_mt_lb_topic" name="SRCH_mt_lb_topic" placeholder="Topic">
+                </div>
+                <div class="col-md-8">
+                    <label for="SRCH_mt_lbl_remark" id="SRCH_mt_lbl_remark">REMARKS</label>
+                    <textarea class="form-control meetingform-validation" rows="1" id="SRCH_mt_ta_remark" name="SRCH_mt_ta_remark" placeholder="Remarks"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                </div>
+                <div class="col-md-4">
+                    <input type="hidden" name="SRCH_mt_rowid" id="SRCH_mt_rowid" class="form-control">
+                </div>
+            </div>
+
+            <div class="col-lg-9 col-lg-offset-11">
+                <button type="button" id="SRCH_mt_btn_addrow" class="btn btn-info" disabled>ADD</button>
+                <button type="button" id="SRCH_mt_btn_update" class="btn btn-info SRCH_mt_btn_updaterow" disabled>UPDATE</button>
+            </div>
+        </fieldset>
+        <div>
+            <table class="table table-striped table-hover" id="SRCH_meeting_table">
+                <thead>
+                <tr class="active">
+<!--                    <th width="300px">EDIT/REMOVE</th>-->
+                    <th width="500">TOPIC</th>
+                    <th>REMARKS</th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <!--        </form>-->
+    </div>
+</div>
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">JOB DONE<em>*</em></h3>
     </div>
     <div class="panel-body">
         <!--        <form id="jobdone" class="form-horizontal" role="form">-->
@@ -1660,7 +1585,7 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">EMPLOYEE REPORT DETAILS</h3>
+        <h3 class="panel-title">EMPLOYEE REPORT DETAILS<em>*</em></h3>
     </div>
     <div class="panel-body">
         <!--        <form>-->
@@ -2091,7 +2016,7 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">DRAWING AREA</h3>
+        <h3 class="panel-title">DRAWING AREA<em>*</em></h3>
     </div>
     <div class="panel-body">
             <div id="appendimg">
@@ -2099,27 +2024,6 @@ $(document).ready(function(){
             </div>
         <!--        </form>-->
     </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">ATTACHMENTS</h3>
-    </div>
-    <div class="panel-body">
-<div>
-    <div ID="SRCH_exsistingfiletable" class="form-group row">
-
-    </div>
-
-<!--    <div ID="filetableuploads" class="form-group row">-->
-<!---->
-<!--    </div>-->
-<!--</div>-->
-<!--<div>-->
-<!--    <div id="attachprompt" class=" col-sm-12"><img width="15" height="15" src="image/paperclip.gif" border="0">-->
-<!--        <a href="javascript:_addAttachmentFields('attachmentarea')" id="attachafile">Attach a file</a>-->
-<!--    </div>-->
-</div>
-</div>
 </div>
 </form>
 </div>

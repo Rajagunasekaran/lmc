@@ -1,6 +1,6 @@
 <?php
 require 'PHPMailer-master/PHPMailerAutoload.php';
-//include "CONNECTION.php";
+include "CONNECTION.php";
 include "COMMON.php";
 include "GET_USERSTAMP.php";
 $dir=dirname(__FILE__).DIRECTORY_SEPARATOR;
@@ -91,6 +91,7 @@ if(isset($_REQUEST)){
         $URSRC_acctno=$_POST['URSRC_tb_accntno'];
         $URSRC_ifsccode=$_POST['URSRC_tb_ifsccode'];
         $URSRC_acctype=$_POST['URSRC_tb_accntyp'];
+        $URSRC_emailid=$_POST['URSRC_tb_emailid'];
         $URSRC_branchaddr1=$_POST['URSRC_ta_brnchaddr'];
         $URSRC_branchaddr= $con->real_escape_string($URSRC_branchaddr1);
 
@@ -111,6 +112,7 @@ if(isset($_REQUEST)){
 
         $parent_image_folder_name=get_parentfolder_id();
         $folder_name=$parent_image_folder_name.DIRECTORY_SEPARATOR.$subfoldername.DIRECTORY_SEPARATOR;
+        $detele_foldername=$parent_image_folder_name.DIRECTORY_SEPARATOR.$subfoldername;
         if (!file_exists($folder_name)) {
             mkdir($folder_name, 0777);
         }
@@ -128,34 +130,15 @@ if(isset($_REQUEST)){
         if (!file_exists($attch_file_folder)) {
             mkdir($attch_file_folder, 0777);
         }
-        for($x=0;$x<$uploadcount;$x++)
-        {
-            if($_FILES['upload_filename'.$x]['name']!=''){
-            $attach_file_name=$URSRC_firstname.'_'.$currentdate.'_'.date('His').'_'.$_FILES['upload_filename'.$x]['name'];
 
-            move_uploaded_file($_FILES['upload_filename'.$x]['tmp_name'],$attch_file_folder.$attach_file_name);
-            $upload_file_array[]=$attach_file_name;//$_FILES['upload_filename'.$x]['name'];
-            }
-
-        }
-        $upload_filename='';
-        for($y=0;$y<count($upload_file_array);$y++){
-            if($upload_file_array[$y]!=''){
-                if($y==0){
-                    $upload_filename= $upload_file_array[$y];
-                }
-                else{
-                    $upload_filename=$upload_filename.'/'.$upload_file_array[$y];
-                }
-            }
-        }
         $con->autocommit(false);
 
-        $result = $con->query("CALL SP_TS_LOGIN_CREATION_INSERT(1,'$loginid','$password',$empty_field,'$final_radioval','$finaldate','$emp_type','$upload_filename','$URSRC_firstname','$URSRC_lastname','$NRICNO','$URSRC_designation','$radio_gender','$URSRC_Mobileno','$URSRC_finaldob','$URSRC_team_name','$attach_sub_folder_name','$address1','$comments','$URSRC_kinname','$URSRC_relationhd','$URSRC_mobile','$URSRC_bankname','$URSRC_brancname','$URSRC_acctname','$URSRC_acctno','$URSRC_ifsccode','$URSRC_acctype','$URSRC_branchaddr','$subfoldername','$USERSTAMP',@success_flag)");
+        $result = $con->query("CALL SP_TS_LOGIN_CREATION_INSERT(1,'$loginid','$password',$empty_field,'$final_radioval','$finaldate','$emp_type','$URSRC_firstname','$URSRC_lastname','$NRICNO','$URSRC_designation','$radio_gender','$URSRC_Mobileno','$URSRC_finaldob','$URSRC_team_name','$attach_sub_folder_name','$address1','$comments','$URSRC_kinname','$URSRC_relationhd','$URSRC_mobile','$URSRC_bankname','$URSRC_brancname','$URSRC_acctname','$URSRC_acctno','$URSRC_ifsccode','$URSRC_acctype','$URSRC_branchaddr','$subfoldername','$USERSTAMP','$URSRC_emailid',@success_flag)");
         if(!$result) die("CALL failed: (" . $con->errno . ") " . $con->error);
         $select = $con->query('SELECT @success_flag');
         $result = $select->fetch_assoc();
         $flag= $result['@success_flag'];
+
         if($flag==1){
 
             $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=12");
@@ -232,8 +215,8 @@ if(isset($_REQUEST)){
             for($i=0;$i<$commnet_adds_length;$i++){
                 $comment_msg_add.=$comment_address[$i].'<br>';
             }
-            $replace= array( "[FNAME]","[LNAME]","[TEAMNAME]","[NRICNO]", "[DOB]","[GENDER]","[DESG]","[MOBNO]","[KINNAME]","[REL]","[ALTMOBNO]","[EMPADDRESS]","[BANKNAME]","[BRANCHNAME]","[ACCNAME]","[ACCNO]","[IFSCCODE]","[ACCTYPE]","[BANKADDRESS]","PERSONAL DETAILS:","BANK ACCOUNT DETAILS:");
-            $str_replaced  = array($URSRC_firstname, $URSRC_lastname,$URSRC_team_name,$NRICNO,$URSRC_dob,$radio_gender,$URSRC_designation,$URSRC_Mobileno,$URSRC_kinname,$URSRC_relationhd,$URSRC_mobile,$comment_msg_add,$URSRC_bankname,$URSRC_brancname,$URSRC_acctname,$URSRC_acctno,$URSRC_ifsccode,$URSRC_acctype,$comment_msg,'<b>'."PERSONAL DETAILS:".'</b>','<b>'."BANK ACCOUNT DETAILS:".'</b>');
+            $replace= array( "[FNAME]","[LNAME]","[TEAMNAME]","[NRICNO]", "[DOB]","[GENDER]","[DESG]","[MOBNO]","[KINNAME]","[REL]","[ALTMOBNO]","[EMPADDRESS]","[BANKNAME]","[BRANCHNAME]","[ACCNAME]","[ACCNO]","[IFSCCODE]","[ACCTYPE]","[BANKADDRESS]","PERSONAL DETAILS:","BANK ACCOUNT DETAILS:","[EMAILID]");
+            $str_replaced  = array($URSRC_firstname, $URSRC_lastname,$URSRC_team_name,$NRICNO,$URSRC_dob,$radio_gender,$URSRC_designation,$URSRC_Mobileno,$URSRC_kinname,$URSRC_relationhd,$URSRC_mobile,$comment_msg_add,$URSRC_bankname,$URSRC_brancname,$URSRC_acctname,$URSRC_acctno,$URSRC_ifsccode,$URSRC_acctype,$comment_msg,'<b>'."PERSONAL DETAILS:".'</b>','<b>'."BANK ACCOUNT DETAILS:".'</b>',$URSRC_emailid);
             $newphrase = str_replace($replace, $str_replaced, $emp_email_body);
             $final_message=$final_message.'<br>'.$newphrase;
             $mail = new PHPMailer;
@@ -245,30 +228,27 @@ if(isset($_REQUEST)){
             $mail->SMTPSecure = $smtpsecure;
             $mail->From = $from;
             $mail->FromName = 'LMC';
-            $mail->addAddress($toaddress);
+            $mail->addAddress($URSRC_emailid);
+            $mail->addCC($toaddress);
             $mail->WordWrap = 50;
             $mail->isHTML(true);
             $mail->Subject = $mail_subject;
             $mail->Body    = $final_message;
             $mail->send();
-
         }
         else{
-            unlink($dir.$attch_delete_folder);
-
+            rmdir($dir.$attch_delete_folder);
+            rmdir($dir.$detele_foldername);
         }
         $flag_array=[$flag];
-
         $con->commit();
-
-
         echo JSON_ENCODE($flag_array);
     }
     //FETCHING LOGIN DETAILS
     if($_REQUEST['option']=="loginfetch")
     {
         $loginid_result =$_REQUEST['URSRC_login_id'];
-        $loginsearch_fetchingdata= mysqli_query($con,"SELECT DISTINCT EMP.EMP_DOC_FOLDER_ID,EMP.EMP_ADDRESS,EMP.NRIC_NO,TC.TEAM_NAME,UA.UA_FILE_NAME,RC.RC_NAME,UA.UA_JOIN_DATE,URC1.URC_DATA,EMP.EMP_ID,EMP.EMP_FIRST_NAME,EMP.EMP_LAST_NAME,DATE_FORMAT(EMP.EMP_DOB,'%d-%m-%Y') AS EMP_DOB,EMP.EMP_GENDER,EMP.EMP_DESIGNATION,EMP.EMP_MOBILE_NUMBER,EMP.EMP_NEXT_KIN_NAME,EMP.EMP_RELATIONHOOD,EMP.EMP_ALT_MOBILE_NO,EMP.EMP_BANK_NAME,EMP.EMP_BRANCH_NAME,EMP.EMP_ACCOUNT_NAME,EMP.EMP_ACCOUNT_NO,EMP.EMP_IFSC_CODE,EMP.EMP_ACCOUNT_TYPE,EMP.EMP_BRANCH_ADDRESS,EMP.EMP_REMARKS,ULD.ULD_USERNAME,DATE_FORMAT(CONVERT_TZ(EMP.EMP_TIMESTAMP,'+00:00','+08:00'), '%d-%m-%Y %T') AS EMP_TIMESTAMP
+        $loginsearch_fetchingdata= mysqli_query($con,"SELECT DISTINCT EMP.EMP_EMAIL_ID,EMP.EMP_DOC_FOLDER_ID,EMP.EMP_ADDRESS,EMP.NRIC_NO,TC.TEAM_NAME,RC.RC_NAME,UA.UA_JOIN_DATE,URC1.URC_DATA,EMP.EMP_ID,EMP.EMP_FIRST_NAME,EMP.EMP_LAST_NAME,DATE_FORMAT(EMP.EMP_DOB,'%d-%m-%Y') AS EMP_DOB,EMP.EMP_GENDER,EMP.EMP_DESIGNATION,EMP.EMP_MOBILE_NUMBER,EMP.EMP_NEXT_KIN_NAME,EMP.EMP_RELATIONHOOD,EMP.EMP_ALT_MOBILE_NO,EMP.EMP_BANK_NAME,EMP.EMP_BRANCH_NAME,EMP.EMP_ACCOUNT_NAME,EMP.EMP_ACCOUNT_NO,EMP.EMP_IFSC_CODE,EMP.EMP_ACCOUNT_TYPE,EMP.EMP_BRANCH_ADDRESS,EMP.EMP_REMARKS,ULD.ULD_USERNAME,DATE_FORMAT(CONVERT_TZ(EMP.EMP_TIMESTAMP,'+00:00','+08:00'), '%d-%m-%Y %T') AS EMP_TIMESTAMP
 FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LMC_USER_RIGHTS_CONFIGURATION URC,LMC_USER_RIGHTS_CONFIGURATION URC1,LMC_ROLE_CREATION RC,LMC_TEAM_CREATION TC  WHERE EMP.TC_ID=TC.TC_ID  AND EMP.ULD_ID=ULD.ULD_ID AND UA.UA_EMP_TYPE=URC1.URC_ID AND ULD.ULD_ID=UA.ULD_ID AND URC.URC_ID=RC.URC_ID AND RC.RC_ID=UA.RC_ID AND ULD_USERNAME='$loginid_result' AND UA.UA_REC_VER=(SELECT MAX(UA_REC_VER) FROM LMC_USER_ACCESS UA,LMC_USER_LOGIN_DETAILS ULD where ULD.ULD_ID=UA.ULD_ID AND ULD_USERNAME='$loginid_result' AND UA_JOIN IS NOT NULL) ORDER BY EMP.EMP_FIRST_NAME,EMP.EMP_LAST_NAME");
         $URSRC_values=array();
         $rolecreation_result = mysqli_query($con,"SELECT * FROM LMC_ROLE_CREATION");
@@ -304,7 +284,8 @@ FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LM
             $URSRC_filename=$row['UA_FILE_NAME'];
             $URSRC_ADDRESS=$row['EMP_ADDRESS'];
             $URSRC_folderid=$row['EMP_DOC_FOLDER_ID'];
-            $final_values=array('URSRC_folderid'=>$URSRC_folderid,'URSRC_address'=>$URSRC_ADDRESS,'URSRC_nricno'=>$URSRC_nricno,'team_name'=>$URSRC_team_name,'joindate'=>$join_date,'rcname' => $URSRC_rcname,'emp_type'=>$URSRC_EMP_TYPE,'firstname'=>$URSRC_firstname,'lastname'=>$URSRC_lastname,'dob'=>$URSRC_dob,'gender'=>$URSRC_emp_gender,'designation'=>$URSRC_designation,'mobile'=>$URSRC_mobile,'kinname'=>$URSRC_kinname,'relationhood'=>$URSRC_relationhd,'altmobile'=>$URSRC_Mobileno,'bankname'=>$URSRC_bankname,'branchname'=>$URSRC_brancname,'accountname'=>$URSRC_acctname,'accountno'=>$URSRC_acctno,'ifsccode'=>$URSRC_ifsccode,'accountype'=>$URSRC_acctype,'branchaddress'=>$URSRC_branchaddr,'comment'=>$URSRC_comment,'URSRC_filename'=>$URSRC_filename);
+            $URSRC_emailid=$row['EMP_EMAIL_ID'];
+            $final_values=array('URSRC_emailid'=>$URSRC_emailid,'URSRC_folderid'=>$URSRC_folderid,'URSRC_address'=>$URSRC_ADDRESS,'URSRC_nricno'=>$URSRC_nricno,'team_name'=>$URSRC_team_name,'joindate'=>$join_date,'rcname' => $URSRC_rcname,'emp_type'=>$URSRC_EMP_TYPE,'firstname'=>$URSRC_firstname,'lastname'=>$URSRC_lastname,'dob'=>$URSRC_dob,'gender'=>$URSRC_emp_gender,'designation'=>$URSRC_designation,'mobile'=>$URSRC_mobile,'kinname'=>$URSRC_kinname,'relationhood'=>$URSRC_relationhd,'altmobile'=>$URSRC_Mobileno,'bankname'=>$URSRC_bankname,'branchname'=>$URSRC_brancname,'accountname'=>$URSRC_acctname,'accountno'=>$URSRC_acctno,'ifsccode'=>$URSRC_ifsccode,'accountype'=>$URSRC_acctype,'branchaddress'=>$URSRC_branchaddr,'comment'=>$URSRC_comment,'URSRC_filename'=>$URSRC_filename);
         }
         $URSRC_values[]=array($final_values,$get_rolecreation_array);
         echo json_encode($URSRC_values);
@@ -355,6 +336,7 @@ FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LM
         $address1=$_POST['URSRC_ta_address'];
         $address= $con->real_escape_string($address1);
         $NRICNO=$_POST["URSRC_tb_nric"];
+        $URSRC_emailid=$_POST['URSRC_tb_emailid'];
         $URSRC_team_name=$_POST["URSRC_lb_selectteam"];
         $parent_attach_folder_name=get_docfolder_id();
 
@@ -377,29 +359,10 @@ FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LM
         $URSRC_old_filename=$_REQUEST['URSRC_filename'];
         $upload_file_array=array();
 
-        for($x=0;$x<$uploadcount;$x++)
-        {
-            if($_FILES['upload_filename'.$x]['name']!=''){
-            $attach_file_name=$URSRC_firstname.'_'.$currentdate.'_'.date('His').'_'.$_FILES['upload_filename'.$x]['name'];
-            move_uploaded_file($_FILES['upload_filename'.$x]['tmp_name'],$attch_file_folder.$attach_file_name);
-            $upload_file_array[]=$attach_file_name;//$_FILES['upload_filename'.$x]['name'];
 
-            }
-        }
-        $upload_filename='';
-        for($y=0;$y<count($upload_file_array);$y++){
-            if($upload_file_array[$y]!=''){
-                if($y==0){
-                    $upload_filename= $upload_file_array[$y];
-                }
-                else{
-                    $upload_filename=$upload_filename.'/'.$upload_file_array[$y];
-                }
-            }
-        }
         $finaldate = date('Y-m-d',strtotime($joindate));
         $con->autocommit(false);
-        $result = $con->query("CALL SP_TS_LOGIN_UPDATE('$loginid',$ULD_id,'$rolename','$finaldate','$emp_type','$upload_filename','$URSRC_firstname','$URSRC_lastname','$NRICNO','$URSRC_designation','$URSRC_rd_gender','$URSRC_Mobileno','$URSRC_finaldob','$URSRC_team_name','$address1','$URSRC_comment','$URSRC_kinname','$URSRC_relationhd','$URSRC_mobile','$URSRC_bankname','$URSRC_brancname','$URSRC_acctname','$URSRC_acctno','$URSRC_ifsccode','$URSRC_acctype','$URSRC_branchaddr','$USERSTAMP',@success_flag)");
+        $result = $con->query("CALL SP_TS_LOGIN_UPDATE('$loginid',$ULD_id,'$rolename','$finaldate','$emp_type','$URSRC_firstname','$URSRC_lastname','$NRICNO','$URSRC_designation','$URSRC_rd_gender','$URSRC_Mobileno','$URSRC_finaldob','$URSRC_team_name','$address1','$URSRC_comment','$URSRC_kinname','$URSRC_relationhd','$URSRC_mobile','$URSRC_bankname','$URSRC_brancname','$URSRC_acctname','$URSRC_acctno','$URSRC_ifsccode','$URSRC_acctype','$URSRC_branchaddr','$USERSTAMP','$URSRC_emailid',@success_flag)");
         if(!$result) die("CALL failed: (" . $con->errno . ") " . $con->error);
         $select = $con->query('SELECT @success_flag');
         $result = $select->fetch_assoc();
@@ -432,30 +395,15 @@ FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LM
             if($row=mysqli_fetch_array($select_smtpsecure)){
                 $smtpsecure=$row["URC_DATA"];
             }
-//
-            if($oldloginid!=$loginid){
+            $select_from=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=18");
+            if($row=mysqli_fetch_array($select_from)){
+                $from=$row["URC_DATA"];
+            }
 
-                $select_template="SELECT * FROM LMC_EMAIL_TEMPLATE_DETAILS WHERE ET_ID=1";
+                $select_template="SELECT * FROM LMC_EMAIL_TEMPLATE_DETAILS WHERE ET_ID=11";
                 $select_template_rs=mysqli_query($con,$select_template);
                 if($row=mysqli_fetch_array($select_template_rs)){
                     $mail_subject=$row["ETD_EMAIL_SUBJECT"];
-                    $body=$row["ETD_EMAIL_BODY"];
-                }
-
-                $email_body;
-                $body_msg =explode("^", $body);
-                $length=count($body_msg);
-                for($i=0;$i<$length;$i++){
-                    $email_body.=$body_msg[$i].'<br><br>';
-                }
-                $replace= array("[LOGINID]", "[DES]");
-                $str_replaced  = array($URSRC_firstname,'<b>'.$URSRC_designation.'</b>');
-                $final_message = str_replace($replace, $str_replaced, $email_body);
-
-                $select_template="SELECT * FROM LMC_EMAIL_TEMPLATE_DETAILS WHERE ET_ID=2";
-                $select_template_rs=mysqli_query($con,$select_template);
-                if($row=mysqli_fetch_array($select_template_rs)){
-                    $mail_subject1=$row["ETD_EMAIL_SUBJECT"];
                     $body=$row["ETD_EMAIL_BODY"];
                 }
 
@@ -472,22 +420,15 @@ FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LM
                     $comment_msg.=$comment[$i].'<br>';
                 }
 
-
-                $comment_address =explode("\n", $address);
+                $comment_address =explode("\n", $address1);
                 $commnet_adds_length=count($comment_address);
                 for($i=0;$i<$commnet_adds_length;$i++){
                     $comment_msg_add.=$comment_address[$i].'<br>';
                 }
-
-
-                //PERSONAL DETAILS:^ FIRST NAME: [FNAME]^ LAST NAME : [LNAME]^ TEAM NAME : [TEAMNAME]^ NRIC NO: [NRICNO]^ DOB: [DOB]^ GENDER: [GENDER]^DESIGNATION: [DESG]^ MOBILE NO: [MOBNO]^ NEXT KIN NAME:[KINNAME]^ RELATIONHOOD:[REL]^ ALTERNATE MOBILE NO:[ALTMOBNO]^ EMPLOYEE ADDRESS: [EMPADDRESS]^ BANK ACCOUNT DETAILS:^ BANK NAME:[BANKNAME]^ BRANCH NAME:[BRANCHNAME]^ ACCOUNT NAME:[ACCNAME]^ ACCOUNT NO:[ACCNO]^ IFSC CODE:[IFSCCODE]^ ACCOUNT TYPE:[ACCTYPE]^ BANK ADDRESS:[BANKADDRESS]^ Kindly Check your details,^ If any mistake immediately inform to PROJECT MANAGER. Also submit your AADHAR CARD and DEGREE CERTIFICATE photo copy to our Admin Executive. Wishing you luck for all your assignments and a long and rewarding career at LIH MING CONSTRUCTION.^ Warm Regards,^ ADMIN EXECUTIVE,^ LIH MING CONSTRUCTION .
-                $replace= array( "[FNAME]","[LNAME]","[TEAMNAME]","[NRICNO]", "[DOB]","[GENDER]","[DESG]","[MOBNO]","[KINNAME]","[REL]","[ALTMOBNO]","[EMPADDRESS]","[BANKNAME]","[BRANCHNAME]","[ACCNAME]","[ACCNO]","[IFSCCODE]","[ACCTYPE]","[BANKADDRESS]","PERSONAL DETAILS:","BANK ACCOUNT DETAILS:");
-                $str_replaced  = array($URSRC_firstname, $URSRC_lastname,$URSRC_team_name,$NRICNO,$URSRC_dob,$radio_gender,$URSRC_designation,$URSRC_Mobileno,$URSRC_kinname,$URSRC_relationhd,$URSRC_mobile,$comment_msg_add,$URSRC_bankname,$URSRC_brancname,$URSRC_acctname,$URSRC_acctno,$URSRC_ifsccode,$URSRC_acctype,$comment_msg,'<b>'."PERSONAL DETAILS:".'</b>','<b>'."BANK ACCOUNT DETAILS:".'</b>');
-
-
+                $replace= array( "[FNAME]","[LNAME]","[TEAMNAME]","[NRICNO]", "[DOB]","[GENDER]","[DESG]","[MOBNO]","[KINNAME]","[REL]","[ALTMOBNO]","[EMPADDRESS]","[BANKNAME]","[BRANCHNAME]","[ACCNAME]","[ACCNO]","[IFSCCODE]","[ACCTYPE]","[BANKADDRESS]","PERSONAL DETAILS:","BANK ACCOUNT DETAILS:","[UNAME]","[EMAILID]","[USERNAME]");
+                $str_replaced  = array($URSRC_firstname, $URSRC_lastname,$URSRC_team_name,$NRICNO,$URSRC_dob,$URSRC_rd_gender,$URSRC_designation,$URSRC_Mobileno,$URSRC_kinname,$URSRC_relationhd,$URSRC_mobile,$comment_msg_add,$URSRC_bankname,$URSRC_brancname,$URSRC_acctname,$URSRC_acctno,$URSRC_ifsccode,$URSRC_acctype,$comment_msg,'<b>'."PERSONAL DETAILS:".'</b>','<b>'."BANK ACCOUNT DETAILS:".'</b>',$loginid,$URSRC_emailid,$URSRC_firstname);
                 $newphrase = str_replace($replace, $str_replaced, $emp_email_body);
-
-                $final_message=$final_message.'<br>'.$newphrase;
+                $final_message=$newphrase;
                 $mail = new PHPMailer;
                 $mail->isSMTP();
                 $mail->Host = $host;
@@ -497,7 +438,8 @@ FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LM
                 $mail->SMTPSecure = $smtpsecure;
                 $mail->From = $from;
                 $mail->FromName = 'LMC';
-                $mail->addAddress($toaddress);
+                $mail->addAddress($URSRC_emailid);
+                $mail->addCC($toaddress);
                 $mail->WordWrap = 50;
                 $mail->isHTML(true);
                 $mail->Subject = $mail_subject;
@@ -505,7 +447,7 @@ FROM LMC_EMPLOYEE_DETAILS EMP ,LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA ,LM
                 $mail->send();
 
             }
-        }
+
         $flag_array=[$flag];
         $con->commit();
         echo json_encode($flag_array);

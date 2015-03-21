@@ -27,9 +27,14 @@ if($row=mysqli_fetch_array($activeempname))
 }
 if($_REQUEST['option']=='COMMON_DATA')
 {
+//MEETING TOPIC
+    $topic=mysqli_query($con,"SELECT MT_TOPIC FROM LMC_MEETING_TOPIC ORDER BY MT_TOPIC ASC");
+    while($row=mysqli_fetch_array($topic)){
+        $topicname[]=$row["MT_TOPIC"];
+    }
 //TEAM CREATION
-    $team=mysqli_query($con,"select TEAM_NAME from LMC_TEAM_CREATION  where ULD_ID='$activeemp'");
-    while($row=mysqli_fetch_array($team)){
+    $team=mysqli_query($con,"SELECT TC.TEAM_NAME FROM LMC_EMPLOYEE_DETAILS ED JOIN LMC_TEAM_CREATION TC WHERE TC.TC_ID = ED.TC_ID AND ED.ULD_ID=$activeemp");
+    if($row=mysqli_fetch_array($team)){
         $teamname[]=$row["TEAM_NAME"];
     }
 //MACHINERY TYPE
@@ -58,10 +63,24 @@ if($_REQUEST['option']=='COMMON_DATA')
         $employeename[]=array($row["EMPNAME"],$row['EMP_ID']);
     }
     //ERRPOR MESSAGE
-    $errormsg=get_error_msg('3,6,7,21,143');
-    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename);
+    $errormsg=get_error_msg('3,6,7,21,143,144,145,147,148');
+    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename,$topicname);
     echo JSON_encode($values);
-
+}
+if($_REQUEST['option']=="checktopic"){
+    $topicname=$_GET['topic_name'];
+    $sql="SELECT * FROM LMC_MEETING_TOPIC where MT_TOPIC='$topicname'";
+    $sql_result= mysqli_query($con,$sql);
+    $row=mysqli_num_rows($sql_result);
+    $x=$row;
+    if($x > 0)
+    {
+        $topic_flag=1;
+    }
+    else{
+        $topic_flag=0;
+    }
+    echo ($topic_flag);
 }
 elseif($_REQUEST['Option']=='InputForm')
 {
@@ -125,7 +144,7 @@ elseif($_REQUEST['Option']=='InputForm')
     $size=  $roadm.'^'. $concm.'^'.$turfm;
     $length=  $roadmm.'^'.$concmm.'^'.$turfmm;
 
-
+    $meeting=$_POST['MeetingDetails'];
     $material=$_POST["MaterialDetails"];
     $fitting=$_POST["FittingDetails"];
     $equipment=$_POST["EquipmentDetails"];
@@ -135,27 +154,40 @@ elseif($_REQUEST['Option']=='InputForm')
     $SV_details=$_POST["SiteVisit"];
     $EmployeeReport=$_POST["EmployeeDetails"];
     $imagedata=$_POST['imgData'];
-    $docfilename=$_POST['filename'];
     if($imagedata!='' && $reportdate!='' && $EmployeeReport[0]!='' && $teamname!=''){
         $daterep=str_replace('-','',$reportdate);
         $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
         $userfolderid=get_emp_folderid($EmployeeReport[0]);
-        $uploadpath=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR.$imgfilename;
-        try{
-            $data=str_replace('data:image/png;base64,','',$imagedata);
-            $data = str_replace(' ','+',$data);
-            $data = base64_decode($data);
-            $success = file_put_contents($uploadpath, $data);
-            $imgflag=1;
+        $path=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
+        if(is_dir($path)){
+            $dirflag=1;
         }
-        catch(Exception $e){
-            print $e->getMessage();
-            unlink($uploadpath);
+        else{
+            $dirflag=0;
+        }
+        if($dirflag==1){
+            $uploadpath=$path.$imgfilename;
+            try{
+                $data=str_replace('data:image/png;base64,','',$imagedata);
+                $data = str_replace(' ','+',$data);
+                $data = base64_decode($data);
+                $success = file_put_contents($uploadpath, $data);
+                $imgflag=1;
+            }
+            catch(Exception $e){
+                $imgflag=0;
+                unlink($uploadpath);
+                print $e->getMessage();
+            }
+        }
+        else{
             $imgflag=0;
+            $imgfilename='';
         }
     }
     elseif($imagedata=='' || $reportdate=='' || $EmployeeReport[0]=='' || $teamname==''){
         $imgflag=0;
+        $imgfilename='';
     }
     if($weather!=''){
         $weathertime=$weather.' ('.$weatherfrom.' TO '.$weatherto.')';
@@ -164,44 +196,30 @@ elseif($_REQUEST['Option']=='InputForm')
         $weathertime='';
     }
 //TEAM REPORT DETAILS
-    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($typeofjob)");
+    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB SEPARATOR ' / ') AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($typeofjob)");
     while($row=mysqli_fetch_array($jobname)){
         $jobnames=$row["JOB"];
     }
-    $teamreporttable='<table width=1000 colspan=3px cellpadding=3px  border="0"><caption style="caption-side: left;font-weight: bold;">TEAM REPORT</caption>
-   <tr><td width="100" style= "border: 1px solid black;color:#fff; background-color:#498af3;font-weight: bold;" height=25px>LOCATION</td><td width="360">'.$teamlocation.'</td><td width="130" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;" height=25px>CONTRACT NO</td><td  width="250">'.$contractno.'</td><td width="150">'.$teamname.'</td></tr></table>
-   <table width=1000 colspan=3px cellpadding=3px  border="0"><tr><td width="250" style="border: 1px solid black;color:#fff; background-color:#498af3;font-weight: bold;" height=25px>DATE</td><td style="border: 1px solid black;"width="250">'.$reportdate.'</td><td width="250" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;" height=25px>WEATHER</td><td style="border: 1px solid black;" width="250">'.$weathertime.'</td></tr>
-   <tr><td width="250" style="color:#fff; background-color:#498af3; border: 1px solid black;font-weight: bold;" height=25px>REACH SITE</td><td style="border: 1px solid black;" width="250">'.$reachsite.'</td><td width="250" style="color:#fff; background-color:#498af3; border: 1px solid black;font-weight: bold;" height=25px>LEAVE SITE</td><td style="border: 1px solid black;" width="250">'.$leavesite.'</td></tr>
-   <tr><td width="250" colspan="1" style="color:#498af3;border: 1px solid black;color:#fff; background-color:#498af3;font-weight: bold;" height=25px>TYPE OF JOB</td><td style="border: 1px solid black;" width="250" colspan="3">'.$jobnames.'</td></tr>
+//TEAM REPORT
+    $teamreporttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">TEAM REPORT</caption>
+   <tr><td width="100" style= "padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>LOCATION</td><td width="360" style="padding-left: 10px;">'.$teamlocation.'</td><td width="140" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>CONTRACT NO</td><td  width="250" style="padding-left: 10px;">'.$contractno.'</td><td width="150" style="padding-left: 10px;">'.$teamname.'</td></tr></table>
+   <table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="250" style="padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>DATE</td><td style="padding-left: 10px;"width="250">'.$reportdate.'</td><td width="250" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>WEATHER</td><td style="padding-left: 10px;" width="250">'.$weathertime.'</td></tr>
+   <tr><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>REACH SITE</td><td style="padding-left: 10px;" width="250">'.$reachsite.'</td><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>LEAVE SITE</td><td style="padding-left: 10px;" width="250">'.$leavesite.'</td></tr>
+   <tr><td width="250" colspan="1" style="color:#498af3;padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>TYPE OF JOB</td><td style="padding-left: 10px;" width="250" colspan="3">'.$jobnames.'</td></tr>
    </table>';
-
-//JOB DONE DETAILS
-    $jobdonetable='<br><table width=1000 colspan=3px cellpadding=3px  border="0"><caption style="caption-side: left;font-weight: bold;">JOB DONE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/>
-   <tr><td width="250" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;" height=25px>PIPELAID</td><td style="border: 1px solid black;text-align:center;" width="250" colspan=2>ROAD</td><td width="250" colspan=2 style="border: 1px solid black;text-align:center;">CONC</td><td width="250" colspan=2 style="border: 1px solid black;text-align:center;">TRUF</td></tr>
-   <tr><td style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold; " height=25px>SIZE/LENGTH</td><td style="border: 1px solid black;">'.$roadm.'</td><td style="border: 1px solid black;">'.$roadmm.'</td><td style="border: 1px solid black;">'.$concm.'</td><td style="border: 1px solid black;">'.$concmm.'</td><td style="border: 1px solid black;">'.$turfm.'</td><td style="border: 1px solid black;">'.$turfmm.'</td>
-   <tr><td style="color:#fff; background-color:#498af3; border: 1px solid black;font-weight: bold;" height=25px>PIPE TESTING</td><td colspan="2" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;text-align:center;" height=25px>START(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;text-align:center;" height=25px>END(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;text-align:center;" height=25px>REMARK</td></tr>
-   <tr><td style="border: 1px solid black;">'.$pipetesting.'</td><td colspan="2" style="border: 1px solid black;">'.$pressurestart.'</td><td style="border: 1px solid black;"colspan="2">'.$pressureend.'</td><td colspan="2" style="border: 1px solid black;">'.$teamremarks.'</td></tr>
-   </table>';
-
-//EMPLOYEE TABLE
-    $employeetable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">EMPLOYEE DETAILS</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>EMPLOYEE NAME</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>OT</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
-    $employeetable=$employeetable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$EmployeeReport[5]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$EmployeeReport[1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$EmployeeReport[2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$EmployeeReport[3]."</td><td nowrap style='border: 1px solid black;'>".$EmployeeReport[4]."</td></tr></table>";
 // final table start
     $reportheadername='TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($reportdate));
-    $finaltable='<html><body><table><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">'.$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr><br><br><tr><td>'.$jobdonetable.'</td></tr><br><br><tr><td>'.$employeetable.'</td></tr>';
+    $finaltable='<html><body><table><tr><td style="text-align: center;"><div><img id=imaglogo src="image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">'.$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr>';
 
 // FOR EXCEL
-    $sheettitle='LIH MING CONSTRUCTION PTE LTD
-TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($reportdate));
-    $objPHPExcel->getActiveSheet()->setTitle('LMC TS ENTRY REPORT')->setCellValue('A1', $sheettitle)->setCellValue('a2', 'TEAM REPORT')->setCellValue('a8', 'JOB DONE')->setCellValue('a14', 'EMPLOYEE REPORT')->setCellValue('a3', 'LOCATION')->setCellValue('b3',$teamlocation)->setCellValue('c3', 'CONTRACT NO')->setCellValue('d3', $contractno)->setCellValue('e3', 'TEAM')->setCellValue('f3', $teamname)
+    $sheettitle="LIH MING CONSTRUCTION PTE LTD\nTIME SHEET REPORT FOR ".$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($reportdate));
+    $objPHPExcel->getActiveSheet()->setTitle('REPORT SUBMISSION ENTRY')->setCellValue('A1', $sheettitle)->setCellValue('A2', 'TEAM REPORT')
+        ->setCellValue('A3', 'LOCATION')->setCellValue('B3',$teamlocation)->setCellValue('C3', 'CONTRACT NO')->setCellValue('D3', $contractno)->setCellValue('F3', 'TEAM')->setCellValue('G3', $teamname)
         ->setCellValue('A4', 'DATE') ->setCellValue('B4', $reportdate) ->setCellValue('C4','WEATHER')->setCellValue('D4',$weathertime)
-        ->setCellValue('A5', 'REACH SITE')->setCellValue('B5', $reachsite)->setCellValue('C5', 'LEAVE SITE')->setCellValue('D5', $leavesite)->setCellValue('A6', 'TYPE OF JOB')->setCellValue('B6',$jobnames)
-        ->setCellValue('A9','PIPE LAID')->setCellValue('B9','ROAD')->setCellValue('D9','CONC')->setCellValue('F9','TURF')
-        ->setCellValue('A10','SIZE / LENGTH')->setCellValue('B10',$roadm)->setCellValue('C10',$roadmm)->setCellValue('D10',$concm)->setCellValue('E10',$concmm)->setCellValue('F10',$turfm)->setCellValue('G10',$turfmm)
-        ->setCellValue('A11','PIPE TESTING')->setCellValue('B11','START ( PRESSURE )')->setCellValue('D11','END ( PRESSURE )')->setCellValue('F11','REMARKS')
-        ->setCellValue('A12',$pipetesting)->setCellValue('B12',$pressurestart)->setCellValue('D12',$pressureend)->setCellValue('F12',$teamremarks)
-        ->setCellValue('A15','NAME')->setCellValue('B15','START')->setCellValue('C15','END')->setCellValue('D15','OT')->setCellValue('F15','REMARKS')
-        ->setCellValue('A16',$EmployeeReport[5])->setCellValue('B16',$EmployeeReport[1])->setCellValue('C16',$EmployeeReport[2])->setCellValue('D16',$EmployeeReport[3])->setCellValue('F16',$EmployeeReport[4]);
+        ->setCellValue('A5', 'REACH SITE')->setCellValue('B5', $reachsite)->setCellValue('C5', 'LEAVE SITE')->setCellValue('D5', $leavesite)->setCellValue('A6', 'TYPE OF JOB')->setCellValue('B6',$jobnames);
+    $styleArray = array('borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN)));
+    $objPHPExcel->getActiveSheet()->getStyle('A2')->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A3:G6')->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
@@ -210,96 +228,190 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(13);
     $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(13);
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A1:G1');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D4:F4');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D5:F5');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E4:F4');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E5:F5');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B6:F6');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B9:C9');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D9:E9');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F9:G9');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B11:C11');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D11:E11');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F11:G11');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B12:C12');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D12:E12');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F12:G12');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D15:E15');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F15:G15');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D16:E16');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F16:G16');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D3:E3');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D4:G4');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D5:G5');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B6:G6');
     $objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(35);
+    $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setWrapText(true);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('A2')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A3:A10')->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('E3')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A11:G11')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A14:G15')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('B12:E12')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('B11:G11')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A:E')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('A9:G9')->getAlignment()->setVertical(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('A9:G9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('D3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-    $objPHPExcel->getActiveSheet()->getStyle('A1:A11')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-    $objPHPExcel->getActiveSheet()->getStyle('A15:G15')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('B16:E16')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('A2:A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->getColor()->setRGB('FFFAFA');
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->getFont()->getColor()->setRGB('FFFAFA');
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('E3')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('E3')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('A9:A11')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('A9:A11')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('B11:G11')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('B11:G11')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('A15:G15')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('A15:G15')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $maxrowNo=18;
-    $rowNumber='';
+    $objPHPExcel->getActiveSheet()->getStyle('F3')->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('F3')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+
+    $maxrowNo=8;
+    $MSrowNumber='';
+    $JErowNumber='';
+    $SVrowNumber='';
     $METrowNumber='';
     $MUrowNumber='';
     $RMrowNumber='';
     $EUrowNumber='';
     $FUrowNumber='';
     $MIUrowNumber='';
+
+//MEETING SECTION
+    $MS_topic;$MS_remarks;
+    if($meeting!='null')
+    {
+        $MSrowNumber = $maxrowNo;
+        $maxrowNo=$maxrowNo+count($meeting)+3;
+        $meetingtable='<br><table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MEETING</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3"  align="center" ><td height=20px width="400" align="center" style="color:white;" nowrap><b>TOPIC</b></td><td height=20px align="center" style="color:white;" nowrap><b>REMARKS</b></td></tr>';
+
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$MSrowNumber,'MEETING');
+        $MSrowNumber++;
+        $objPHPExcel->getActiveSheet()->getStyle($MSrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A'.$MSrowNumber.':B'.$MSrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$MSrowNumber,'TOPIC');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C'.$MSrowNumber.':G'.$MSrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('C'.$MSrowNumber,'REMARKS');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $MSrowNumber++;
+        for($i=0;$i<count($meeting);$i++)
+        {
+            $meetingtable=$meetingtable."<tr><td height=20px nowrap style='padding-left: 10px;'>".$meeting[$i][0]."</td><td height=20px nowrap style='padding-left: 10px;'>".$meeting[$i][1]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->applyFromArray($styleArray);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A'.$MSrowNumber.':B'.$MSrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$MSrowNumber,$meeting[$i][0]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C'.$MSrowNumber.':G'.$MSrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('C'.$MSrowNumber,$meeting[$i][1]);
+            if($i==0)
+            {
+                $MS_topic=$meeting[$i][0]; $MS_remarks=$meeting[$i][1];
+            }
+            else
+            {
+                $MS_topic=$MS_topic.'^'.$meeting[$i][0]; $MS_remarks=$MS_remarks.'^'.$meeting[$i][1];
+            }
+            $MSrowNumber++;
+        }
+        $meetingtable=$meetingtable.'</table>';
+        $finaltable=$finaltable.'<br><br><tr><td>'.$meetingtable.'</td></tr>';
+    }
+//JOB DONE DETAILS
+    $jobdonetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">JOB DONE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/>
+   <tr><td width="250" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>PIPELAID</td><td style="text-align:center;" width="250" colspan=2>ROAD</td><td width="250" colspan=2 style="text-align:center;">CONC</td><td width="250" colspan=2 style="text-align:center;">TRUF</td></tr>
+   <tr><td style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold; " height=20px>SIZE/LENGTH</td><td style="padding-left: 10px;">'.$roadm.'</td><td style="padding-left: 10px;">'.$roadmm.'</td><td style="padding-left: 10px;">'.$concm.'</td><td style="padding-left: 10px;">'.$concmm.'</td><td style="padding-left: 10px;">'.$turfm.'</td><td style="padding-left: 10px;">'.$turfmm.'</td>
+   <tr><td style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>PIPE TESTING</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>START(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>END(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>REMARK</td></tr>
+   <tr><td style="padding-left: 10px;">'.$pipetesting.'</td><td colspan="2" style="text-align:center;">'.$pressurestart.'</td><td style="text-align:center;"colspan="2">'.$pressureend.'</td><td colspan="2" style="padding-left: 10px;">'.$teamremarks.'</td></tr>
+   </table>';
+
+//EMPLOYEE TABLE
+    $employeetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EMPLOYEE DETAILS</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" width="350" nowrap><b>EMPLOYEE NAME</b></td><td height=20px align="center" style="color:white;" width="100" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" width="100"nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="100" nowrap><b>OT</b></td><td height=20px align="center" style="color:white;" width="350" nowrap><b>REMARKS</b></td></tr>';
+    $employeetable=$employeetable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$EmployeeReport[5]."</td><td height=20px nowrap style='text-align:center;'>".$EmployeeReport[1]."</td><td height=20px nowrap style='text-align:center;'>".$EmployeeReport[2]."</td><td height=20px nowrap style='text-align:center;'>".$EmployeeReport[3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$EmployeeReport[4]."</td></tr></table>";
+    $finaltable=$finaltable.'<br><br><tr><td>'.$jobdonetable.'</td></tr><br><br><tr><td>'.$employeetable.'</td></tr>';
+
+    $JErowNumber = $maxrowNo;
+    if($maxrowNo>8){
+        $maxrowNo=$maxrowNo+10;
+    }
+    else if($maxrowNo==8){
+        $maxrowNo=18;
+    }
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'JOB DONE');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$JErowNumber.':C'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':G'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'PIPE LAID')->setCellValue('B'.$JErowNumber,'ROAD')->setCellValue('D'.$JErowNumber,'CONC')->setCellValue('F'.$JErowNumber,'TURF');$JErowNumber++;
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'SIZE / LENGTH')->setCellValue('B'.$JErowNumber,$roadm)->setCellValue('C'.$JErowNumber,$roadmm)->setCellValue('D'.$JErowNumber,$concm)->setCellValue('E'.$JErowNumber,$concmm)->setCellValue('F'.$JErowNumber,$turfm)->setCellValue('G'.$JErowNumber,$turfmm);$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$JErowNumber.':C'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':G'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'PIPE TESTING')->setCellValue('B'.$JErowNumber,'START (PRESSURE)')->setCellValue('D'.$JErowNumber,'END (PRESSURE)')->setCellValue('F'.$JErowNumber,'REMARKS');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$JErowNumber.':C'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':E'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,$pipetesting)->setCellValue('B'.$JErowNumber,$pressurestart)->setCellValue('D'.$JErowNumber,$pressureend)->setCellValue('F'.$JErowNumber,$teamremarks);$JErowNumber++;$JErowNumber++;
+
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'EMPLOYEE REPORT');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'NAME')->setCellValue('B'.$JErowNumber,'START')->setCellValue('C'.$JErowNumber,'END')->setCellValue('D'.$JErowNumber,'OT')->setCellValue('F'.$JErowNumber,'REMARKS');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':E'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,$EmployeeReport[5])->setCellValue('B'.$JErowNumber,$EmployeeReport[1])->setCellValue('C'.$JErowNumber,$EmployeeReport[2])->setCellValue('D'.$JErowNumber,$EmployeeReport[3])->setCellValue('F'.$JErowNumber,$EmployeeReport[4]);
+
 //Site Visit
     $SV_designation;$SV_name;$SV_start;$SV_end;$SV_remarks;
     if($SV_details!='null')
     {
-        $rowNumber = $maxrowNo;
+        $SVrowNumber = $maxrowNo;
         $maxrowNo=$maxrowNo+count($SV_details)+3;
-        $sitevisittable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">SITE VISIT</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>DESIGNATION</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>NAME</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $sitevisittable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">SITE VISIT</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>DESIGNATION</b></td><td height=20px align="center" style="color:white;" nowrap><b>NAME</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
 
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber)->getFont()->setBold(true);
-        $objPHPExcel->getActiveSheet()->setCellValue('A'.$rowNumber,'SITE VISIT');
-        $rowNumber++;
-        $objPHPExcel->getActiveSheet()->getStyle($rowNumber)->getFont()->setBold(true);
-        $objPHPExcel->getActiveSheet()->setCellValue('A'.$rowNumber,'DESIGNATION');
-        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$rowNumber.':C'.$rowNumber);
-        $objPHPExcel->getActiveSheet()->setCellValue('B'.$rowNumber,'NAME');
-        $objPHPExcel->getActiveSheet()->setCellValue('D'.$rowNumber,'START (Time)');
-        $objPHPExcel->getActiveSheet()->setCellValue('E'.$rowNumber,'END (Time)');
-        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$rowNumber.':G'.$rowNumber);
-        $objPHPExcel->getActiveSheet()->setCellValue('F'.$rowNumber,'REMARKS');
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber.':G'.$rowNumber)->getFont()->getColor()->setRGB('FFFAFA');
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber.':G'.$rowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber.':G'.$rowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        $rowNumber++;
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$SVrowNumber,'SITE VISIT');
+        $SVrowNumber++;
+        $objPHPExcel->getActiveSheet()->getStyle($SVrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$SVrowNumber,'DESIGNATION');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$SVrowNumber.':C'.$SVrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('B'.$SVrowNumber,'NAME');
+        $objPHPExcel->getActiveSheet()->setCellValue('D'.$SVrowNumber,'START (Time)');
+        $objPHPExcel->getActiveSheet()->setCellValue('E'.$SVrowNumber,'END (Time)');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$SVrowNumber.':G'.$SVrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('F'.$SVrowNumber,'REMARKS');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $SVrowNumber++;
         for($i=0;$i<count($SV_details);$i++)
         {
-            $sitevisittable=$sitevisittable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$SV_details[$i][0]."</td><td nowrap style='border: 1px solid black;'>".$SV_details[$i][1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$SV_details[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$SV_details[$i][3]."</td><td nowrap style='border: 1px solid black;'>".$SV_details[$i][4]."</td></tr>";
-            $objPHPExcel->getActiveSheet()->getStyle('C'.$rowNumber.':E'.$rowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            $objPHPExcel->getActiveSheet()->setCellValue('A'.$rowNumber,$SV_details[$i][0]);
-            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$rowNumber.':C'.$rowNumber);
-            $objPHPExcel->getActiveSheet()->setCellValue('B'.$rowNumber,$SV_details[$i][1]);
-            $objPHPExcel->getActiveSheet()->setCellValue('D'.$rowNumber,$SV_details[$i][2]);
-            $objPHPExcel->getActiveSheet()->setCellValue('E'.$rowNumber,$SV_details[$i][3]);
-            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$rowNumber.':G'.$rowNumber);
-            $objPHPExcel->getActiveSheet()->setCellValue('F'.$rowNumber,$SV_details[$i][4]);
+            $sitevisittable=$sitevisittable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$SV_details[$i][0]."</td><td height=20px nowrap style='padding-left: 10px;'>".$SV_details[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$SV_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$SV_details[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$SV_details[$i][4]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('C'.$SVrowNumber.':E'.$SVrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->applyFromArray($styleArray);
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$SVrowNumber,$SV_details[$i][0]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$SVrowNumber.':C'.$SVrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('B'.$SVrowNumber,$SV_details[$i][1]);
+            $objPHPExcel->getActiveSheet()->setCellValue('D'.$SVrowNumber,$SV_details[$i][2]);
+            $objPHPExcel->getActiveSheet()->setCellValue('E'.$SVrowNumber,$SV_details[$i][3]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$SVrowNumber.':G'.$SVrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('F'.$SVrowNumber,$SV_details[$i][4]);
             if($i==0)
             {
                 $SV_designation=$SV_details[$i][0]; $SV_name=$SV_details[$i][1]; $SV_start=$SV_details[$i][2];$SV_end=$SV_details[$i][3];$SV_remarks=$SV_details[$i][4];
@@ -308,7 +420,7 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
             {
                 $SV_designation=$SV_designation.'^'.$SV_details[$i][0]; $SV_name=$SV_name.'^'.$SV_details[$i][1]; $SV_start=$SV_start.'^'.$SV_details[$i][2]; $SV_end=$SV_end.'^'.$SV_details[$i][3]; $SV_remarks=$SV_remarks.'^'.$SV_details[$i][4];
             }
-            $rowNumber++;
+            $SVrowNumber++;
         }
 
         $sitevisittable=$sitevisittable.'</table>';
@@ -321,12 +433,14 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     {
         $METrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($mech_eqp_transfer)+3;
-        $machineryequipmenttable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">MACHINERY/EQUIPMENT TRANSFER</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>FROM(LORRY NO)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>ITEM</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>TO(LORRY NO)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $machineryequipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY/EQUIPMENT TRANSFER</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>FROM(LORRY NO)</b></td><td height=20px align="center" style="color:white;" nowrap><b>ITEM</b></td><td height=20px align="center" style="color:white;" nowrap><b>TO(LORRY NO)</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
 
         $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$METrowNumber,'MACHINERY / EQUIPMENT TRANSFER');
         $METrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($METrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber.':G'.$METrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$METrowNumber,'FROM (LORRY NO)');
         $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$METrowNumber.':C'.$METrowNumber);
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$METrowNumber,'ITEM');
@@ -340,7 +454,8 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $METrowNumber++;
         for($i=0;$i<count($mech_eqp_transfer);$i++)
         {
-            $machineryequipmenttable=$machineryequipmenttable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][0]."</td><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][1]."</td><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][2]."</td><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][3]."</td></tr>";
+            $machineryequipmenttable=$machineryequipmenttable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][0]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][2]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][3]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber.':G'.$METrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$METrowNumber,$mech_eqp_transfer[$i][0]);
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$METrowNumber.':C'.$METrowNumber);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$METrowNumber,$mech_eqp_transfer[$i][1]);
@@ -368,11 +483,13 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     {
         $MUrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($mechinery)+3;
-        $machineryusagetable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">MACHINERY USAGE</caption>  <sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>MACHINERY TYPE</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $machineryusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY USAGE</caption>  <sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>MACHINERY TYPE</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MUrowNumber,'MACHINERY USAGE');
         $MUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($MUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber.':G'.$MUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MUrowNumber,'MACHINERY TYPE');
         $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MUrowNumber.':C'.$MUrowNumber);
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$MUrowNumber,'START (Time)');
@@ -386,8 +503,9 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $MUrowNumber++;
         for($i=0;$i<count($mechinery);$i++)
         {
-            $machineryusagetable=$machineryusagetable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$mechinery[$i][0]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$mechinery[$i][1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$mechinery[$i][2]."</td><td nowrap style='border: 1px solid black;'>".$mechinery[$i][3]."</td></tr>";
+            $machineryusagetable=$machineryusagetable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$mechinery[$i][0]."</td><td height=20px nowrap style='text-align:center;'>".$mechinery[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$mechinery[$i][2]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mechinery[$i][3]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('B'.$MUrowNumber.':E'.$MUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber.':G'.$MUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$MUrowNumber,$mechinery[$i][0]);
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MUrowNumber.':C'.$MUrowNumber);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$MUrowNumber,$mechinery[$i][1]);
@@ -415,11 +533,13 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     {
         $RMrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($rental)+3;
-        $rentaltable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">RENTAL MACHINERY</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>LORRY NUMBER</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>THROW EARTH(STORE)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>THROW EARTH(OUTSIDE)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $rentaltable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">RENTAL MACHINERY</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>LORRY NUMBER</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(STORE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(OUTSIDE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="200" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$RMrowNumber,'RENTAL MACHINERY');
         $RMrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($RMrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber.':G'.$RMrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$RMrowNumber,'LORRY NUMBER');
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$RMrowNumber,'THROW EARTH(STORE)');
         $objPHPExcel->getActiveSheet()->setCellValue('C'.$RMrowNumber,'THROW EARTH(OUTSIDE)');
@@ -433,8 +553,9 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $RMrowNumber++;
         for($i=0;$i<count($rental);$i++)
         {
-            $rentaltable=$rentaltable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$rental[$i][0]."</td><td nowrap style='border: 1px solid black;'>".$rental[$i][1]."</td><td nowrap style='border: 1px solid black;'>".$rental[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$rental[$i][3]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$rental[$i][4]."</td><td nowrap style='border: 1px solid black;'>".$rental[$i][5]."</td></tr>";
+            $rentaltable=$rentaltable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$rental[$i][0]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][3]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][4]."</td><td height=20px nowrap style='padding-left: 10px;'>".$rental[$i][5]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('B'.$RMrowNumber.':E'.$RMrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber.':G'.$RMrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$RMrowNumber,$rental[$i][0]);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$RMrowNumber,$rental[$i][1]);
             $objPHPExcel->getActiveSheet()->setCellValue('C'.$RMrowNumber,$rental[$i][2]);
@@ -462,11 +583,13 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     {
         $EUrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($equipment)+3;
-        $equipmenttable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">EQUIPMENT USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>AIR-COMPRESSOR</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>LORRYNO(TRANSPORT)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $equipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EQUIPMENT USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>AIR-COMPRESSOR</b></td><td height=20px align="center" style="color:white;" nowrap><b>LORRYNO(TRANSPORT)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="200" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$EUrowNumber,'EQUIPMENT USAGE');
         $EUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($EUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber.':G'.$EUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$EUrowNumber,'AIR-COMPRESSOR');
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$EUrowNumber,'LORRY NO(TRANSPORT)');
         $objPHPExcel->getActiveSheet()->setCellValue('C'.$EUrowNumber,'START (Time)');
@@ -480,8 +603,9 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $EUrowNumber++;
         for($i=0;$i<count($equipment);$i++)
         {
-            $equipmenttable=$equipmenttable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$equipment[$i][0]."</td><td nowrap style='border: 1px solid black;'>".$equipment[$i][1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$equipment[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$equipment[$i][3]."</td><td nowrap style='border: 1px solid black;'>".$equipment[$i][4]."</td></tr>";
+            $equipmenttable=$equipmenttable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$equipment[$i][0]."</td><td height=20px nowrap style='padding-left: 10px;'>".$equipment[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$equipment[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$equipment[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$equipment[$i][4]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('C'.$EUrowNumber.':E'.$EUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber.':G'.$EUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$EUrowNumber,$equipment[$i][0]);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$EUrowNumber,$equipment[$i][1]);
             $objPHPExcel->getActiveSheet()->setCellValue('C'.$EUrowNumber,$equipment[$i][2]);
@@ -509,11 +633,13 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     {
         $FUrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($fitting)+3;
-        $fittingtable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">FITTING USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>ITEMS</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>SIZE</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>QUANTITY</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $fittingtable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">FITTING USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>SIZE</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td><td height=20px align="center" style="color:white;" width="240" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$FUrowNumber,'FITTINGS USAGE');
         $FUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($FUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber.':G'.$FUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$FUrowNumber,'ITEMS');
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$FUrowNumber,'SIZE');
         $objPHPExcel->getActiveSheet()->setCellValue('C'.$FUrowNumber,'QUANTITY');
@@ -525,8 +651,9 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $FUrowNumber++;
         for($i=0;$i<count($fitting);$i++)
         {
-            $fittingtable=$fittingtable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$fitting[$i][0]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$fitting[$i][1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$fitting[$i][2]."</td><td nowrap style='border: 1px solid black;'>".$fitting[$i][3]."</td></tr>";
+            $fittingtable=$fittingtable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$fitting[$i][0]."</td><td height=20px nowrap style='text-align:center;'>".$fitting[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$fitting[$i][2]."</td><td height=20px nowrap style='padding-left: 10px;'>".$fitting[$i][3]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('B'.$FUrowNumber.':C'.$FUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber.':G'.$FUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$FUrowNumber,$fitting[$i][0]);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$FUrowNumber,$fitting[$i][1]);
             $objPHPExcel->getActiveSheet()->setCellValue('C'.$FUrowNumber,$fitting[$i][2]);
@@ -551,11 +678,13 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     if($material!='null')
     {
         $MIUrowNumber=$maxrowNo;
-        $materialusagetable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>ITEMS</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>RECEIPT NO</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>QUANTITY</b></td></tr></th>';
+        $materialusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>RECEIPT NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MIUrowNumber,'MATERIAL USAGE');
         $MIUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($MIUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber.':G'.$MIUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MIUrowNumber,'ITEMS');
         $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MIUrowNumber.':C'.$MIUrowNumber);
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$MIUrowNumber,'RECEIPT NO');
@@ -567,8 +696,9 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $MIUrowNumber++;
         for($i=0;$i<count($material);$i++)
         {
-            $materialusagetable=$materialusagetable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$material[$i][0]."</td><td nowrap style='border: 1px solid black;'>".$material[$i][1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$material[$i][2]."</td></tr>";
-            $objPHPExcel->getActiveSheet()->getStyle('D'.$MIUrowNumber.':G'.$MIUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $materialusagetable=$materialusagetable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;'>".$material[$i][0]."</td><td height=20px nowrap style='text-align:center;'>".$material[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$material[$i][2]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('B'.$MIUrowNumber.':G'.$MIUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber.':G'.$MIUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$MIUrowNumber,$material[$i][0]);
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MIUrowNumber.':C'.$MIUrowNumber);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$MIUrowNumber,$material[$i][1]);
@@ -598,22 +728,33 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
     $entry_exldata = ob_get_contents();
     ob_end_clean();
 
-    $finaltable=$finaltable.'<br><br><tr><td>REPORT IMAGE<br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
+    $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
 // final table end
+    $teamremarks=$con->real_escape_string($teamremarks);
+    $SV_remarks=$con->real_escape_string($SV_remarks);
+    $mech_remark=$con->real_escape_string($mech_remark);
+    $mechineryremark=$con->real_escape_string($mechineryremark);
+    $fittingremark=$con->real_escape_string($fittingremark);
+    $materialqty=$con->real_escape_string($materialqty);
+    $rental_remark=$con->real_escape_string($rental_remark);
+    $equipmentremark=$con->real_escape_string($equipmentremark);
+    $MS_remarks=$con->real_escape_string($MS_remarks);
+    $Employeeremark=$con->real_escape_string($EmployeeReport[4]);
 //Save Part
     if($imgflag==1){
         $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(1,'$teamname','$EmployeeReport[0]',
        '$reportdate','$teamlocation',$contractno,'$reachsite','$leavesite','$typeofjob','$weather',
-       '$weatherfrom','$weatherto','$pipetesting','$pressurestart','$pressureend','$teamremarks','$docfilename','$imgfilename',
+       '$weatherfrom','$weatherto','$pipetesting','$pressurestart','$pressureend','$teamremarks','$imgfilename',
        '$pipelaid','$size','$length',
-       '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$EmployeeReport[4]',
+       '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$Employeeremark',
        ' ','$SV_name','$SV_designation','$SV_start','$SV_end','$SV_remarks',
        ' ','$mech_from','$mech_to','$mech_item','$mech_remark',
        ' ','$mechinerytype','$mechinerystart','$mechineryend','$mechineryremark',
        ' ','$fittingitems','$fittingsize','$fittingqty','$fittingremark',
        ' ','$materialitems','$materialreceipt','$materialqty',
        ' ','$rental_lorryno','$rental_store', '$rental_outside','$rental_start','$rental_end','$rental_remark',
-       ' ','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark','$UserStamp',@SUCCESS_MESSAGE)";
+       ' ','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark',
+       ' ','$MS_topic','$MS_remarks','$UserStamp',@SUCCESS_MESSAGE)";
         $result = $con->query($callquery);
         if(!$result){
             unlink($uploadpath);
@@ -685,7 +826,7 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $reportfilename='TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($reportdate)).'.pdf';
         $mpdf=new mPDF('utf-8','A4');
         $mpdf->debug=true;
-        $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;">LIH MING CONSTRUCTION PTE LTD</div></h3>', 'O', true);
+//        $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;">LIH MING CONSTRUCTION PTE LTD</div></h3>', 'O', true);
         $mpdf->SetHTMLFooter('<div style="text-align: center;">{PAGENO}</div>');
         $mpdf->WriteHTML($finaltable);
         $reportpdf=$mpdf->Output('foo.pdf','S');
@@ -695,7 +836,8 @@ TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($report
         $mail->AddStringAttachment($entry_exldata,$xlreportfilename);
         $mail->Send();
     }
-    echo $flag;
+    $flagvalues=array($flag,$dirflag);
+    echo JSON_encode($flagvalues);
 }
 elseif($_REQUEST['option']=='EMPLOYEE_NAME')
 {
@@ -736,7 +878,7 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
     $team=$_REQUEST['team'];
     $date=date('Y-m-d',strtotime($_REQUEST['date']));
     //TEAM REPORT DETAILS
-    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME,TRD_DOC_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_DATE='$date' AND L.EMP_ID='$activeemp'");
+    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_DATE='$date' AND L.EMP_ID='$activeemp'");
     while($row=mysqli_fetch_array($teamreport_details))
     {
         $jobid=$row["TOJ_ID"];
@@ -744,13 +886,12 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
         $userfolderid=get_emp_folderid($activeemp);
         if($filname!=null || $filname!=''){
             $upload_dir = $dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
-
             $path = $upload_dir.$filname;
             $type = pathinfo($path, PATHINFO_EXTENSION);
             $data = file_get_contents($path);
             $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
         }
-        $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"],$row['TRD_DOC_FILE_NAME']);
+        $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
     }
     //JOB ID DETAILS
     $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($jobid)");
@@ -806,6 +947,11 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
     {
         $materialusage_details[]=array($row["MUD_ID"],$row["MU_ITEMS"],$row["MUD_RECEIPT_NO"],$row["MUD_QUANTITY"]);
     }
+    // MEETING DETAILS
+    $meetingdetails=mysqli_query($con,"SELECT MD_ID,MT_TOPIC,MD_REMARKS FROM LMC_MEETING_DETAILS MD, LMC_MEETING_TOPIC MT WHERE MD.MT_ID=MT.MT_ID AND TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    while($row=mysqli_fetch_array($meetingdetails)){
+        $meeting_details[]=array($row["MD_ID"],$row["MT_TOPIC"],$row['MD_REMARKS']);
+    }
     //TEAM JOB
     $typeofjob=mysqli_query($con,"select TOJ_JOB,TOJ_ID from LMC_TYPE_OF_JOB");
     while($row=mysqli_fetch_array($typeofjob)){
@@ -831,7 +977,7 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
     {
         $imagefoldderid=$row['EMP_IMAGE_FOLDER_ID'];
     }
-    $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid);
+    $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid,$meeting_details);
     echo JSON_encode($values);
 }
 elseif($_REQUEST['option']=='UPDATE_SEARCH_DATA')
@@ -840,13 +986,13 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH_DATA')
     $fromdate=date('Y-m-d',strtotime($_REQUEST['fromdate']));
     $todate=date('Y-m-d',strtotime($_REQUEST['todate']));
     //EMPLOYEE DETAILS
-    $empdetails=mysqli_query($con," SELECT L1.EMP_ID,DATE_FORMAT(TRD.TRD_DATE,'%d-%m-%Y') AS TRD_DATE,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TRD_ID,L1.TERD_OT,L1.TERD_REMARK,ULD.ULD_USERNAME,DATE_FORMAT(CONVERT_TZ(L1.TERD_TIMESTAMP,'+00:00','+08:00'),'%d-%m-%Y %T') AS TERD_TIMESTAMP FROM LMC_TEAM_EMPLOYEE_REPORT_DETAILS L1,LMC_TEAM_REPORT_DETAILS TRD,LMC_USER_LOGIN_DETAILS ULD WHERE TRD.TRD_DATE BETWEEN '$fromdate' AND '$todate' AND TRD.EMP_ID='$emp' AND L1.TRD_ID=TRD.TRD_ID AND TRD.ULD_ID=ULD.ULD_ID ORDER BY TRD.TRD_DATE ASC ");
+    $empdetails=mysqli_query($con," SELECT L1.EMP_ID,DATE_FORMAT(TRD.TRD_DATE,'%d-%m-%Y') AS TRD_DATE,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TRD_ID,L1.TERD_OT,L1.TERD_REMARK,ULD.ULD_USERNAME,DATE_FORMAT(L1.TERD_TIMESTAMP,'%d-%m-%Y %T') AS TERD_TIMESTAMP FROM LMC_TEAM_EMPLOYEE_REPORT_DETAILS L1,LMC_TEAM_REPORT_DETAILS TRD,LMC_USER_LOGIN_DETAILS ULD WHERE TRD.TRD_DATE BETWEEN '$fromdate' AND '$todate' AND TRD.EMP_ID='$emp' AND L1.TRD_ID=TRD.TRD_ID AND TRD.ULD_ID=ULD.ULD_ID ORDER BY TRD.TRD_DATE ASC ");
     while($row=mysqli_fetch_array($empdetails))
     {
         $employeedetails[]=array($row['EMP_ID'],$row["TRD_DATE"],$row["STARTTIME"],$row["ENDTIME"],$row["TRD_ID"],$row["TERD_OT"],$row['TERD_REMARK'],$row['ULD_USERNAME'],$row['TERD_TIMESTAMP']);
     }
 //ERRPOR MESSAGE
-    $errormsg=get_error_msg('4,17,21,83,133,143');
+    $errormsg=get_error_msg('4,17,21,83,133,143,144');
 
     $values=array($employeedetails,$errormsg);
     echo JSON_encode($values);
@@ -855,22 +1001,23 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
 {
     $trdid=$_REQUEST['trdid'];
     $empid=$_REQUEST['selectedemp'];
+    $btn=$_REQUEST['btn'];
     //TEAM REPORT DETAILS
-    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME,TRD_DOC_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_ID='$trdid'");
+    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($teamreport_details))
     {
         $jobid=$row["TOJ_ID"];
         $filname=$row['TRD_IMG_FILE_NAME'];
-        $userfolderid=get_emp_folderid($activeemp);
+        $userfolderid=get_emp_folderid($empid);
         if($filname!=null || $filname!=''){
             $upload_dir = $dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
-
             $path = $upload_dir.$filname;
             $type = pathinfo($path, PATHINFO_EXTENSION);
             $data = file_get_contents($path);
             $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
         }
-        $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"],$row['TRD_DOC_FILE_NAME']);
+        $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
+        $team_report_details1=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
     }
     //JOB ID DETAILS
     $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($jobid)");
@@ -888,7 +1035,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
     $sitevisitdetails=mysqli_query($con,"SELECT SVD_ID,SVD_NAME,SVD_DESIGNATION,DATE_FORMAT(SVD_START_TIME,'%H:%i' ) AS SVDSTARTTIME,DATE_FORMAT(SVD_END_TIME,'%H:%i' ) AS SVDENDTIME,SVD_REMARK FROM lmc_site_visit_details WHERE TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($sitevisitdetails))
     {
-        $sitevisit_details[]=array($row["SVD_ID"],$row["SVD_NAME"],$row["SVD_DESIGNATION"],$row["SVDSTARTTIME"],$row["SVDENDTIME"],$row["SVD_REMARK"]);
+        $sitevisit_details[]=array($row["SVD_ID"],$row["SVD_DESIGNATION"],$row["SVD_NAME"],$row["SVDSTARTTIME"],$row["SVDENDTIME"],$row["SVD_REMARK"]);
     }
     //MACHINERY_EQUIPMENT DETAILS
     $mech_equip_details=mysqli_query($con,"SELECT MET_ID,MET_FROM_LORRY_NO,MET_TO_LORRY_NO,MET_ITEM,MET_REMARK FROM LMC_MACHINERY_EQUIPMENT_TRANSFER WHERE TRD_ID='$trdid'");
@@ -926,13 +1073,18 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
     {
         $materialusage_details[]=array($row["MUD_ID"],$row["MU_ITEMS"],$row["MUD_RECEIPT_NO"],$row["MUD_QUANTITY"]);
     }
+    // MEETING DETAILS
+    $meetingdetails=mysqli_query($con,"SELECT MD_ID,MT_TOPIC,MD_REMARKS FROM LMC_MEETING_DETAILS MD, LMC_MEETING_TOPIC MT WHERE MD.MT_ID=MT.MT_ID AND TRD_ID='$trdid'");
+    while($row=mysqli_fetch_array($meetingdetails)){
+        $meeting_details[]=array($row["MD_ID"],$row["MT_TOPIC"],$row['MD_REMARKS']);
+    }
     //TEAM JOB
     $typeofjob=mysqli_query($con,"select TOJ_JOB,TOJ_ID from LMC_TYPE_OF_JOB");
     while($row=mysqli_fetch_array($typeofjob)){
         $joptype[]=array($row["TOJ_JOB"],$row['TOJ_ID']);
     }
     //CURRENT EMPLOYEE NAME
-    $activeempname=mysqli_query($con,"SELECT EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS ACTIVE_EMPLOYEE_NAME FROM LMC_EMPLOYEE_DETAILS E,LMC_USER_LOGIN_DETAILS U WHERE E.ULD_ID=U.ULD_ID AND U.ULD_USERNAME='$UserStamp'");
+    $activeempname=mysqli_query($con,"SELECT EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS ACTIVE_EMPLOYEE_NAME FROM LMC_EMPLOYEE_DETAILS E,LMC_USER_LOGIN_DETAILS U WHERE E.ULD_ID=U.ULD_ID AND E.EMP_ID='$empid'");
     if($row=mysqli_fetch_array($activeempname))
     {
         $activeemp_name[]=array($row["EMP_ID"]);
@@ -944,15 +1096,161 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $jobdone_size[]=$row['SIZE'];
         $jobdone_length[]=$row["LENGTH"];
     }
+
     //ERRPOR MESSAGE
-    $errormsg=get_error_msg('4,17,21,83,133,143');
+    $errormsg=get_error_msg('4,17,21,83,133,143,144,145,147,148');
     $folderid=mysqli_query($con,"SELECT EMP_IMAGE_FOLDER_ID FROM LMC_EMPLOYEE_DETAILS WHERE EMP_ID='$empid'");
     if($row=mysqli_fetch_array($folderid))
     {
         $imagefoldderid=$row['EMP_IMAGE_FOLDER_ID'];
     }
-    $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid);
-    echo JSON_encode($values);
+    if($btn=='VIEW_PDF'){
+        $jobdone_size =explode(",",$jobdone_size[0]);
+        $jobdone_length=explode(",",$jobdone_length[0]);
+        if($team_report_details1[13]!=''){
+            $weathertime=$team_report_details1[13].' ('.$team_report_details1[7].' TO '.$team_report_details1[8].')';
+        }
+        else{
+            $weathertime='';
+        }
+// TEAM REPORT
+        $teamreporttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">TEAM REPORT</caption>
+        <tr><td width="100" style= "padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>LOCATION</td><td width="360" style="padding-left: 10px;">'.$team_report_details1[1].'</td><td width="140" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>CONTRACT NO</td><td  width="250" style="padding-left: 10px;">'.$team_report_details1[2].'</td><td width="150" style="padding-left: 10px;">'.$team_report_details1[3].'</td></tr>
+        </table>
+        <table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+        <tr><td width="250" style="padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>DATE</td><td style="padding-left: 10px;"width="250">'.$team_report_details1[0].'</td><td width="250" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>WEATHER</td><td style="padding-left: 10px;" width="250">'.$weathertime.'</td></tr>
+        <tr><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>REACH SITE</td><td style="padding-left: 10px;" width="250">'.$team_report_details1[4].'</td><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>LEAVE SITE</td><td style="padding-left: 10px;" width="250">'.$team_report_details1[5].'</td></tr>
+        <tr><td width="250" colspan="1" style="color:#498af3;padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>TYPE OF JOB</td><td style="padding-left: 10px;" width="250" colspan="3">'.$job_details.'</td></tr>
+        </table>';
+// final table start
+        $reportheadername='TIME SHEET REPORT FOR '.$employeedetails[0][1].' ON '.date('d-m-Y',strtotime($team_report_details1[0]));
+        $finaltable='<html><body><table><tr><td style="text-align: center;"><div><img id=imglogo src="image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">'.$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr>';
+
+// MEETING DETAILS
+        if(count($meeting_details)!=0)
+        {
+            $meetingtable='<br><table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MEETING</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td align="center" width="400" style="color:white;"height=20px nowrap><b>TOPIC</b></td><td height=20px align="center" style="color:white;" nowrap><b>REMARKS</b></td></tr>';
+            for($i=0;$i<count($meeting_details);$i++)
+            {
+                $meetingtable=$meetingtable."<tr style='padding-left: 10px;'><td nowrap style='padding-left: 10px;' height=20px>".$meeting_details[$i][1]."</td><td nowrap style='padding-left: 10px;' height=20px>".$meeting_details[$i][2]."</td></tr>";
+            }
+            $meetingtable=$meetingtable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$meetingtable.'</td></tr>';
+        }
+//JOB DONE DETAILS
+        $jobdonetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">JOB DONE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/>
+        <tr><td width="250" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>PIPELAID</td><td style="text-align:center;" width="250" colspan=2>ROAD</td><td width="250" colspan=2 style="text-align:center;">CONC</td><td width="250" colspan=2 style="text-align:center;">TRUF</td></tr>
+        <tr><td style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold; " height=20px>SIZE/LENGTH</td><td style="padding-left: 10px;">'.$jobdone_size[0].'</td><td style="padding-left: 10px;">'.$jobdone_length[0].'</td><td style="padding-left: 10px;">'.$jobdone_size[1].'</td><td style="padding-left: 10px;">'.$jobdone_length[1].'</td><td style="padding-left: 10px;">'.$jobdone_size[2].'</td><td style="padding-left: 10px;">'.$jobdone_length[2].'</td></tr>
+        <tr><td style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>PIPE TESTING</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>START(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>END(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>REMARK</td></tr>
+        <tr><td style="padding-left: 10px;">'.$team_report_details1[9].'</td><td colspan="2" style="text-align:center;">'.$team_report_details1[10].'</td><td style="text-align:center;"colspan="2">'.$team_report_details1[11].'</td><td colspan="2" style="padding-left: 10px;">'.$team_report_details1[12].'</td></tr>
+        </table>';
+
+//EMPLOYEE TABLE
+        $employeetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EMPLOYEE DETAILS</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td align="center" style="color:white;" height=20px width="350" nowrap><b>EMPLOYEE NAME</b></td><td align="center" style="color:white;" height=20px nowrap width="100"><b>START</b></td><td width="100" align="center" style="color:white;" height=20px nowrap><b>END</b></td><td width="100" align="center" height=20px style="color:white;" nowrap><b>OT</b></td><td height=20px align="center" style="color:white;" height=20px width="350" nowrap><b>REMARKS</b></td></tr>';
+        $employeetable=$employeetable."<tr style='padding-left: 10px;'><td height=20px nowrap style='padding-left: 10px;'>".$employeedetails[0][1]."</td><td height=20px nowrap style='text-align:center;'>".$employeedetails[0][2]."</td><td height=20px nowrap style='text-align:center;'>".$employeedetails[0][3]."</td><td height=20px nowrap style='text-align:center;'>".$employeedetails[0][4]."</td><td height=20px nowrap style='padding-left: 10px;'>".$employeedetails[0][5]."</td></tr></table>";
+        $finaltable=$finaltable.'<br><br><tr><td>'.$jobdonetable.'</td></tr><br><br><tr><td>'.$employeetable.'</td></tr>';
+//Site Visit
+        if(count($sitevisit_details)!=0)
+        {
+            $sitevisittable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">SITE VISIT</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>DESIGNATION</b></td><td height=20px align="center" style="color:white;" nowrap><b>NAME</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
+            for($i=0;$i<count($sitevisit_details);$i++)
+            {
+                $sitevisittable=$sitevisittable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$sitevisit_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$sitevisit_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$sitevisit_details[$i][3]."</td><td height=20px nowrap style='text-align:center;'>".$sitevisit_details[$i][4]."</td><td height=20px nowrap style='padding-left: 10px;'>".$sitevisit_details[$i][5]."</td></tr>";
+            }
+            $sitevisittable=$sitevisittable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$sitevisittable.'</td></tr>';
+        }
+// machinary equip trans
+        if(count($mechequip_details)!=0)
+        {
+            $machineryequipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY/EQUIPMENT TRANSFER</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>FROM(LORRY NO)</b></td><td height=20px align="center" style="color:white;" nowrap><b>ITEM</b></td><td height=20px align="center" style="color:white;" nowrap><b>TO(LORRY NO)</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
+            for($i=0;$i<count($mechequip_details);$i++)
+            {
+                $machineryequipmenttable=$machineryequipmenttable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$mechequip_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mechequip_details[$i][2]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mechequip_details[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mechequip_details[$i][4]."</td></tr>";
+            }
+            $machineryequipmenttable=$machineryequipmenttable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$machineryequipmenttable.'</td></tr>';
+        }
+// machinary usage
+        if(count($machinery_usage_details)!=0)
+        {
+            $machineryusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>MACHINERY TYPE</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
+            for($i=0;$i<count($machinery_usage_details);$i++)
+            {
+                $machineryusagetable=$machineryusagetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$machinery_usage_details[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$machinery_usage_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$machinery_usage_details[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$machinery_usage_details[$i][4]."</td></tr>";
+            }
+            $machineryusagetable=$machineryusagetable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$machineryusagetable.'</td></tr>';
+        }
+// rental details
+        if(count($rentalmachinery_details)!=0)
+        {
+            $rentaltable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">RENTAL MACHINERY</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>LORRY NUMBER</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(STORE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(OUTSIDE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="200" nowrap><b>REMARKS</b></td></tr>';
+            for($i=0;$i<count($rentalmachinery_details);$i++)
+            {
+                $rentaltable=$rentaltable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$rentalmachinery_details[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$rentalmachinery_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$rentalmachinery_details[$i][3]."</td><td height=20px nowrap style='text-align:center;'>".$rentalmachinery_details[$i][4]."</td><td height=20px nowrap style='text-align:center;'>".$rentalmachinery_details[$i][5]."</td><td height=20px nowrap style='padding-left: 10px;'>".$rentalmachinery_details[$i][6]."</td></tr>";
+            }
+            $rentaltable=$rentaltable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$rentaltable.'</td></tr>';
+        }
+// equipment usage
+        if(count($equipmentusage_details)!=0)
+        {
+            $equipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EQUIPMENT USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>AIR-COMPRESSOR</b></td><td height=20px align="center" style="color:white;" nowrap><b>LORRYNO(TRANSPORT)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
+            for($i=0;$i<count($equipmentusage_details);$i++)
+            {
+                $equipmenttable=$equipmenttable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$equipmentusage_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$equipmentusage_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$equipmentusage_details[$i][3]."</td><td height=20px nowrap style='text-align:center;'>".$equipmentusage_details[$i][4]."</td><td height=20px nowrap style='padding-left: 10px;'>".$equipmentusage_details[$i][5]."</td></tr>";
+            }
+            $equipmenttable=$equipmenttable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$equipmenttable.'</td></tr>';
+        }
+//fitting usage
+        if(count($fittingusage_details)!=0)
+        {
+            $fittingtable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">FITTING USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>SIZE</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td><td height=20px align="center" style="color:white;" width="300" nowrap><b>REMARKS</b></td></tr>';
+            for($i=0;$i<count($fittingusage_details);$i++)
+            {
+                $fittingtable=$fittingtable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$fittingusage_details[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$fittingusage_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$fittingusage_details[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$fittingusage_details[$i][4]."</td></tr>";
+            }
+            $fittingtable=$fittingtable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$fittingtable.'</td></tr>';
+        }
+//Material Usage //
+        if(count($materialusage_details)!=0)
+        {
+            $materialusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>RECEIPT NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
+            for($i=0;$i<count($materialusage_details);$i++)
+            {
+                $materialusagetable=$materialusagetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$materialusage_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$materialusage_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$materialusage_details[$i][3]."</td></tr>";
+            }
+            $materialusagetable=$materialusagetable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$materialusagetable.'</td></tr>';
+        }
+//image
+        if($path!='')
+        {
+            $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$path.'"/></td></tr></table></body></html>';
+        }
+        else{
+            $finaltable=$finaltable.'</table></body></html>';
+        }
+        $dir1 = $dir.'Phpfiles/';
+        foreach(glob($dir1.'*.*') as $v){
+            unlink($v);
+        }
+        $mpdf=new mPDF('utf-8','A4');
+        $mpdf->debug=true;
+//        $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;">LIH MING CONSTRUCTION PTE LTD</div></h3>', 'O', true);
+//        $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;"><img id=image src="image/LOGO.png"/></div></h3>', 'O', true);
+        $mpdf->SetHTMLFooter('<div style="text-align: center;">{PAGENO}</div>');
+        $mpdf->WriteHTML($finaltable);
+        $reportpdf=$mpdf->Output('Phpfiles/'.$reportheadername.'.pdf','f');
+        echo 'Phpfiles/'.$reportheadername.'.pdf';
+    }
+    else{
+        $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid,$meeting_details);
+        echo JSON_encode($values);
+    }
 }
 elseif($_REQUEST['Option']=='UpdateForm')
 {
@@ -1068,25 +1366,10 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $mechinery=$_POST["SRC_MechineryUsageDetails"];
     $mech_eqp_transfer=$_POST["SRC_MechEqptransfer"];
     $SV_details=$_POST["SRC_SiteVisit"];
+    $meeting=$_POST["SRC_MeetingDetails"];
     $EmployeeReport=$_POST["SRC_EmployeeDetails"];
     $imagedata=$_POST['imgData'];
-    $uploadcount=$_POST['uploadcount'];
-    //File upload function
-    $newfilename=$_POST['filename'];
-    $oldfilename=$_POST['oldfilename'];
 
-    if(($newfilename!='') && ($oldfilename!='')){
-        $filename=$oldfilename.'/'.$newfilename;
-    }
-    if(($newfilename=='') && ($oldfilename=='')){
-        $filename=null;
-    }
-    if($oldfilename==''){
-        $filename=$newfilename;
-    }
-    if($newfilename==''){
-        $filename=$oldfilename;
-    }
     $oldimgfileid=mysqli_query($con,"SELECT TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$reportdate' AND EMP_ID='$activeemp'");
     if($row=mysqli_fetch_array($oldimgfileid))
     {
@@ -1098,22 +1381,36 @@ elseif($_REQUEST['Option']=='UpdateForm')
         $daterep=str_replace('-','',$reportdate);
         $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
         $userfolderid=get_emp_folderid($EmployeeReport[0]);
-        $uploadpath=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR.$imgfilename;
-        try{
-            $data=str_replace('data:image/png;base64,','',$imagedata);
-            $data = str_replace(' ','+',$data);
-            $data = base64_decode($data);
-            $success = file_put_contents($uploadpath, $data);
-            $imgflag=1;
+        $path=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
+        if(is_dir($path)){
+            $dirflag=1;
         }
-        catch(Exception $e){
-            print $e->getMessage();
-            unlink($uploadpath);
+        else{
+            $dirflag=0;
+        }
+        if($dirflag==1){
+            $uploadpath=$path.$imgfilename;
+            try{
+                $data=str_replace('data:image/png;base64,','',$imagedata);
+                $data = str_replace(' ','+',$data);
+                $data = base64_decode($data);
+                $success = file_put_contents($uploadpath, $data);
+                $imgflag=1;
+            }
+            catch(Exception $e){
+                $imgflag=0;
+                unlink($uploadpath);
+                print $e->getMessage();
+            }
+        }
+        else{
             $imgflag=0;
+            $imgfilename='';
         }
     }
     elseif($imagedata=='' || $reportdate=='' || $EmployeeReport[0]=='' || $teamname==''){
         $imgflag=0;
+        $imgfilename='';
     }
     if($weather!=''){
         $weathertime=$weather.' ('.$weatherfrom.' TO '.$weatherto.')';
@@ -1126,42 +1423,30 @@ elseif($_REQUEST['Option']=='UpdateForm')
     while($row=mysqli_fetch_array($emp_name)){
         $empnames=$row["EMP_NAME"];
     }
-    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($typeofjob)");
+    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB SEPARATOR ' / ') AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($typeofjob)");
     while($row=mysqli_fetch_array($jobname)){
         $jobnames=$row["JOB"];
     }
-    $teamreporttable='<table width=1000 colspan=3px cellpadding=3px  border="0"><caption style="caption-side: left;font-weight: bold;">TEAM REPORT</caption>
-   <tr><td width="100" style= "border: 1px solid black;color:#fff; background-color:#498af3;font-weight: bold;" height=25px>LOCATION</td><td width="360">'.$teamlocation.'</td><td width="130" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;" height=25px>CONTRACT NO</td><td  width="250">'.$contractno.'</td><td width="150">'.$teamname.'</td></tr></table>
-   <table width=1000 colspan=3px cellpadding=3px  border="0"><tr><td width="250" style="border: 1px solid black;color:#fff; background-color:#498af3;font-weight: bold;" height=25px>DATE</td><td style="border: 1px solid black;"width="250">'.$reportdate.'</td><td width="250" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;" height=25px>WEATHER</td><td style="border: 1px solid black;" width="250">'.$weathertime.'</td></tr>
-   <tr><td width="250" style="color:#fff; background-color:#498af3; border: 1px solid black;font-weight: bold;" height=25px>REACH SITE</td><td style="border: 1px solid black;" width="250">'.$reachsite.'</td><td width="250" style="color:#fff; background-color:#498af3; border: 1px solid black;font-weight: bold;" height=25px>LEAVE SITE</td><td style="border: 1px solid black;" width="250">'.$leavesite.'</td></tr>
-   <tr><td width="250" colspan="1" style="color:#498af3;border: 1px solid black;color:#fff; background-color:#498af3;font-weight: bold;" height=25px>TYPE OF JOB</td><td style="border: 1px solid black;" width="250" colspan="3">'.$jobnames.'</td></tr>
+//TEAM REPORT
+    $teamreporttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">TEAM REPORT</caption>
+   <tr><td width="100" style= "padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>LOCATION</td><td width="360" style="padding-left: 10px;">'.$teamlocation.'</td><td width="140" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>CONTRACT NO</td><td  width="250" style="padding-left: 10px;">'.$contractno.'</td><td width="150" style="padding-left: 10px;">'.$teamname.'</td></tr></table>
+   <table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><tr><td width="250" style="padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>DATE</td><td style="padding-left: 10px;"width="250">'.$reportdate.'</td><td width="250" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>WEATHER</td><td style="padding-left: 10px;" width="250">'.$weathertime.'</td></tr>
+   <tr><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>REACH SITE</td><td style="padding-left: 10px;" width="250">'.$reachsite.'</td><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>LEAVE SITE</td><td style="padding-left: 10px;" width="250">'.$leavesite.'</td></tr>
+   <tr><td width="250" colspan="1" style="color:#498af3;padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>TYPE OF JOB</td><td style="padding-left: 10px;" width="250" colspan="3">'.$jobnames.'</td></tr>
    </table>';
-
-//JOB DONE DETAILS
-    $jobdonetable='<br><table width=1000 colspan=3px cellpadding=3px  border="0"><caption style="caption-side: left;font-weight: bold;">JOB DONE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/>
-   <tr><td width="250" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;" height=25px>PIPELAID</td><td style="border: 1px solid black;text-align:center;" width="250" colspan=2>ROAD</td><td width="250" colspan=2 style="border: 1px solid black;text-align:center;">CONC</td><td width="250" colspan=2 style="border: 1px solid black;text-align:center;">TRUF</td></tr>
-   <tr><td style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold; " height=25px>SIZE/LENGTH</td><td style="border: 1px solid black;">'.$roadm.'</td><td style="border: 1px solid black;">'.$roadmm.'</td><td style="border: 1px solid black;">'.$concm.'</td><td style="border: 1px solid black;">'.$concmm.'</td><td style="border: 1px solid black;">'.$turfm.'</td><td style="border: 1px solid black;">'.$turfmm.'</td>
-   <tr><td style="color:#fff; background-color:#498af3; border: 1px solid black;font-weight: bold;" height=25px>PIPE TESTING</td><td colspan="2" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;text-align:center;" height=25px>START(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;text-align:center;" height=25px>END(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;border: 1px solid black;font-weight: bold;text-align:center;" height=25px>REMARK</td></tr>
-   <tr><td style="border: 1px solid black;">'.$pipetesting.'</td><td colspan="2" style="border: 1px solid black;">'.$pressurestart.'</td><td style="border: 1px solid black;"colspan="2">'.$pressureend.'</td><td colspan="2" style="border: 1px solid black;">'.$teamremarks.'</td></tr>
-   </table>';
-//EMPLOYEE TABLE
-    $employeetable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">EMPLOYEE DETAILS</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>EMPLOYEE NAME</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>OT</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
-    $employeetable=$employeetable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$empnames."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$EmployeeReport[1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$EmployeeReport[2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$EmployeeReport[3]."</td><td nowrap style='border: 1px solid black;'>".$EmployeeReport[4]."</td></tr></table>";
 // final table start
     $reportheadername='TIME SHEET UPDATED REPORT FOR '.$empnames;
-    $finaltable='<html><body><table><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">'.$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr><br><br><tr><td>'.$jobdonetable.'</td></tr><br><br><tr><td>'.$employeetable.'</td></tr>';
+    $finaltable='<html><body><table><tr><td style="text-align: center;"><div><img id=imglogo src="image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">'.$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr>';
 
-    $sheettitle='LIH MING CONSTRUCTION PTE LTD
-TIME SHEET UPDATED REPORT FOR '.$empnames;
-    $objPHPExcel->getActiveSheet()->setTitle('LMC TS UPDATED REPORT')->setCellValue('A1', $sheettitle)->setCellValue('a2', 'TEAM REPORT')->setCellValue('a8', 'JOB DONE')->setCellValue('a14', 'EMPLOYEE REPORT')->setCellValue('a3', 'LOCATION')->setCellValue('b3',$teamlocation)->setCellValue('c3', 'CONTRACT NO')->setCellValue('d3', $contractno)->setCellValue('e3', 'TEAM')->setCellValue('f3', $teamname)
+// FOR EXCEL
+    $sheettitle="LIH MING CONSTRUCTION PTE LTD\nTIME SHEET UPDATED REPORT FOR ".$empnames;
+    $objPHPExcel->getActiveSheet()->setTitle('REPORT SUBMISSION UPDATE')->setCellValue('A1', $sheettitle)->setCellValue('A2', 'TEAM REPORT')
+        ->setCellValue('A3', 'LOCATION')->setCellValue('B3',$teamlocation)->setCellValue('C3', 'CONTRACT NO')->setCellValue('D3', $contractno)->setCellValue('F3', 'TEAM')->setCellValue('G3', $teamname)
         ->setCellValue('A4', 'DATE') ->setCellValue('B4', $reportdate) ->setCellValue('C4','WEATHER')->setCellValue('D4',$weathertime)
-        ->setCellValue('A5', 'REACH SITE')->setCellValue('B5', $reachsite)->setCellValue('C5', 'LEAVE SITE')->setCellValue('D5', $leavesite)->setCellValue('A6', 'TYPE OF JOB')->setCellValue('B6',$jobnames)
-        ->setCellValue('A9','PIPE LAID')->setCellValue('B9','ROAD')->setCellValue('D9','CONC')->setCellValue('F9','TURF')
-        ->setCellValue('A10','SIZE / LENGTH')->setCellValue('B10',$roadm)->setCellValue('C10',$roadmm)->setCellValue('D10',$concm)->setCellValue('E10',$concmm)->setCellValue('F10',$turfm)->setCellValue('G10',$turfmm)
-        ->setCellValue('A11','PIPE TESTING')->setCellValue('B11','START ( PRESSURE )')->setCellValue('D11','END ( PRESSURE )')->setCellValue('F11','REMARKS')
-        ->setCellValue('A12',$pipetesting)->setCellValue('B12',$pressurestart)->setCellValue('D12',$pressureend)->setCellValue('F12',$teamremarks)
-        ->setCellValue('A15','NAME')->setCellValue('B15','START')->setCellValue('C15','END')->setCellValue('D15','OT')->setCellValue('F15','REMARKS')
-        ->setCellValue('A16',$empnames)->setCellValue('B16',$EmployeeReport[1])->setCellValue('C16',$EmployeeReport[2])->setCellValue('D16',$EmployeeReport[3])->setCellValue('F16',$EmployeeReport[4]);
+        ->setCellValue('A5', 'REACH SITE')->setCellValue('B5', $reachsite)->setCellValue('C5', 'LEAVE SITE')->setCellValue('D5', $leavesite)->setCellValue('A6', 'TYPE OF JOB')->setCellValue('B6',$jobnames);
+    $styleArray = array('borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN)));
+    $objPHPExcel->getActiveSheet()->getStyle('A2')->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A3:G6')->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
@@ -1170,95 +1455,196 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(13);
     $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(13);
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A1:G1');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D4:F4');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D5:F5');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E4:F4');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('E5:F5');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B6:F6');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B9:C9');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D9:E9');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F9:G9');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B11:C11');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D11:E11');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F11:G11');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B12:C12');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D12:E12');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F12:G12');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D15:E15');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F15:G15');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D16:E16');
-    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F16:G16');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D3:E3');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D4:G4');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D5:G5');
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B6:G6');
     $objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(35);
+    $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setWrapText(true);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('A2')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A3:A10')->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('E3')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A11:G11')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A14:G15')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('B12:E12')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('B11:G11')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A:E')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('A9:G9')->getAlignment()->setVertical(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('A9:G9')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('D3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-    $objPHPExcel->getActiveSheet()->getStyle('A1:A11')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
-    $objPHPExcel->getActiveSheet()->getStyle('A15:G15')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-    $objPHPExcel->getActiveSheet()->getStyle('B16:E16')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('A2:A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->getColor()->setRGB('FFFAFA');
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->getFont()->getColor()->setRGB('FFFAFA');
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('E3')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('E3')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('A9:A11')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('A9:A11')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('B11:G11')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('B11:G11')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $objPHPExcel->getActiveSheet()->getStyle('A15:G15')->getFont()->getColor()->setRGB('FFFAFA');
-    $objPHPExcel->getActiveSheet()->getStyle('A15:G15')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-    $maxrowNo=18;
-    $rowNumber='';
+    $objPHPExcel->getActiveSheet()->getStyle('F3')->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('F3')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+
+    $maxrowNo=8;
+    $MSrowNumber='';
+    $JErowNumber='';
+    $SVrowNumber='';
     $METrowNumber='';
     $MUrowNumber='';
     $RMrowNumber='';
     $EUrowNumber='';
     $FUrowNumber='';
     $MIUrowNumber='';
+
+//Meeting Details
+    $MS_id;$MS_topic;$MS_remarks;
+    if($meeting!='null')
+    {
+        $MSrowNumber = $maxrowNo;
+        $maxrowNo=$maxrowNo+count($meeting)+3;
+        $meetingtable='<br><table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MEETING</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3"  align="center" ><td height=20px width="400" align="center" style="color:white;" width="400" nowrap><b>TOPIC</b></td><td height=20px align="center" style="color:white;" nowrap><b>REMARKS</b></td></tr>';
+
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$MSrowNumber,'MEETING');
+        $MSrowNumber++;
+        $objPHPExcel->getActiveSheet()->getStyle($MSrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A'.$MSrowNumber.':B'.$MSrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$MSrowNumber,'TOPIC');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C'.$MSrowNumber.':G'.$MSrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('C'.$MSrowNumber,'REMARKS');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $MSrowNumber++;
+        for($i=0;$i<count($meeting);$i++)
+        {
+            $meetingtable=$meetingtable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$meeting[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$meeting[$i][2]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$MSrowNumber.':G'.$MSrowNumber)->applyFromArray($styleArray);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A'.$MSrowNumber.':B'.$MSrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$MSrowNumber,$meeting[$i][1]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('C'.$MSrowNumber.':G'.$MSrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('C'.$MSrowNumber,$meeting[$i][2]);
+            if($i==0)
+            {
+                $MS_id=$meeting[$i][0];$MS_topic=$meeting[$i][1]; $MS_remarks=$meeting[$i][2];
+            }
+            else
+            {
+                if($meeting[$i][0]=='' && $meeting[$i][1]!='')
+                {
+                    $MS_id=$MS_id.','.$meeting[$i][0].' ';
+                }
+                else
+                {
+                    $MS_id=$MS_id.','.$meeting[$i][0];
+                }
+                $MS_topic=$MS_topic.'^'.$meeting[$i][1]; $MS_remarks=$MS_remarks.'^'.$meeting[$i][2];
+            }
+            $MSrowNumber++;
+        }
+        $meetingtable=$meetingtable.'</table>';
+        $finaltable=$finaltable.'<br><br><tr><td>'.$meetingtable.'</td></tr>';
+    }
+//JOB DONE DETAILS
+    $jobdonetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">JOB DONE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/>
+   <tr><td width="250" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>PIPELAID</td><td style="text-align:center;" width="250" colspan=2>ROAD</td><td width="250" colspan=2 style="text-align:center;">CONC</td><td width="250" colspan=2 style="text-align:center;">TRUF</td></tr>
+   <tr><td style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold; " height=20px>SIZE/LENGTH</td><td style="padding-left: 10px;">'.$roadm.'</td><td style="padding-left: 10px;">'.$roadmm.'</td><td style="padding-left: 10px;">'.$concm.'</td><td style="padding-left: 10px;">'.$concmm.'</td><td style="padding-left: 10px;">'.$turfm.'</td><td style="padding-left: 10px;">'.$turfmm.'</td>
+   <tr><td style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>PIPE TESTING</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>START(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>END(PRESSURE)</td><td colspan="2" style="color:#fff; background-color:#498af3;font-weight: bold;text-align:center;" height=20px>REMARK</td></tr>
+   <tr><td style="padding-left: 10px;">'.$pipetesting.'</td><td colspan="2" style="text-align:center;">'.$pressurestart.'</td><td style="text-align:center;"colspan="2">'.$pressureend.'</td><td colspan="2" style="padding-left: 10px;">'.$teamremarks.'</td></tr>
+   </table>';
+//EMPLOYEE TABLE
+    $employeetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EMPLOYEE DETAILS</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;"  width="350" nowrap><b>EMPLOYEE NAME</b></td><td height=20px align="center" style="color:white;" width="100" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" width="100" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="100" nowrap><b>OT</b></td><td height=20px align="center" style="color:white;" width="350" nowrap><b>REMARKS</b></td></tr>';
+    $employeetable=$employeetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$empnames."</td><td height=20px nowrap style='text-align:center;'>".$EmployeeReport[1]."</td><td height=20px nowrap style='text-align:center;'>".$EmployeeReport[2]."</td><td height=20px nowrap style='text-align:center;'>".$EmployeeReport[3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$EmployeeReport[4]."</td></tr></table>";
+    $finaltable=$finaltable.'<br><br><tr><td>'.$jobdonetable.'</td></tr><br><br><tr><td>'.$employeetable.'</td></tr>';
+
+    $JErowNumber = $maxrowNo;
+    if($maxrowNo>8){
+        $maxrowNo=$maxrowNo+10;
+    }
+    else if($maxrowNo==8){
+        $maxrowNo=18;
+    }
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'JOB DONE');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$JErowNumber.':C'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':G'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'PIPE LAID')->setCellValue('B'.$JErowNumber,'ROAD')->setCellValue('D'.$JErowNumber,'CONC')->setCellValue('F'.$JErowNumber,'TURF');$JErowNumber++;
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'SIZE / LENGTH')->setCellValue('B'.$JErowNumber,$roadm)->setCellValue('C'.$JErowNumber,$roadmm)->setCellValue('D'.$JErowNumber,$concm)->setCellValue('E'.$JErowNumber,$concmm)->setCellValue('F'.$JErowNumber,$turfm)->setCellValue('G'.$JErowNumber,$turfmm);$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$JErowNumber.':C'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':G'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'PIPE TESTING')->setCellValue('B'.$JErowNumber,'START (PRESSURE)')->setCellValue('D'.$JErowNumber,'END (PRESSURE)')->setCellValue('F'.$JErowNumber,'REMARKS');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$JErowNumber.':C'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':E'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,$pipetesting)->setCellValue('B'.$JErowNumber,$pressurestart)->setCellValue('D'.$JErowNumber,$pressureend)->setCellValue('F'.$JErowNumber,$teamremarks);$JErowNumber++;$JErowNumber++;
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'EMPLOYEE REPORT');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->setBold(true);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,'NAME')->setCellValue('B'.$JErowNumber,'START')->setCellValue('C'.$JErowNumber,'END')->setCellValue('D'.$JErowNumber,'OT')->setCellValue('F'.$JErowNumber,'REMARKS');$JErowNumber++;
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$JErowNumber.':E'.$JErowNumber);
+    $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$JErowNumber.':G'.$JErowNumber);
+    $objPHPExcel->getActiveSheet()->getStyle('A'.$JErowNumber.':G'.$JErowNumber)->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->getStyle('B'.$JErowNumber.':E'.$JErowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $objPHPExcel->getActiveSheet()->setCellValue('A'.$JErowNumber,$empnames)->setCellValue('B'.$JErowNumber,$EmployeeReport[1])->setCellValue('C'.$JErowNumber,$EmployeeReport[2])->setCellValue('D'.$JErowNumber,$EmployeeReport[3])->setCellValue('F'.$JErowNumber,$EmployeeReport[4]);
+
 //Site Visit
     $SV_ID; $SV_designation;$SV_name;$SV_start;$SV_end;$SV_remarks;
     if($SV_details!='null')
     {
-        $rowNumber = $maxrowNo;
+        $SVrowNumber = $maxrowNo;
         $maxrowNo=$maxrowNo+count($SV_details)+3;
-        $sitevisittable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">SITE VISIT</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>DESIGNATION</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>NAME</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber)->getFont()->setBold(true);
-        $objPHPExcel->getActiveSheet()->setCellValue('A'.$rowNumber,'SITE VISIT');
-        $rowNumber++;
-        $objPHPExcel->getActiveSheet()->getStyle($rowNumber)->getFont()->setBold(true);
-        $objPHPExcel->getActiveSheet()->setCellValue('A'.$rowNumber,'DESIGNATION');
-        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$rowNumber.':C'.$rowNumber);
-        $objPHPExcel->getActiveSheet()->setCellValue('B'.$rowNumber,'NAME');
-        $objPHPExcel->getActiveSheet()->setCellValue('D'.$rowNumber,'START (Time)');
-        $objPHPExcel->getActiveSheet()->setCellValue('E'.$rowNumber,'END (Time)');
-        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$rowNumber.':G'.$rowNumber);
-        $objPHPExcel->getActiveSheet()->setCellValue('F'.$rowNumber,'REMARKS');
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber.':G'.$rowNumber)->getFont()->getColor()->setRGB('FFFAFA');
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber.':G'.$rowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-        $objPHPExcel->getActiveSheet()->getStyle('A'.$rowNumber.':G'.$rowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-        $rowNumber++;
+        $sitevisittable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">SITE VISIT</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>DESIGNATION</b></td><td height=20px align="center" style="color:white;" nowrap><b>NAME</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
+
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$SVrowNumber,'SITE VISIT');
+        $SVrowNumber++;
+        $objPHPExcel->getActiveSheet()->getStyle($SVrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$SVrowNumber,'DESIGNATION');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$SVrowNumber.':C'.$SVrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('B'.$SVrowNumber,'NAME');
+        $objPHPExcel->getActiveSheet()->setCellValue('D'.$SVrowNumber,'START (Time)');
+        $objPHPExcel->getActiveSheet()->setCellValue('E'.$SVrowNumber,'END (Time)');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$SVrowNumber.':G'.$SVrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('F'.$SVrowNumber,'REMARKS');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $SVrowNumber++;
         for($i=0;$i<count($SV_details);$i++)
         {
-            $sitevisittable=$sitevisittable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$SV_details[$i][1]."</td><td nowrap style='border: 1px solid black;'>".$SV_details[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$SV_details[$i][3]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$SV_details[$i][4]."</td><td nowrap style='border: 1px solid black;'>".$SV_details[$i][5]."</td></tr>";
-            $objPHPExcel->getActiveSheet()->getStyle('C'.$rowNumber.':E'.$rowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
-            $objPHPExcel->getActiveSheet()->setCellValue('A'.$rowNumber,$SV_details[$i][1]);
-            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$rowNumber.':C'.$rowNumber);
-            $objPHPExcel->getActiveSheet()->setCellValue('B'.$rowNumber,$SV_details[$i][2]);
-            $objPHPExcel->getActiveSheet()->setCellValue('D'.$rowNumber,$SV_details[$i][3]);
-            $objPHPExcel->getActiveSheet()->setCellValue('E'.$rowNumber,$SV_details[$i][4]);
-            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$rowNumber.':G'.$rowNumber);
-            $objPHPExcel->getActiveSheet()->setCellValue('F'.$rowNumber,$SV_details[$i][5]);
+            $sitevisittable=$sitevisittable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$SV_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$SV_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$SV_details[$i][3]."</td><td height=20px nowrap style='text-align:center;'>".$SV_details[$i][4]."</td><td height=20px nowrap style='padding-left: 10px;'>".$SV_details[$i][5]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('C'.$SVrowNumber.':E'.$SVrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$SVrowNumber.':G'.$SVrowNumber)->applyFromArray($styleArray);
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$SVrowNumber,$SV_details[$i][1]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$SVrowNumber.':C'.$SVrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('B'.$SVrowNumber,$SV_details[$i][2]);
+            $objPHPExcel->getActiveSheet()->setCellValue('D'.$SVrowNumber,$SV_details[$i][3]);
+            $objPHPExcel->getActiveSheet()->setCellValue('E'.$SVrowNumber,$SV_details[$i][4]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('F'.$SVrowNumber.':G'.$SVrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('F'.$SVrowNumber,$SV_details[$i][5]);
             if($i==0)
             {
                 $SV_ID=$SV_details[$i][0];$SV_designation=$SV_details[$i][1]; $SV_name=$SV_details[$i][2]; $SV_start=$SV_details[$i][3];$SV_end=$SV_details[$i][4];$SV_remarks=$SV_details[$i][5];
@@ -1275,7 +1661,7 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
                 }
                 $SV_designation=$SV_designation.'^'.$SV_details[$i][1]; $SV_name=$SV_name.'^'.$SV_details[$i][2]; $SV_start=$SV_start.'^'.$SV_details[$i][3]; $SV_end=$SV_end.'^'.$SV_details[$i][4]; $SV_remarks=$SV_remarks.'^'.$SV_details[$i][5];
             }
-            $rowNumber++;
+            $SVrowNumber++;
         }
         $sitevisittable=$sitevisittable.'</table>';
         $finaltable=$finaltable.'<br><br><tr><td>'.$sitevisittable.'</td></tr>';
@@ -1286,11 +1672,13 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     {
         $METrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($mech_eqp_transfer)+3;
-        $machineryequipmenttable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">MACHINERY/EQUIPMENT TRANSFER</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>FROM(LORRY NO)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>ITEM</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>TO(LORRY NO)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $machineryequipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY/EQUIPMENT TRANSFER</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>FROM(LORRY NO)</b></td><td height=20px align="center" style="color:white;" nowrap><b>ITEM</b></td><td height=20px align="center" style="color:white;" nowrap><b>TO(LORRY NO)</b></td><td height=20px align="center" style="color:white;" width="250"  nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$METrowNumber,'MACHINERY / EQUIPMENT TRANSFER');
         $METrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($METrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber.':G'.$METrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$METrowNumber,'FROM (LORRY NO)');
         $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$METrowNumber.':C'.$METrowNumber);
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$METrowNumber,'ITEM');
@@ -1304,7 +1692,8 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $METrowNumber++;
         for($i=0;$i<count($mech_eqp_transfer);$i++)
         {
-            $machineryequipmenttable=$machineryequipmenttable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][1]."</td><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][2]."</td><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][3]."</td><td nowrap style='border: 1px solid black;'>".$mech_eqp_transfer[$i][4]."</td></tr>";
+            $machineryequipmenttable=$machineryequipmenttable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][2]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mech_eqp_transfer[$i][4]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$METrowNumber.':G'.$METrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$METrowNumber,$mech_eqp_transfer[$i][1]);
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$METrowNumber.':C'.$METrowNumber);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$METrowNumber,$mech_eqp_transfer[$i][2]);
@@ -1339,11 +1728,13 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     {
         $MUrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($mechinery)+3;
-        $machineryusagetable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">MACHINERY USAGE</caption>  <sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>MACHINERY TYPE</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $machineryusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY USAGE</caption>  <sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>MACHINERY TYPE</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MUrowNumber,'MACHINERY USAGE');
         $MUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($MUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber.':G'.$MUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MUrowNumber,'MACHINERY TYPE');
         $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MUrowNumber.':C'.$MUrowNumber);
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$MUrowNumber,'START (Time)');
@@ -1357,8 +1748,9 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $MUrowNumber++;
         for($i=0;$i<count($mechinery);$i++)
         {
-            $machineryusagetable=$machineryusagetable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$mechinery[$i][1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$mechinery[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$mechinery[$i][3]."</td><td nowrap style='border: 1px solid black;'>".$mechinery[$i][4]."</td></tr>";
+            $machineryusagetable=$machineryusagetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$mechinery[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$mechinery[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$mechinery[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$mechinery[$i][4]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('B'.$MUrowNumber.':E'.$MUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$MUrowNumber.':G'.$MUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$MUrowNumber,$mechinery[$i][1]);
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MUrowNumber.':C'.$MUrowNumber);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$MUrowNumber,$mechinery[$i][2]);
@@ -1393,11 +1785,13 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     {
         $RMrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($rental)+3;
-        $rentaltable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">RENTAL MACHINERY</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>LORRY NUMBER</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>THROW EARTH(STORE)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>THROW EARTH(OUTSIDE)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $rentaltable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">RENTAL MACHINERY</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>LORRY NUMBER</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(STORE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(OUTSIDE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="200" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$RMrowNumber,'RENTAL MACHINERY');
         $RMrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($RMrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber.':G'.$RMrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$RMrowNumber,'LORRY NUMBER');
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$RMrowNumber,'THROW EARTH(STORE)');
         $objPHPExcel->getActiveSheet()->setCellValue('C'.$RMrowNumber,'THROW EARTH(OUTSIDE)');
@@ -1411,8 +1805,9 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $RMrowNumber++;
         for($i=0;$i<count($rental);$i++)
         {
-            $rentaltable=$rentaltable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$rental[$i][1]."</td><td nowrap style='border: 1px solid black;'>".$rental[$i][2]."</td><td nowrap style='border: 1px solid black;'>".$rental[$i][3]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$rental[$i][4]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$rental[$i][5]."</td><td nowrap style='border: 1px solid black;'>".$rental[$i][6]."</td></tr>";
+            $rentaltable=$rentaltable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$rental[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][3]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][4]."</td><td height=20px nowrap style='text-align:center;'>".$rental[$i][5]."</td><td height=20px nowrap style='padding-left: 10px;'>".$rental[$i][6]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('B'.$RMrowNumber.':E'.$RMrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$RMrowNumber.':G'.$RMrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$RMrowNumber,$rental[$i][1]);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$RMrowNumber,$rental[$i][2]);
             $objPHPExcel->getActiveSheet()->setCellValue('C'.$RMrowNumber,$rental[$i][3]);
@@ -1447,11 +1842,13 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     {
         $EUrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($equipment)+3;
-        $equipmenttable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">EQUIPMENT USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>AIR-COMPRESSOR</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>LORRYNO(TRANSPORT)</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>START</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>END</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $equipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EQUIPMENT USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>AIR-COMPRESSOR</b></td><td height=20px align="center" style="color:white;" nowrap><b>LORRYNO(TRANSPORT)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="200" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$EUrowNumber,'EQUIPMENT USAGE');
         $EUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($EUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber.':G'.$EUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$EUrowNumber,'AIR-COMPRESSOR');
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$EUrowNumber,'LORRY NO(TRANSPORT)');
         $objPHPExcel->getActiveSheet()->setCellValue('C'.$EUrowNumber,'START (Time)');
@@ -1465,8 +1862,9 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $EUrowNumber++;
         for($i=0;$i<count($equipment);$i++)
         {
-            $equipmenttable=$equipmenttable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$equipment[$i][1]."</td><td nowrap style='border: 1px solid black;'>".$equipment[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$equipment[$i][3]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$equipment[$i][4]."</td><td nowrap style='border: 1px solid black;'>".$equipment[$i][5]."</td></tr>";
+            $equipmenttable=$equipmenttable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$equipment[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$equipment[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$equipment[$i][3]."</td><td height=20px nowrap style='text-align:center;'>".$equipment[$i][4]."</td><td height=20px nowrap style='padding-left: 10px;'>".$equipment[$i][5]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('C'.$EUrowNumber.':E'.$EUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$EUrowNumber.':G'.$EUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$EUrowNumber,$equipment[$i][1]);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$EUrowNumber,$equipment[$i][2]);
             $objPHPExcel->getActiveSheet()->setCellValue('C'.$EUrowNumber,$equipment[$i][3]);
@@ -1501,11 +1899,13 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     {
         $FUrowNumber=$maxrowNo;
         $maxrowNo=$maxrowNo+count($fitting)+3;
-        $fittingtable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">FITTING USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>ITEMS</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>SIZE</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>QUANTITY</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>REMARKS</b></td></tr></th>';
+        $fittingtable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">FITTING USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>SIZE</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td><td height=20px align="center" style="color:white;" width="240" nowrap><b>REMARKS</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$FUrowNumber,'FITTINGS USAGE');
         $FUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($FUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber.':G'.$FUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$FUrowNumber,'ITEMS');
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$FUrowNumber,'SIZE');
         $objPHPExcel->getActiveSheet()->setCellValue('C'.$FUrowNumber,'QUANTITY');
@@ -1517,8 +1917,9 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $FUrowNumber++;
         for($i=0;$i<count($fitting);$i++)
         {
-            $fittingtable=$fittingtable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$fitting[$i][1]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$fitting[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$fitting[$i][3]."</td><td nowrap style='border: 1px solid black;'>".$fitting[$i][4]."</td></tr>";
+            $fittingtable=$fittingtable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$fitting[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$fitting[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$fitting[$i][3]."</td><td height=20px nowrap style='padding-left: 10px;'>".$fitting[$i][4]."</td></tr>";
             $objPHPExcel->getActiveSheet()->getStyle('B'.$FUrowNumber.':C'.$FUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$FUrowNumber.':G'.$FUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$FUrowNumber,$fitting[$i][1]);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$FUrowNumber,$fitting[$i][2]);
             $objPHPExcel->getActiveSheet()->setCellValue('C'.$FUrowNumber,$fitting[$i][3]);
@@ -1550,11 +1951,13 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     if($material!='null')
     {
         $MIUrowNumber=$maxrowNo;
-        $materialusagetable='<table width=1000 colspan=3px cellpadding=3px><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><th nowrap><tr style="color:white;" bgcolor="#498af3" align="center" height=25px><td align="center" style="border: 1px solid black;color:white;" nowrap><b>ITEMS</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>RECEIPT NO</b></td><td align="center" style="border: 1px solid black;color:white;" nowrap><b>QUANTITY</b></td></tr></th>';
+        $materialusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>RECEIPT NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MIUrowNumber,'MATERIAL USAGE');
         $MIUrowNumber++;
         $objPHPExcel->getActiveSheet()->getStyle($MIUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber.':G'.$MIUrowNumber)->applyFromArray($styleArray);
         $objPHPExcel->getActiveSheet()->setCellValue('A'.$MIUrowNumber,'ITEMS');
         $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MIUrowNumber.':C'.$MIUrowNumber);
         $objPHPExcel->getActiveSheet()->setCellValue('B'.$MIUrowNumber,'RECEIPT NO');
@@ -1566,8 +1969,9 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $MIUrowNumber++;
         for($i=0;$i<count($material);$i++)
         {
-            $materialusagetable=$materialusagetable."<tr style='border: 1px solid black;' height=20px ><td nowrap style='border: 1px solid black;'>".$material[$i][1]."</td><td nowrap style='border: 1px solid black;'>".$material[$i][2]."</td><td nowrap style='border: 1px solid black;text-align:center;'>".$material[$i][3]."</td></tr>";
-            $objPHPExcel->getActiveSheet()->getStyle('D'.$MIUrowNumber.':G'.$MIUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $materialusagetable=$materialusagetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$material[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$material[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$material[$i][3]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('B'.$MIUrowNumber.':G'.$MIUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber.':G'.$MIUrowNumber)->applyFromArray($styleArray);
             $objPHPExcel->getActiveSheet()->setCellValue('A'.$MIUrowNumber,$material[$i][1]);
             $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$MIUrowNumber.':C'.$MIUrowNumber);
             $objPHPExcel->getActiveSheet()->setCellValue('B'.$MIUrowNumber,$material[$i][2]);
@@ -1594,6 +1998,7 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $materialusagetable=$materialusagetable.'</table>';
         $finaltable=$finaltable.'<br><br><tr><td>'.$materialusagetable.'</td></tr>';
     }
+
     header('Content-Type: application/vnd.ms-excel');
     header('Content-Disposition: attachment;filename="simple.xls"');
     header('Cache-Control: max-age=0');
@@ -1605,20 +2010,32 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
     $update_exldata = ob_get_contents();
     ob_end_clean();
 
-    $finaltable=$finaltable.'<br><br><tr><td>REPORT IMAGE<br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
+    $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
 //final table end
+    $teamremarks=$con->real_escape_string($teamremarks);
+    $SV_remarks=$con->real_escape_string($SV_remarks);
+    $mech_remark=$con->real_escape_string($mech_remark);
+    $mechineryremark=$con->real_escape_string($mechineryremark);
+    $fittingremark=$con->real_escape_string($fittingremark);
+    $materialqty=$con->real_escape_string($materialqty);
+    $rental_remark=$con->real_escape_string($rental_remark);
+    $equipmentremark=$con->real_escape_string($equipmentremark);
+    $MS_remarks=$con->real_escape_string($MS_remarks);
+    $Employeeremark=$con->real_escape_string($EmployeeReport[4]);
     //update part
     if($imgflag==1){
-    $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(2,'$teamname','$EmployeeReport[0]','$reportdate','$teamlocation',$contractno,'$reachsite','$leavesite','$typeofjob','$weather','$weatherfrom','$weatherto','$pipetesting','$pressurestart','$pressureend','$teamremarks','$filename','$imgfilename',
-        '$pipelaid','$size','$length',
-        '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$EmployeeReport[4]',
-        '$SV_ID','$SV_designation','$SV_name','$SV_start','$SV_end','$SV_remarks',
+    $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(2,'$teamname','$EmployeeReport[0]','$reportdate','$teamlocation',
+    $contractno,'$reachsite','$leavesite','$typeofjob','$weather','$weatherfrom','$weatherto','$pipetesting','$pressurestart',
+    '$pressureend','$teamremarks','$imgfilename','$pipelaid','$size','$length',
+        '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$Employeeremark',
+        '$SV_ID','$SV_name','$SV_designation','$SV_start','$SV_end','$SV_remarks',
         '$ME_id','$mech_from','$mech_to','$mech_item','$mech_remark',
         '$mechinery_id','$mechinerytype','$mechinerystart','$mechineryend','$mechineryremark',
         '$fitting_id','$fittingitems','$fittingsize','$fittingqty','$fittingremark',
         '$mat_id','$materialitems','$materialreceipt','$materialqty',
         '$rental_id','$rental_lorryno','$rental_store', '$rental_outside','$rental_start','$rental_end','$rental_remark',
-        '$equip_id','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark','$UserStamp',@SUCCESS_MESSAGE)";
+        '$equip_id','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark',
+        '$MS_id','$MS_topic','$MS_remarks','$UserStamp',@SUCCESS_MESSAGE)";
         $result = $con->query($callquery);
         if(!$result){
             unlink($uploadpath);
@@ -1695,7 +2112,7 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $reportfilename='TIME SHEET UPDATED REPORT FOR '.$empnames.'.pdf';
         $mpdf=new mPDF('utf-8','A4');
         $mpdf->debug=true;
-        $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;">LIH MING CONSTRUCTION PTE LTD</div></h3>', 'O', true);
+//        $mpdf->SetHTMLHeader('<h3><div style="text-align: center; font-weight: bold;margin-bottom: 2cm;">LIH MING CONSTRUCTION PTE LTD</div></h3>', 'O', true);
         $mpdf->SetHTMLFooter('<div style="text-align: center;">{PAGENO}</div>');
         $mpdf->WriteHTML($finaltable);
         $reportpdf=$mpdf->Output('foo.pdf','S');
@@ -1705,66 +2122,8 @@ TIME SHEET UPDATED REPORT FOR '.$empnames;
         $mail->AddStringAttachment($update_exldata,$xlreportfilename);
         $mail->Send();
     }
-    echo $flag;
+    $flagvalues=array($flag,$dirflag);
+    echo JSON_encode($flagvalues);
 }
-elseif($_REQUEST['option']=='tempfilname')
-{
-    $uploadcount=$_REQUEST['ENT_upload_count'];
-    $reportdate=$_POST['tr_txt_date'];
-    $Employeeid=$_REQUEST['Employeeid'];
-    $repdate=str_replace('-','',$reportdate);
-    $upload_file_array=array();
-    $userfolderid=get_emp_folderid($Employeeid);
-    $uploadpath=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
-    for($x=0;$x<$uploadcount;$x++)
-    {
-        if($_FILES['ENT_upload_filename'.$x]['name']!=''){
-            $attach_file_name=$Employeeid.'_'.$repdate.'_'.date('His').'_'.$_FILES['ENT_upload_filename'.$x]['name'];
-            move_uploaded_file($_FILES['ENT_upload_filename'.$x]['tmp_name'],$uploadpath.$attach_file_name);
-            $upload_file_array[]=$attach_file_name;//$_FILES['upload_filename'.$x]['name'];
-        }
-    }
-    $upload_filename='';
-    for($y=0;$y<=count($upload_file_array);$y++){
-        if($upload_file_array[$y]!=''){
-            if($y==0){
-                $upload_filename= $upload_file_array[$y];
-            }
-            else{
-                $upload_filename=$upload_filename.'/'.$upload_file_array[$y];
-            }
-        }
-    }
-    echo $upload_filename;
-}
-elseif($_REQUEST['option']=='updatetempfilname')
-{
-    $uploadcount=$_REQUEST['SRC_upload_count'];
-    $date=$_POST['SRC_tr_txt_date'];
-    $Employeeid=$_REQUEST['Employeeid'];
-    $currentdate=str_replace('-','',$date);
-    $upload_file_array=array();
-    $userfolderid=get_emp_folderid($Employeeid);
-    $uploadpath=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
-    for($x=0;$x<$uploadcount;$x++)
-    {
-        if($_FILES['SRC_upload_filename'.$x]['name']!=''){
-            $attach_file_name=$Employeeid.'_'.$currentdate.'_'.date('His').'_'.$_FILES['SRC_upload_filename'.$x]['name'];
-            move_uploaded_file($_FILES['SRC_upload_filename'.$x]['tmp_name'],$uploadpath.$attach_file_name);
-            $upload_file_array[]=$attach_file_name;//$_FILES['upload_filename'.$x]['name'];
-        }
-    }
-    $upload_filename='';
-    for($y=0;$y<=count($upload_file_array);$y++){
-        if($upload_file_array[$y]!=''){
-            if($y==0){
-                $upload_filename= $upload_file_array[$y];
-            }
-            else{
-                $upload_filename=$upload_filename.'/'.$upload_file_array[$y];
-            }
-        }
-    }
-    echo $upload_filename;
-}
+
 ?>

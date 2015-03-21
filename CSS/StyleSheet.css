@@ -1,6 +1,13 @@
 /******************** MENU START ******************************/
 
-
+.nav li.dropdown:hover> ul.dropdown-menu{
+    display: block;
+    margin: 0;
+}
+.dropdown-menu li.dropdown-submenu:hover>ul{
+    display: block;
+    margin: 0;
+}
 .navbar-collapse.collapse{
 
     background:#498af3!important;
@@ -21,14 +28,27 @@
     background:#498af3!important;
 
 }
+
+.navbar-nav>li>.dropdown-submenu{
+
+    background:#498af3!important;
+
+
+}
 .navbar-header{
 
     background:#498af3!important;
 }
-/*.dropdown-menu > li{*/
-/*background:#498af3!important;*/
+.dropdown-menu > li{
+background:#498af3!important;
 
-/*}*/
+}
+
+.dropdown-submenu > li{
+
+    background:#498af3!important;
+
+}
 .dropdown-menu > li > a{
 
     color: #ffffff!important;
@@ -36,6 +56,23 @@
     font-size: 12px !important;
 
 }
+
+.dropdown-submenu .dropdown-menu {
+    background:#498af3!important;
+
+}
+
+
+
+
+.dropdown-submenu > li > a{
+
+    color: #ffffff!important;
+    background:#498af3!important;
+    font-size: 12px !important;
+
+}
+
 a {
     text-decoration: none !important;
 
@@ -521,14 +558,7 @@ table.srcresult td {
     background-color: white;
 }
 
-.nav li.dropdown:hover> ul.dropdown-menu{
-    display: block;
-    margin: 0;
-}
-.dropdown-menu li.dropdown-submenu:hover>ul{
-    display: block;
-    margin: 0;
-}
+
 
 
 .lg-container{

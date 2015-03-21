@@ -10,7 +10,7 @@ include "NEW_MENU.php";
 <script>
     //READY FUNCTION START
     $(document).ready(function(){
-        $('.preloader').show();
+//        $('.preloader').show();
         var ET_ENTRY_chknull_input="";
         var ET_ENTRY_errormsg=[];
         //START FUNCTION FOR EMAIL TEMPLATE ERROR MESSAGE
@@ -206,37 +206,37 @@ include "NEW_MENU.php";
 <div class="container">
     <div class="panel panel-info">
         <div class="panel-heading">
-           <h2 class="panel-title">EMAIL ENTRY</h2>
+            <h2 class="panel-title">EMAIL ENTRY</h2>
         </div>
         <div class="panel-body">
             <form id="ET_ENTRY_form_template" name="ET_ENTRY_form_template" class="form-horizontal" role="form">
-            <div class="form-group">
-                <label name="ET_ENTRY_lbl_scriptname" id="ET_ENTRY_lbl_scriptname" class="control-label col-sm-2">SCRIPT NAME<em>*</em></label>
-                <div class="col-sm-3">
-                    <input  type="text" name="ET_ENTRY_tb_scriptname" id="ET_ENTRY_tb_scriptname" placeholder="Script Name" class="autosize form-control" >
-                    <label id="ET_ENTRY_lbl_validid" name="ET_ENTRY_lbl_validid" class="errormsg" disabled=""></label>
+                <div class="form-group">
+                    <label name="ET_ENTRY_lbl_scriptname" id="ET_ENTRY_lbl_scriptname" class="control-label col-sm-2">SCRIPT NAME<em>*</em></label>
+                    <div class="col-sm-3">
+                        <input  type="text" name="ET_ENTRY_tb_scriptname" id="ET_ENTRY_tb_scriptname" placeholder="Script Name" class="autosize form-control" >
+                        <label id="ET_ENTRY_lbl_validid" name="ET_ENTRY_lbl_validid" class="errormsg" disabled=""></label>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label name="ET_ENTRY_lbl_subject" id="ET_ENTRY_lbl_subject" class="control-label col-sm-2">SUBJECT<em>*</em></label>
-                <div class="col-sm-10">
-                    <textarea class="form-control tarea maxlength"   rows="8" cols="10"  name="ET_ENTRY_ta_subject" id="ET_ENTRY_ta_subject" placeholder="Subject" >
-                    </textarea>
+                <div class="form-group">
+                    <label name="ET_ENTRY_lbl_subject" id="ET_ENTRY_lbl_subject" class="control-label col-sm-2">SUBJECT<em>*</em></label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control tarea maxlength"   rows="8" cols="10"  name="ET_ENTRY_ta_subject" id="ET_ENTRY_ta_subject" placeholder="Subject" >
+                        </textarea>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label name="ET_ENTRY_lbl_body" id="ET_ENTRY_lbl_body" class="control-label col-sm-2">BODY<em>*</em></label>
-                <div class="col-sm-10">
-                    <textarea class="form-control tarea maxlength" rows="8"  name="ET_ENTRY_ta_body" id="ET_ENTRY_ta_body" placeholder="Body" >
-                    </textarea>
+                <div class="form-group">
+                    <label name="ET_ENTRY_lbl_body" id="ET_ENTRY_lbl_body" class="control-label col-sm-2">BODY<em>*</em></label>
+                    <div class="col-sm-10">
+                        <textarea class="form-control tarea maxlength" rows="8"  name="ET_ENTRY_ta_body" id="ET_ENTRY_ta_body" placeholder="Body" >
+                        </textarea>
+                    </div>
                 </div>
-            </div>
-            <input type="button" class="btn  btn-info " name="ET_ENTRY_btn_save" id="ET_ENTRY_btn_save"    value="SAVE" disabled="">
-            <input type="button" class="btn  btn-info" name="ET_ENTRY_btn_reset" id="ET_ENTRY_btn_reset"  value="RESET">
-            <input type=hidden id="ET_ENTRY_hidden_chkvalid">
-        </form>
+                <input type="button" class="btn  btn-info " name="ET_ENTRY_btn_save" id="ET_ENTRY_btn_save"    value="SAVE" disabled="">
+                <input type="button" class="btn  btn-info" name="ET_ENTRY_btn_reset" id="ET_ENTRY_btn_reset"  value="RESET">
+                <input type=hidden id="ET_ENTRY_hidden_chkvalid">
+            </form>
+        </div>
     </div>
-</div>
 </div>
 </body>
 <!--BODY TAG END-->

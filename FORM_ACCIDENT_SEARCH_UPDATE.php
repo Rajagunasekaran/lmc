@@ -6,11 +6,12 @@ var stime='';
 var etime='';
 var upload_count=0;
 $(document).ready(function(){
+    $(".titlecase").Setcase({caseValue : 'title'});
     $('#SRC_radiosearchbtn').hide();
     $('#SRC_Final_Update').hide();
     $('#SRC_entryform').hide();
     $('#REV_nodata_startenddate').hide();
-    $('.preloader').show();
+//    $('.preloader').show();
     var teamname=[];
     var empname=[];
     var machinerytype=[];
@@ -46,7 +47,6 @@ $(document).ready(function(){
     var option="COMMON_DATA";
     xmlhttp.open("GET","DB_ACCIDENT_SEARCH_UPDATE.php?option="+option);
     xmlhttp.send();
-
     // time and date picker
     $('.time-picker').datetimepicker({
         format:'H:mm'
@@ -106,7 +106,6 @@ $(document).ready(function(){
     var report_maxdate=new Date(Date.parse(maxdate));
     $('#acc_tb_dateofaccident').datepicker("option","maxDate",report_maxdate);
 //DAPT PICKER
-
     $(".date-picker").datepicker({
         dateFormat:"dd-mm-yy",
         changeYear: true,
@@ -190,11 +189,12 @@ $(document).ready(function(){
     var empdi;
     var sex;
     var option;
-
+    //CLICK FUNCTION FOR SEARCH BTN IN TOP
     var values_array=[];
     $(document).on("click",'#SRC_searchbtn', function (){
         datatable()
     });
+    //FUNCTION FOR DATA TABLE
     function datatable(){
         $('.preloader').show();
         var selectedemp=$('#SRC_team_lb_empname').val();
@@ -210,7 +210,7 @@ $(document).ready(function(){
                 $('.preloader').hide();
                 if(values_array!=null){
                     $('#REV_nodata_startenddate').hide();
-                    var SRC_UPD_table_header='<table id="SRC_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead  bgcolor="#6495ed" style="color:white"><tr><th></th><th>DATE</th><th>NAME</th><th>PLACE</th><th>TYPE OF INJURY</th><th>NATURE OF INJURY</th><th>LOCATION</th><th>REMARKS</th><th>USERSTAMP</th><th>TIMESTAMP</th></tr></thead><tbody>'
+                    var SRC_UPD_table_header='<table id="SRC_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead  bgcolor="#6495ed" style="color:white"><tr><th></th><th>DATE</th><th>NAME</th><th>PLACE</th><th>TYPE OF INJURY</th><th>NATURE OF INJURY</th><th>LOCATION</th><th>USERSTAMP</th><th>TIMESTAMP</th><th align="center">VIEW</th></tr></thead><tbody>'
                     for(var j=0;j<values_array.length;j++){
                         empdi=values_array[j][0];
                         reportdate=values_array[j][1];
@@ -241,7 +241,7 @@ $(document).ready(function(){
                         designation=values_array[j][26];
                         service=values_array[j][27];
                         comment=values_array[j][28];
-                        SRC_UPD_table_header+='<tr ><td><input type="radio" name="SRC_UPD_rd_flxtbl" class="USRC_UPD_class_radio" id='+ardid+'  value='+ardid+'></td><td>'+reportdate+'</td><td>'+empdi+'</td><td> '+place+'</td><td> '+typeofinj+'</td><td> '+natofinj+'</td><td >'+location+'</td><td >'+remarks+'</td><td >'+userstamp+'</td><td >'+timestamp+'</td></tr>';
+                        SRC_UPD_table_header+='<tr id='+ardid+'><td><input type="radio" name="SRC_UPD_rd_flxtbl" class="USRC_UPD_class_radio" id='+ardid+'  value='+ardid+'></td><td nowrap>'+reportdate+'</td><td>'+empdi+'</td><td> '+place+'</td><td> '+typeofinj+'</td><td> '+natofinj+'</td><td >'+location+'</td><td >'+userstamp+'</td><td nowrap>'+timestamp+'</td><td><input type="button" class="ajaxview btn btn-info btn-sm"   value="VIEW PDF" id="ACD_pdfbtn"/> </td></tr>';
                     }
 
                     SRC_UPD_table_header+='</tbody></table>';
@@ -259,11 +259,12 @@ $(document).ready(function(){
                     var todate=$('#SRC_to_date').val();
                     var sd=errormessage[2].toString().replace("[SDATE]",fromdate);
                     var msg=sd.toString().replace("[EDATE]",todate);
-                    $('#REV_nodata_startenddate').text(msg).show();
+//                    $('#REV_nodata_startenddate').text(msg).show();
                     $('#SRC_searchbtn').attr('disabled','disabled');
-//                    show_msgbox("ACCIDENT SEARCH UPDATE",errormessage[2],"error",false)
+                    show_msgbox("ACCIDENT SEARCH UPDATE",msg,"error",false)
+                    $('#SRC_from_date').val('');
+                    $('#SRC_to_date').val('');
                     $('#SRC_UPD_div_tablecontainer').hide();
-
                 }
             }
         }
@@ -278,7 +279,27 @@ $(document).ready(function(){
         $('#SRC_entryform').hide();
         $('#SRC_Final_Update').hide();
     });
-
+// CLICK EVENT FR PDFBTN BUTTON
+    $(document).on('click','#ACD_pdfbtn',function(){
+        $('#pdf_show').empty();
+        var pdfid= $(this).parent().parent().attr('id');
+        var selectedemp=$('#SRC_team_lb_empname').val();
+        var fromdate=$('#SRC_from_date').val();
+        var todate=$('#SRC_to_date').val();
+        var xmlhttp=new XMLHttpRequest();
+        xmlhttp.onreadystatechange=function(){
+            if (xmlhttp.readyState==4 && xmlhttp.status==200)
+            {
+                var viewfilename=xmlhttp.responseText;
+                $('#pdfModal').modal({backdrop: 'static', keyboard: false});
+                $('#pdf_show').append('<object data="'+viewfilename+'" type="application/pdf" width="100%" height="100%" ></object>');
+            }
+        }
+        var option="VIEW_PDF_FETCH";
+        xmlhttp.open("GET","DB_ACCIDENT_SEARCH_UPDATE.php?option="+option+"&pdfid="+pdfid+"&fromdate="+fromdate+"&todate="+todate);
+        xmlhttp.send();
+    });
+    // CLICK EVENT FR RADIO SEARCH BTN BUTTON
     $(document).on('click','#SRC_radiosearchbtn',function(){
         $("html, body").animate({ scrollTop: $(document).height() }, "fast");
         $("#USRC_UPD_btn_submit").attr("disabled", "disabled");
@@ -338,11 +359,11 @@ $(document).ready(function(){
                 $('#acc_tb_workpermit').val(acc_permit).show();
                 $('#acc_tb_passportno').val(acc_passport).show();
                 $('#acc_tb_nationality').val(acc_nationality).show();
-                if(sex=='Male')
+                if(acc_sex=='Male')
                 {
                     $('#male').attr('checked',true);
                 }
-                if(sex=='Female')
+                if(acc_sex=='Female')
                 {
                     $('#female').attr('checked',true);
                 }
@@ -389,7 +410,6 @@ $(document).ready(function(){
         var description=$('#acc_ta_description').val();
         var genderm=$("input[name=sex]:checked").val()=="male";
         var genderf=$("input[name=sex]:checked").val()=="female";
-
         if((dateofaccident!='')&&(timeofaccident!='') && (placeofaccident!='') && (locationofaccident!='')  && (typeofinjury!='') && (natureofinjury!='') && (partsofinjured!='')
             && (name!='') && (age!='') && (addrssofinjured!='') && (nricno!='') && (finno!='') && (workspermit!='') && (passportno!='')
             && (nationality!='') && (dob!='') && (maritalstatus!='') && (designation!='') && (lengthofservice!='') && (description!=''))
@@ -407,7 +427,6 @@ $(document).ready(function(){
     //  CLICK EVENT FOR BUTTON SAVE
     $('#SRC_Final_Update').click(function(){
         $('.preloader').show();
-//        var ardid=$('.USRC_UPD_class_radio').val();
         var radioid=$("input[name='SRC_UPD_rd_flxtbl']:checked").val();
         var formelement =$('#SRC_entryform').serialize();
         var option="SAVE";
@@ -426,17 +445,17 @@ $(document).ready(function(){
                     $('#SRC_radiosearchbtn').hide();
                     $('#SRC_Final_Update').hide();
                     $("input[name=SRC_UPD_rd_flxtbl]:checked").attr('checked',false);
+                    $('#acc_ta_adrs').height('22');
+                    $('#acc_ta_description').height('214');
                     datatable();
                 }
                 else if(msg_alert==0)
                 {
                     show_msgbox("ACCIDENT SEARCH UPDATE",errormessage[3],"error",false)
-//                    form_clear();
                 }
                 else
                 {
                     show_msgbox("ACCIDENT SEARCH UPDAT",msg_alert,"error",false)
-//                    form_clear();
                 }
             }
         });
@@ -455,7 +474,7 @@ $(document).ready(function(){
 <div class="row form-group">
     <div class="col-md-1">
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
         <label>FROM DATE</label>
         <div class="input-group">
             <input id="SRC_from_date" name="SRC_from_date" type="text" class="date-picker datemandtry dterange form-control" placeholder="From Date"/>
@@ -463,7 +482,7 @@ $(document).ready(function(){
         </div>
         <br><label id="REV_nodata_startenddate" name="REV_nodata_startenddate" class="errormsg col-sm-10" style="white-space: nowrap!important;" hidden  ></label>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-3">
         <label>TO DATE</label>
         <div class="input-group">
             <input id="SRC_to_date" name="SRC_to_date" type="text" class="date-picker datemandtry dterange form-control" placeholder="To Date"/>
@@ -477,6 +496,23 @@ $(document).ready(function(){
             <label style="color: white">*</label>
             <div class="input-group">
                 <button type="button" id="SRC_searchbtn" class="btn btn-info" disabled>SEARCH</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="pdfModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">INCIDENT INVESTIGATION REPORT
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div id="pdf_show"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" id="closepdf" data-dismiss="modal">CLOSE</button>
             </div>
         </div>
     </div>
@@ -511,26 +547,26 @@ $(document).ready(function(){
 
                     <div class="col-md-4">
                         <label>PLACE OF ACCIDENT<em>*</em></label>
-                        <input type="text" class="form-control txtlen" id="acc_tb_placeofacc"  name="acc_tb_placeofacc" placeholder="Place of Accident">
+                        <input type="text" class="form-control txtlen titlecase" id="acc_tb_placeofacc"  name="acc_tb_placeofacc" placeholder="Place of Accident">
                     </div>
                     <div class="col-md-4">
                         <label>LOCATION OF ACCIDENT<em>*</em></label>
-                        <input type="text" class="form-control txtlen" id="acc_tb_locofacc"  name="acc_tb_locofacc" placeholder="Location of Accident">
+                        <input type="text" class="form-control txtlen titlecase" id="acc_tb_locofacc"  name="acc_tb_locofacc" placeholder="Location of Accident">
                     </div>
                 </div>
                 <div class="row form-group">
                     <div class="col-md-4">
                         <label>TYPE OF INJURY<em>*</em></label>
-                        <input type="text" class="form-control txtlen" id="acc_tb_typeofinju" name="acc_tb_typeofinju" placeholder="Type of Injury">
+                        <input type="text" class="form-control txtlen titlecase" id="acc_tb_typeofinju" name="acc_tb_typeofinju" placeholder="Type of Injury">
                     </div>
                     <div class="col-md-4">
                         <label>NATURE OF INJURY<em>*</em></label>
-                        <input type="text" class="form-control txtlen" id="acc_tb_natureofinju" name="acc_tb_natureofinju" placeholder="Nature of Injury">
+                        <input type="text" class="form-control txtlen titlecase" id="acc_tb_natureofinju" name="acc_tb_natureofinju" placeholder="Nature of Injury">
                     </div>
 
                     <div class="col-md-4">
                         <label>PARTS OF BODY INJURED<em>*</em></label>
-                        <input type="text" class="form-control txtlen" id="acc_tb_partsofbody"  name="acc_tb_partsofbody" placeholder="Parts of Body Injured">
+                        <input type="text" class="form-control txtlen titlecase" id="acc_tb_partsofbody"  name="acc_tb_partsofbody" placeholder="Parts of Body Injured">
                     </div>
                 </div>
             </fieldset>
@@ -545,7 +581,7 @@ $(document).ready(function(){
                 <div class="row form-group">
                     <div class="col-md-4">
                         <label>TYPE OF MACHINERY</label>
-                        <input type="text" class="form-control txtlen" id="acc_tb_typeofmachinery" name="acc_tb_typeofmachinery" placeholder="Type of Machinery">
+                        <input type="text" class="form-control txtlen titlecase" id="acc_tb_typeofmachinery" name="acc_tb_typeofmachinery" placeholder="Type of Machinery">
                     </div>
                     <div class="col-md-4">
                         <label>LM NO</label>
@@ -578,7 +614,7 @@ $(document).ready(function(){
                     </div>
                     <div class="col-md-4">
                         <label>ADDRESS OF INJURED<em>*</em></label>
-                        <textarea class="form-control textareaaccinjured" id="acc_ta_adrs" rows="1" name="acc_ta_adrs" placeholder="Address"></textarea>
+                        <textarea class="form-control textareaaccinjured titlecase" id="acc_ta_adrs" maxlength="200" rows="1"  name="acc_ta_adrs" placeholder="Address"></textarea>
                     </div>
                     <div class="col-md-3">
                         <label>NRIC NO<em>*</em></label>
@@ -601,7 +637,7 @@ $(document).ready(function(){
 
                     <div class="col-md-3">
                         <label>NATIONALITY<em>*</em></label>
-                        <input type="text" class="form-control charlen autosizealph" id="acc_tb_nationality" name="acc_tb_nationality" placeholder="Nationality">
+                        <input type="text" class="form-control charlen autosizealph titlecase" id="acc_tb_nationality" name="acc_tb_nationality" placeholder="Nationality">
                     </div>
                 </div>
                 <div class="row form-group">
@@ -621,11 +657,11 @@ $(document).ready(function(){
                     </div>
                     <div class="col-md-3">
                         <label>MARITAL STATUS<em>*</em></label>
-                        <input type="text" class="form-control charlen" id="acc_tb_maritalstatus" name="acc_tb_maritalstatus" placeholder="Marital Status">
+                        <input type="text" class="form-control charlen titlecase" id="acc_tb_maritalstatus" name="acc_tb_maritalstatus" placeholder="Marital Status">
                     </div>
                     <div class="col-md-3">
                         <label>DESIGNATION<em>*</em></label>
-                        <input type="text" class="form-control txtlen" id="acc_tb_des" name="acc_tb_des" placeholder="Designation">
+                        <input type="text" class="form-control txtlen titlecase" id="acc_tb_des" name="acc_tb_des" placeholder="Designation">
                     </div>
                 </div>
                 <div class="row form-group">
@@ -654,7 +690,7 @@ $(document).ready(function(){
                 <div class="row form-group">
                     <div class="col-md-10">
                         <label>DESCRIPTION OF ACCIDENT<em>*</em></label>
-                        <textarea class="form-control textareaupdacc" id="acc_ta_description" rows="10" name="acc_ta_description" placeholder="Description"></textarea>
+                        <textarea class="form-control textareaupdacc" id="acc_ta_description" maxlength="3000" rows="10" name="acc_ta_description"  placeholder="Description"></textarea>
                     </div>
                 </div>
             </fieldset>

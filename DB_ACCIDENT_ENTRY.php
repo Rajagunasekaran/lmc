@@ -22,7 +22,7 @@ elseif($_REQUEST['option']=='SAVE'){
     $nameofoperator=$_POST['acc_tb_nameofoperator'];
     $name=$_POST['acc_tb_name'];
     $age=$_POST['acc_tb_age'];
-    $addrssofinjured=$_POST['acc_ta_adrs'];
+    $addrssofinjured=$con->real_escape_string($_POST['acc_ta_adrs']);
     $nricno=$_POST['acc_tb_nric'];
     $finno=$_POST['acc_tb_fin'];
     $workspermit=$_POST['acc_tb_workpermit'];
@@ -34,8 +34,9 @@ elseif($_REQUEST['option']=='SAVE'){
     $designation=$_POST['acc_tb_des'];
     $lengthofservice=$_POST['acc_tb_length'];
     $commens=$_POST['work'];
-    $description=$_POST['acc_ta_description'];
+    $description=$con->real_escape_string($_POST['acc_ta_description']);
     $dateofaccident = date('Y-m-d',strtotime($dateofaccident));
+    $dateofbirth = date('Y-m-d',strtotime($dob));
     if($gender=='male')
     {
         $gender='Male';
@@ -54,7 +55,7 @@ elseif($_REQUEST['option']=='SAVE'){
     }
     $sqlquery="CALL SP_INSERT_UPDATE_ACCIDENT_DETAILS(1,'','$dateofaccident','$placeofaccident','$typeofinjury','$natureofinjury','$timeofaccident','$locationofaccident',
     '$partsofinjured','$typeofmachinery','$lmno','$nameofoperator','$name',$age,'$addrssofinjured','$nricno','$finno',$workspermit,'$passportno',
-    '$nationality','$gender','$dob','$maritalstatus','$designation','$lengthofservice','$commens','$description','$UserStamp',@SUCCESS_FLAG)";
+    '$nationality','$gender','$dateofbirth','$maritalstatus','$designation','$lengthofservice','$commens','$description','$UserStamp',@SUCCESS_FLAG)";
     $result = $con->query($sqlquery);
     if(!$result){
         die("CALL failed: (" . $con->errno . ") " . $con->error);

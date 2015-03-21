@@ -11,7 +11,7 @@ include "NEW_MENU.php";
     $(document).ready(function(){
         var pdferrmsg;
         $('#TH_btn_pdf').hide();
-        $('.preloader').show();
+
         var TH_err_msg=[];
         var xmlhttp=new XMLHttpRequest();
         xmlhttp.onreadystatechange=function() {

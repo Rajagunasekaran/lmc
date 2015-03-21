@@ -7,6 +7,8 @@ ini_set('max_execution_time', 300); //300 seconds = 5 minutes
  * and open the template in the editor.
  */
 include 'CONNECTION.php';
+include 'COMMON.php';
+
 //if ($_POST['choice'] == "password") {
 //    $username = $_POST['username'];
 //    $username = stripslashes($username);
@@ -46,4 +48,25 @@ if ($_POST['choice'] == "resetPassword") {
         $flag=1;
     }
     echo $flag;
+}
+if($_REQUEST['option']=='checkusername'){
+
+
+    $username = $_REQUEST['username'];
+    $sql="select * from LMC_USER_LOGIN_DETAILS where ULD_USERNAME='$username'";
+    $sql_result= mysqli_query($con,$sql);
+    $row=mysqli_num_rows($sql_result);
+    $x=$row;
+    if($x > 0)
+    {
+        $flag=1;
+    }
+    else{
+        $flag=0;
+    }
+    $errormsg=get_error_msg('12');
+$value_array=array($flag,$errormsg);
+echo json_encode($value_array);
+
+
 }

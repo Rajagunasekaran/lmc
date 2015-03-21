@@ -54,6 +54,14 @@ function get_parentfolder_id(){
     }
     return  $parentfolder_id;
 }
+function get_reportdocfolder_id(){
+    global $con;
+    $docparentid=mysqli_query($con,"SELECT URC_DATA FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=19 AND CGN_ID=17");
+    while($row=mysqli_fetch_array($docparentid)){
+        $reportdocfolder=$row["URC_DATA"];
+    }
+    return  $reportdocfolder;
+}
 function get_emp_folderid($ULD_ID){
     global $con;
     $select_folderid=mysqli_query($con,"SELECT EMP_IMAGE_FOLDER_ID FROM LMC_EMPLOYEE_DETAILS WHERE ULD_ID='$ULD_ID'");
@@ -128,7 +136,7 @@ function get_error_msg($str){
 
 
 if($_REQUEST["option"]=="USER_RIGHTS_TERMINATE"){
-    $str='9,10,11,12,13,14,56,70,113,114,116,132,133,138,139';
+    $str='9,10,11,12,13,14,56,70,113,114,116,132,133,138,139,40';
     $errormsg_array= get_error_msg($str);
     $role_result=mysqli_query($con,"SELECT  RC_NAME,RC_ID FROM LMC_ROLE_CREATION;");
     $get_role_array=array();

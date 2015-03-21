@@ -32,11 +32,13 @@
     <script type="text/javascript" src="bootstrap/js/bootstrap-datetimepicker.js"></script>
     <script type="text/javascript" src="bootstrap/js/bootstrap-datetimepicker.min.js"></script>
     <script type='text/javascript' src='jquery/fabric.min.js'></script>
+    <script type="text/javascript" src="bootstrap/js/jquery.bootstrap.wizard.js"></script>
+    <script type="text/javascript" src="bootstrap/js/jquery.bootstrap.wizard.min.js"></script>
     <!--Message box-->
     <link rel="stylesheet" type="text/css" href="msgbox/jquery-confirm.css">
     <script type="text/javascript" src="msgbox/jquery-confirm.js"></script>
-    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
+<!--    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.css">-->
+<!--    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">-->
 <!--    <script type="text/javascript" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>-->
 <!--    <!--DATA TABLE -->
     <link rel="stylesheet" href="DATA_TABLE_10.5/dataTables.tableTools.css">
@@ -45,6 +47,12 @@
     <script type="text/javascript" src="DATA_TABLE_10.5/DataTable1.10.5.js"></script>
     <script type="text/javascript" src="DATA_TABLE_10.5/jquery.dataTables.min.js"></script>
     <!--DATA TABLE -->
+
+    <link rel="stylesheet" href="menu/bootstrap-submenu.min.css">
+    <link rel="stylesheet" href="menu/docs.min.css">
+    <script src="menu/bootstrap-submenu.min.js" defer></script>
+    <script src="jquery/SetCase%20.js"></script>
+    <script src="menu/docs.js" defer></script>
     <style>
         <?php include 'CSS/StyleSheet.css'; ?>
     </style>
@@ -76,3 +84,5 @@
     </style>
 </head>
 
+<html>
+<!--HEAD TAG START-->

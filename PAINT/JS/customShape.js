@@ -25,18 +25,16 @@ $('#drawing-line-width').change(function () {
     fontwidth = strokeWidth;
     if (mode != 'line')
         pencil();
-});
+}); 
+
 function onObjectSelected(e)
 {
     if (fillColor == true) {
         e.target.setFill(color);
         fillColor = false;
     }
-}
-;
-canvas.on({
-    'object:selected': onObjectSelected,
-});
+};
+
 function handleRemove() {
     canvas.clear().renderAll();
 }
@@ -47,40 +45,16 @@ function updateImage(c) {
             });
 }
 var line, isDown;
+function drawLine() {
+//     canvas.selectable = false;
+     canvas.forEachObject(function(o){ o.hasBorders = o.hasControls = false;o.selectable=false; });
+//    canvas.deactivateAllWithDispatch().renderAll();
+        mode = 'line';
+    fillColor = false;
+    canvas.isDrawingMode = false;  
 
-canvas.on('mouse:down', function (o) {
-    if (mode == 'line') {
-        isDown = true;
-        var pointer = canvas.getPointer(o.e);
-        var points = [pointer.x, pointer.y, pointer.x, pointer.y];
-        line = new fabric.Line(points, {
-            strokeWidth: strokeWidth,
-            stroke: color,
-            originX: 'center',
-            originY: 'center',
-            hasControls: false,
-            selectable: false,
-        });
-        canvas.add(line);
-    }
-});
-
-canvas.on('mouse:move', function (o) {
-    if (mode == 'line') {
-        if (!isDown)
-            return;
-        var pointer = canvas.getPointer(o.e);
-        line.set({x2: pointer.x, y2: pointer.y});
-        canvas.renderAll();
-    }
-});
-canvas.on('mouse:up', function (o) {
-    if (mode == 'line') {
-        isDown = false;
-    }
-});
-function circle() {
-    
+}
+function circle() {    
     fillColor = false;
     canvas.isDrawingMode = false;
     mode = 'circle';
@@ -108,7 +82,7 @@ function textEditor1() {
         fill: color,
         fontWeight: fontbold,
         fontStyle: fontitalic,
-        backgroundColor: bgcolor,
+        backgroundColor: 'transparent',
         textDecoration: fontunderline,
     }));
 }
@@ -201,6 +175,7 @@ drawingColorEl.onchange = function () {
     canvas.freeDrawingBrush.color = this.value;
 };
 function save() {
+    canvas.deactivateAll().renderAll();
     var dataURL = canvas.toDataURL();
     $.ajax({
         type: 'POST',
@@ -232,19 +207,24 @@ function rectangle() {
         height: 100,
         stroke: color,
         fill: 'transparent',
-        strokeWidth: strokeWidth
+        strokeWidth: strokeWidth,
+        selectable:true,
+        hasControls: true,
     });
     canvas.add(rect);
 }
 function setColor() {
     canvas.isDrawingMode = false;
     fillColor = true;
+    canvas.deactivateAllWithDispatch().renderAll()
 }
 function clearCanvas() {
     canvas.clear();
 }
 function selector() {
+    mode='selector';
     canvas.isDrawingMode = false;
+     canvas.forEachObject(function(o){ o.hasBorders = o.hasControls = true;o.selectable=true; });
 }
 function tappingTee1() {
     canvas.isDrawingMode = false;
@@ -427,6 +407,7 @@ function diGatevalue1() {
             });
 }
 function diFlanging1() {
+    canvas.isDrawingMode = false;
     mode = 'image';
     var svg = '<?xml version="1.0" standalone="no"?><svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"      width="250px" height="312px"  viewBox="0 0 250 312" preserveAspectRatio="none"><g transform="translate(0.000000,300.000000) scale(0.050000,-0.050000)" fill="' + color + '" stroke="none"><path \n\
         d="M2704 4537 c-2 -7 -6 -522 -7 -1145 -2 -912 -5 -1134 -15 -1144 -10 -10 -78 -13 -289 -15 -218 -1 -277 -4 -284 -15 -12 -19 -11 -255 1 -263 5 -3 328 -6 717 -6 531 0 708 3 714 12 12 21 10 257 -3 266 -7 3 -129 7 -271 7 -240 1 -260 2 -272 20 -11 15 -14 213 -15 1148 0 622 -3 1134 -6 1139 -3 5 -64 9 -135 9 -98 0 -131 -3 -135 -13z"/></g></svg>';
@@ -443,6 +424,7 @@ function diFlanging1() {
             });
 }
 function diFlangesotcket1() {
+    canvas.isDrawingMode = false;
     mode = 'image';
     var svg = '<?xml version="1.0" standalone="no"?><svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"      width="250px" height="312px"  viewBox="0 0 250 312" preserveAspectRatio="none"><g transform="translate(0.000000,300.000000) scale(0.050000,-0.050000)" fill="' + color + '" stroke="none"><path \n\
         d="M2102 4398 l3 -143 271 -1 c150 -1 277 -4 283 -8 8 -5 11 -202 11 -709 l0 -701 -360 -361 c-198 -198 -360 -365 -360 -370 0 -12 182 -195 194 -195 4 0 151 144 326 319 175 175 327 322 338 326 17 5 73 -46 316 -287 162 -161 310 -308 329 -327 l35 -33 96 93 c53 51 96 97 96 103 0 6 -162 173 -360 371 l-360 361 0 701 c0 511 3 704 11 709 7 4 129 7 273 6 167 0 265 3 273 10 14 11 19 231 7 262 -6 14 -78 16 -715 16 l-710 0 3 -142z"/></g></svg>';
@@ -460,6 +442,7 @@ function diFlangesotcket1() {
 
 }
 function diColor1() {
+    canvas.isDrawingMode = false;
     mode = 'image';
     var svg = '<?xml version="1.0" standalone="no"?><svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"      width="250px" height="312px"  viewBox="0 0 250 312" preserveAspectRatio="none"><g transform="translate(0.000000,300.000000) scale(0.050000,-0.050000)" fill="' + color + '" stroke="none"><path \n\
         d="M2343 3583 c-11 -22 -9 -1255 1 -1271 5 -9 155 -12 624 -12 339 0 627 3 640 6 l22 6 0 632 c0 478 -3 635 -12 644 -9 9 -165 12 -640 12 -588 0 -628 -1 -635 -17z m1005 -255 c9 -9 12 -107 12 -380 0 -357 -1 -368 -20 -378 -13 -7 -136 -10 -375 -8 -303 3 -357 5 -365 18 -6 9 -10 165 -10 372 0 311 2 359 16 372 13 14 61 16 373 16 264 0 360 -3 369 -12z"/></g></svg>';
@@ -476,6 +459,7 @@ function diColor1() {
             });
 }
 function diCap1() {
+    canvas.isDrawingMode = false;
     mode = 'image';
     var svg = '<?xml version="1.0" standalone="no"?><svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"      width="250px" height="312px"  viewBox="0 0 250 312" preserveAspectRatio="none"><g transform="translate(0.000000,300.000000) scale(0.050000,-0.050000)" fill="' + color + '" stroke="none"><path \n\
         d="M2216 3344 c-8 -20 -8 -747 0 -768 5 -14 29 -16 159 -16 138 0 154 2 159 18 3 9 5 113 5 230 -1 149 2 217 10 225 19 19 882 21 907 2 18 -12 19 -32 22 -244 l3 -232 157 3 157 3 0 395 0 395 -786 3 c-711 2 -787 1 -793 -14z"/></g></svg>';
@@ -493,6 +477,7 @@ function diCap1() {
 
 }
 function coupler1() {
+    canvas.isDrawingMode = false;
     mode = 'image';
     var svg = '<?xml version="1.0" standalone="no"?><svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"      width="250px" height="312px"  viewBox="0 0 250 312" preserveAspectRatio="none"><g transform="translate(0.000000,300.000000) scale(0.050000,-0.050000)" fill="' + color + '" stroke="none"><path \n\
         d="M2067 4466 c-7 -18 -9 -238 -8 -1138 l1 -748 944 0 c713 0 947 3 952 12 8 13 12 108 11 293 0 72 -1 460 -1 863 l0 732 -947 0 c-800 0 -948 -2 -952 -14z m1483 -396 c13 -8 15 -78 14 -534 0 -419 -3 -527 -13 -540 -12 -14 -71 -16 -545 -16 -400 0 -535 3 -544 12 -17 17 -17 1059 0 1076 15 15 1064 17 1088 2z"/></g></svg>';
@@ -521,9 +506,61 @@ function coupler1() {
 //                        });  
 }
 function beEndCateValue1() {
+    canvas.isDrawingMode = false;
     mode = 'image';
     var svg = '<?xml version="1.0" standalone="no"?><svg version="1.1"  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"      width="250px" height="312px"  viewBox="0 0 250 312" preserveAspectRatio="none"><g transform="translate(0.000000,300.000000) scale(0.050000,-0.050000)" fill="' + color + '" stroke="none"><path \n\
         d="M3078 5504 l-3 -336 -23 -19 c-22 -17 -45 -19 -388 -18 -200 0 -368 -2 -374 -6 -6 -4 -10 -82 -10 -207 l0 -201 55 -68 c30 -37 55 -73 55 -78 0 -6 14 -26 30 -44 27 -31 133 -173 347 -465 134 -183 167 -228 200 -271 58 -77 73 -46 -229 -456 -56 -77 -155 -210 -218 -295 -63 -86 -128 -175 -145 -198 -16 -23 -45 -63 -62 -88 l-33 -46 0 -187 c0 -132 4 -191 12 -199 9 -9 108 -12 384 -12 333 0 373 -2 385 -17 11 -13 15 -88 19 -357 l5 -341 193 -3 192 -2 0 338 c0 289 2 341 16 360 l15 22 369 0 c202 0 375 3 384 6 14 5 16 32 16 200 0 166 -2 199 -17 222 -17 26 -101 141 -272 372 -413 557 -448 608 -435 625 5 7 21 30 36 53 15 22 55 78 89 124 75 101 114 153 274 373 135 186 165 226 210 285 17 21 49 66 73 98 l42 60 0 195 c0 130 -4 198 -11 203 -6 3 -174 6 -373 5 -346 -2 -364 -1 -387 18 l-24 19 -5 334 -5 333 -192 3 -192 2 -3 -336z m628 -788 c23 -9 16 -53 -14 -88 -15 -18 -53 -68 -85 -110 -31 -43 -81 -111 -110 -150 -30 -40 -67 -91 -83 -114 -101 -142 -125 -167 -151 -157 -7 2 -38 40 -70 85 -32 44 -127 173 -210 286 -84 114 -153 215 -153 225 0 10 9 21 19 25 23 8 835 6 857 -2z m-404 -1388 c16 -14 50 -58 213 -283 55 -76 124 -168 153 -204 37 -46 51 -73 50 -91 l-3 -25 -440 0 -440 0 -3 22 c-2 15 12 41 40 76 39 49 177 236 323 440 57 77 76 89 107 65z"/></g></svg>';
+    var encoded = window.btoa(svg);
+    fabric.Image.fromURL('data:image/svg+xml;base64,' + encoded,
+            function (oImg) {
+                oImg.set({
+                    width: 100 + parseInt(strokeWidth),
+                    height: 100 + parseInt(strokeWidth),
+                    left: 50,
+                    top: 10,
+                });
+                canvas.add(oImg);
+            });
+
+}
+function di90degElbow() {
+    canvas.isDrawingMode = false;
+    mode = 'image';
+    var svg = '<?xml version="1.0" standalone="no"?><svg version="1.0" xmlns="http://www.w3.org/2000/svg"  width="600.000000pt" height="540.000000pt" viewBox="0 0 600.000000 540.000000"  preserveAspectRatio="xMidYMid meet"> <metadata>Created by potrace 1.10, written by Peter Selinger 2001-2011</metadata><g transform="translate(0.000000,540.000000) scale(0.100000,-0.100000)" fill="' + color + '" stroke="none"> <path d="M1325 4169 c-49 -48 -75 -80 -75 -94 0 -15 26 -46 81 -96 44 -41 165 -157 268 -259 104 -102 200 -196 215 -209 l26 -23 0 -843 c0 -928 -5 -855 60 -855 39 0 60 -24 60 -69 0 -20 5 -42 12 -49 9 -9 220 -12 886 -12 l874 0 206 -199 c114 -110 241 -233 282 -275 41 -42 78 -76 83 -76 16 0 157 143 157 159 0 8 -119 132 -266 274 -168 165 -264 266 -262 276 2 9 120 131 263 271 143 139 262 260 263 268 5 19 -128 152 -151 152 -17 0 -59 -39 -456 -426 -102 -100 -196 -187 -208 -193 -15 -8 -241 -11 -777 -11 -673 0 -756 2 -770 16 -14 14 -16 101 -16 806 l0 790 53 49 c123 115 547 536 547 545 0 12 -144 154 -155 154 -5 0 -77 -66 -161 -147 -232 -227 -378 -364 -396 -374 -19 -10 -58 26 -407 369 -85 83 -156 152 -158 152 -1 0 -36 -32 -78 -71z"/></g></svg>';
+    var encoded = window.btoa(svg);
+    fabric.Image.fromURL('data:image/svg+xml;base64,' + encoded,
+            function (oImg) {
+                oImg.set({
+                    width: 100 + parseInt(strokeWidth),
+                    height: 100 + parseInt(strokeWidth),
+                    left: 50,
+                    top: 10,
+                });
+                canvas.add(oImg);
+            });
+
+}
+function di45DegElbow() {
+    canvas.isDrawingMode = false;
+    mode = 'image';
+    var svg = '<?xml version="1.0" standalone="no"?><svg version="1.0" xmlns="http://www.w3.org/2000/svg"  width="600.000000pt" height="561.000000pt" viewBox="0 0 600.000000 561.000000"  preserveAspectRatio="xMidYMid meet"> <metadata>Created by potrace 1.10, written by Peter Selinger 2001-2011</metadata><g transform="translate(0.000000,561.000000) scale(0.100000,-0.100000)" fill="' + color + '" stroke="none"> <path d="M1192 4372 c-11 -7 -13 -84 -12 -383 0 -326 -2 -377 -15 -396 l-16 -23 -383 0 c-316 0 -386 -2 -395 -14 -8 -9 -11 -48 -9 -112 l3 -99 440 -5 c242 -3 442 -7 445 -8 2 -1 286 -283 630 -627 344 -344 629 -625 633 -625 5 0 21 7 38 15 34 18 49 13 49 -19 0 -12 5 -27 12 -34 9 -9 222 -12 898 -12 l886 0 209 -211 c116 -115 247 -247 293 -291 l83 -81 80 79 c43 43 79 84 79 90 0 6 -80 92 -177 191 -302 305 -353 360 -353 383 0 15 85 106 270 291 149 148 270 273 270 277 0 11 -154 162 -165 162 -6 0 -157 -147 -337 -327 l-328 -328 -798 -3 c-438 -2 -812 0 -831 3 -27 5 -137 110 -650 622 l-616 615 -5 436 -5 437 -105 3 c-58 1 -111 -2 -118 -6z"/> </g> </svg>';
+    var encoded = window.btoa(svg);
+    fabric.Image.fromURL('data:image/svg+xml;base64,' + encoded,
+            function (oImg) {
+                oImg.set({
+                    width: 100 + parseInt(strokeWidth),
+                    height: 100 + parseInt(strokeWidth),
+                    left: 50,
+                    top: 10,
+                });
+                canvas.add(oImg);
+            });
+
+}
+function diReducer() {
+    canvas.isDrawingMode = false;
+    mode = 'image';
+    var svg = '<?xml version="1.0" standalone="no"?><svg version="1.1"  xmlns="http://www.w3.org/2000/svg" width="600.000000pt" height="594.000000pt" viewBox="0 0 600.000000 594.000000"  preserveAspectRatio="xMidYMid meet"> <metadata> Created by potrace 1.10, written by Peter Selinger 2001-2011 </metadata> <g transform="translate(0.000000,594.000000) scale(0.100000,-0.100000)" fill="' + color + '" stroke="none"><path d="M2273 4308 c-6 -7 -11 -84 -12 -173 -1 -157 4 -198 45 -390 9 -38 21 -110 29 -160 8 -49 19 -110 25 -135 5 -25 19 -94 30 -155 11 -60 23 -117 26 -125 3 -8 10 -40 15 -70 38 -219 50 -285 115 -598 45 -224 52 -212 -125 -212 -124 0 -141 -2 -149 -17 -13 -25 -14 -281 -2 -304 10 -18 33 -19 824 -19 733 0 814 2 820 16 3 9 6 78 6 154 0 76 -3 145 -6 154 -5 14 -27 16 -139 16 -73 0 -140 3 -149 6 -19 7 -21 50 -5 109 6 22 15 67 20 100 13 86 38 224 49 265 11 45 24 112 56 290 36 207 54 292 64 315 5 11 14 58 19 105 5 47 14 105 20 130 45 188 64 323 68 489 2 96 2 185 -2 198 l-5 23 -814 0 c-639 0 -816 -3 -823 -12z m1288 -325 c15 -15 15 -55 0 -118 -7 -27 -19 -86 -26 -130 -28 -158 -35 -192 -70 -360 -20 -93 -43 -213 -50 -265 -8 -52 -22 -124 -30 -160 -9 -36 -22 -101 -29 -145 -32 -183 -87 -452 -97 -478 -6 -15 -21 -30 -33 -33 -11 -2 -81 -3 -155 -2 l-135 3 -17 45 c-17 45 -31 118 -52 265 -7 44 -15 85 -18 90 -4 6 -11 39 -18 75 -12 67 -45 241 -62 320 -5 25 -14 79 -19 120 -5 41 -14 91 -20 110 -14 52 -36 158 -65 320 -14 80 -33 177 -41 215 -23 109 -22 122 9 134 37 14 914 8 928 -6z"/></g> </svg>';
     var encoded = window.btoa(svg);
     fabric.Image.fromURL('data:image/svg+xml;base64,' + encoded,
             function (oImg) {

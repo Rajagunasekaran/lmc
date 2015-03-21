@@ -48,7 +48,7 @@ function updateClock ( )
 }
 $(document).ready(function(){
 
-    $(".preloader").show();
+    
     $('#checkin').attr("disabled","disabled");
 
     <?php echo  "var Userstamp = ". $Userstamp.PHP_EOL;?>
@@ -127,6 +127,9 @@ $(document).ready(function(){
         var filelist=all_menu_array[4];
         var sub_submenuItem="";
         var script_flag=all_menu_array[3];
+//        var dashbord='<ul class="nav navbar-nav  "><li ><a href="MENU.php">DASH BOARD</a></li></ul>';
+//        $("#menu").append(dashbord);
+//        $(".preloader").hide();
         for(var i=0;i<ACRMENU_mainmenu.length;i++)//add main menu
         {
             var main='mainmenu'+i
@@ -189,13 +192,15 @@ $(document).ready(function(){
             $("#ACRMENU_ulclass_mainmenu").append('</li>');
         }
 
-        $(".preloader").hide();
+//   var dashbord='<ul class="nav navbar-nav navbar-right "><li ><a href="MENU.php">DASH BOARD</a></li></ul>';
+//        $("#menu").append(dashbord);
+//        $(".preloader").hide();
         MenuPage=0;
         CheckPageStatus();
     }
 });
 </script>
-<title>LMC TIME SHEET</title>
+<title>LIH MING CONSTRUCTION PTE LTD</title>
 </head>
 <body >
 
@@ -212,7 +217,7 @@ $(document).ready(function(){
 
         <table>
             <tr>
-                <td style="width:1000px";><b><h4><span style="font-family:Helvetica Neue" id="clock" ></span></h4></b></td><td style="width:100px" style="font-family:Helvetica Neue";><b><i class="fa fa-user fa-2x"></i>  <?php echo $UserStamp ?></b></td><td></td><td><b><a href="logout.php">Logout<i class="fa fa-power-off fa-2x"></i></b>  </a></td>
+                <td style="width:1000px";><b><h4><span  style="font-family:Helvetica Neue" id="clock" ></span></h4></b></td><td style="width:100px" style="font-family:Helvetica Neue;"><b><i class="glyphicon glyphicon-user " ></i>  <?php echo $UserStamp ?></b></td><td><b><a href="logout.php">Logout <i class="glyphicon glyphicon-log-out"></i></b></a></td>
             </tr>
             <tr>
                 <td><b><label id="clockmsg" name="clockmsg" ></label></b> </td>
@@ -228,8 +233,9 @@ $(document).ready(function(){
                 </button>
 
             </div>
-            <div class="collapse navbar-collapse" >
+            <div class="collapse navbar-collapse" id="menu" >
                 <ul class="nav navbar-nav" id="ACRMENU_ulclass_mainmenu">
+                    <li ><a href="MENU.php">DASH BOARD</a></li>
                 </ul>
             </div>
         </nav>

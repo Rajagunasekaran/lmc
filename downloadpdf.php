@@ -83,6 +83,6 @@ function output_file($file, $name, $mime_type='')
     die();
 }
 set_time_limit(0);
-$file_path='LMC_REPORT_IMAGE/'.$_REQUEST['filename'];
+$file_path='LMC_REPORT_DOCUMENTS/'.$_REQUEST['filename'];
 output_file($file_path, ''.$_REQUEST['filename'].'', 'text/plain');
 ?>
