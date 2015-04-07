@@ -60,7 +60,13 @@ $Userstamp=json_encode($UserStamp);
             if(attr_id==undefined){
                 attr_id='';
             }
-            show_msgbox("MENU CONFIRMATION","Do You Want to Open "+attr_id+" "+$(this).text()+" ?","success",true);
+            if(attr_id==$(this).text())
+            {
+                show_msgbox("MENU CONFIRMATION","Do You Want to Open "+attr_id+" ?","success",true);
+            }
+            else{
+                show_msgbox("MENU CONFIRMATION","Do You Want to Open "+attr_id+" "+$(this).text()+" ?","success",true);
+            }
             return false;
         });
         function init () {
@@ -132,9 +138,9 @@ $Userstamp=json_encode($UserStamp);
                 var main='mainmenu'+i
                 var submen='submenu'+i;
                 var filename=filelist[count]+'.php';
-                if(ARCMENU_first_submenu.length==0)
+                if(ARCMENU_first_submenu[i].length==1)
                 {
-                    mainmenuItem='<li><a page="'+filename+'" href="#"  id="'+ACRMENU_mainmenu[i]+'" >'+ACRMENU_mainmenu[i]+'</a></li>'
+                    mainmenuItem='<li><a class="btnclass" page="'+filename+'" href="#"  id="'+ACRMENU_mainmenu[i]+'" >'+ACRMENU_mainmenu[i]+'</a></li>'
 
                 }
                 else
@@ -198,6 +204,9 @@ $Userstamp=json_encode($UserStamp);
     });
 </script>
 <title>LIH MING CONSTRUCTION PTE LTD</title>
+<meta charset="utf-8">
+<link rel="shortcut icon" type="image/ico" href="image/LMCico.png">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
 </head>
 <body >
 
@@ -232,7 +241,7 @@ $Userstamp=json_encode($UserStamp);
             </div>
             <div class="collapse navbar-collapse" id="menu" >
                 <ul class="nav navbar-nav" id="ACRMENU_ulclass_mainmenu">
-                    <li ><a href="MENU.php">DASH BOARD</a></li>
+<!--                    <li ><a href="MENU.php">DASH BOARD</a></li>-->
                 </ul>
             </div>
         </nav>

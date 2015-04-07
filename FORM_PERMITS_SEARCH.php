@@ -1399,22 +1399,22 @@ $(document).ready(function(){
 <form id="SRCH_entryform" class="form-horizontal">
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">TEAM REPORT<em>*</em></h3>
+        <h3 class="panel-title">TEAM REPORT</h3>
     </div>
     <div class="panel-body">
         <!--        <form id="teamreport" class="form-horizontal">-->
         <fieldset disabled>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label id="tr_lbl_location">LOCATION<em>*</em></label>
+                    <label id="tr_lbl_location">LOCATION</label>
                     <input type="text" class="form-control txtlen" id="SRCH_tr_txt_location" name="SRCH_tr_txt_location" placeholder="Location">
                 </div>
                 <div class="col-md-3">
-                    <label  id="tr_lbl_contactno">CONTRACT NO<em>*</em></label>
+                    <label  id="tr_lbl_contactno">CONTRACT NO</label>
                     <input type="text" class="form-control decimal quantity" id="SRCH_tr_txt_contractno" name="SRCH_tr_txt_contractno" placeholder="Contact No">
                 </div>
                 <div class="col-md-3 selectContainer">
-                    <label id="tr_lbl_team">TEAM<em>*</em></label>
+                    <label id="tr_lbl_team">TEAM</label>
                     <select class="form-control" id="SRCH_tr_lb_team" disabled name="SRCH_tr_lb_team">
                     </select>
                 </div>
@@ -1441,11 +1441,11 @@ $(document).ready(function(){
                     <input type="text" class="form-control time-picker" id="SRCH_tr_txt_wttime" name="SRCH_tr_txt_wttime" placeholder="Weather Time">
                 </div>
                 <div class="col-md-2">
-                    <label id="tr_lbl_reachsite">REACH SITE<em>*</em></label>
+                    <label id="tr_lbl_reachsite">REACH SITE</label>
                     <input type="text" class="form-control time-picker" id="SRCH_tr_txt_reachsite"  name="SRCH_tr_txt_reachsite" placeholder="Time">
                 </div>
                 <div class="col-md-2">
-                    <label id="tr_lbl_leavesite">LEAVE SITE<em>*</em></label>
+                    <label id="tr_lbl_leavesite">LEAVE SITE</label>
                     <input type="text" class="form-control time-picker" id="SRCH_tr_txt_leavesite" name="SRCH_tr_txt_leavesite" placeholder="Time">
                 </div>
             </div>
@@ -1462,14 +1462,14 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">MEETING</h3>
+        <h3 class="panel-title">TOOLBOX MEETING</h3>
     </div>
     <div class="panel-body">
         <!--        <form>-->
         <fieldset disabled hidden>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label for="SRCH_mt_lbl_topic" id="SRCH_mt_lbl_topic">TOPIC<em>*</em></label>
+                    <label for="SRCH_mt_lbl_topic" id="SRCH_mt_lbl_topic">TOPIC</label>
                     <input type="text" class="form-control meetingform-validation" id="SRCH_mt_lb_topic" name="SRCH_mt_lb_topic" placeholder="Topic">
                 </div>
                 <div class="col-md-8">
@@ -1490,7 +1490,7 @@ $(document).ready(function(){
                 <button type="button" id="SRCH_mt_btn_update" class="btn btn-info SRCH_mt_btn_updaterow" disabled>UPDATE</button>
             </div>
         </fieldset>
-        <div>
+        <div class="table-responsive">
             <table class="table table-striped table-hover" id="SRCH_meeting_table">
                 <thead>
                 <tr class="active">
@@ -1508,70 +1508,102 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">JOB DONE<em>*</em></h3>
+        <h3 class="panel-title">JOB DONE</h3>
     </div>
     <div class="panel-body">
         <!--        <form id="jobdone" class="form-horizontal" role="form">-->
         <fieldset disabled>
-            <div class="row form-group">
-                <label class="col-md-3" id="SRCH_tr_lbl_pipelaid">PIPE LAID<em>*</em></label>
-                <div class="col-md-3">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="SRCH_jd_chk_road" name="SRCH_jd_chk_road"> ROAD
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="SRCH_jd_chk_contc" name="SRCH_jd_chk_contc"> CONC
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="SRCH_jd_chk_truf" name="SRCH_jd_chk_truf"> TURF
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="row form-group">
-                <label class="col-md-2" id="SRCH_tr_lbl_location">SIZE / LENGTH<em>*</em></label>
-                <div class="col-md-9 ">
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadm" name="SRCH_jd_chk_roadm" placeholder="M">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadmm"  name="SRCH_jd_chk_roadmm" placeholder="MM">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concm"   name="SRCH_jd_chk_concm" placeholder="M">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concmm" name="SRCH_jd_chk_concmm" placeholder="MM">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufm" name="SRCH_jd_chk_trufm" placeholder="M">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufmm" name="SRCH_jd_chk_trufmm" placeholder="MM">
-                    </div>
-                </div>
+            <div class="table-responsive">
+                <table class="table" border="1" style="border: #ddd;">
+                    <tr>
+                        <td class="jobthl">
+                            <label style="padding-bottom: 15px"></label>
+                            <label id="SRCH_tr_lbl_pipelaid">PIPE LAID</label>
+                        </td>
+                        <td colspan="2" style="text-align: center">
+                            <div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="SRCH_jd_chk_road" name="SRCH_jd_chk_road"> ROAD
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                        <td colspan="2" style="text-align: center">
+                            <div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="SRCH_jd_chk_contc" name="SRCH_jd_chk_contc"> CONC
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                        <td colspan="2" style="text-align: center">
+                            <div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="SRCH_jd_chk_truf" name="SRCH_jd_chk_truf"> TURF
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="jobthl" style="border-top: 1px solid white;">
+                            <label style="padding-bottom: 15px"> </label>
+                            <label id="SRCH_tr_lbl_location">SIZE/LENGTH</label>
+                        </td>
+                        <td class="jobtd" style="border-top: 1px solid white;">
+                            <div>
+                                <label>M</label>
+                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadm" name="SRCH_jd_chk_roadm" placeholder="M">
+                            </div>
+                        </td>
+                        <td style="border-top: 1px solid white;">
+                            <div>
+                                <label>MM</label>
+                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadmm"  name="SRCH_jd_chk_roadmm" placeholder="MM">
+                            </div>
+                        </td>
+                        <td class="jobtd" style="border-top: 1px solid white;">
+                            <div>
+                                <label>M</label>
+                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concm"   name="SRCH_jd_chk_concm" placeholder="M">
+                            </div>
+                        </td>
+                        <td style="border-top: 1px solid white;">
+                            <div>
+                                <label>MM</label>
+                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concmm" name="SRCH_jd_chk_concmm" placeholder="MM">
+                            </div>
+                        </td>
+                        <td class="jobtd" style="border-top: 1px solid white;">
+                            <div>
+                                <label>M</label>
+                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufm" name="SRCH_jd_chk_trufm" placeholder="M">
+                            </div>
+                        </td>
+                        <td class="jobthr" style="border-top: 1px solid white;">
+                            <div>
+                                <label>MM</label>
+                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufmm" name="SRCH_jd_chk_trufmm" placeholder="MM">
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label for="SRCH_jd_txt_testing" id="SRCH_jd_lbl_testing">PIPE TESTING<em>*</em></label>
+                    <label for="SRCH_jd_txt_testing" id="SRCH_jd_lbl_testing">PIPE TESTING</label>
                     <input type="text" class="form-control txtlen" id="SRCH_jd_txt_pipetesting" name="SRCH_jd_txt_pipetesting" placeholder="Pipe Testing">
                 </div>
                 <div class="col-md-3">
-                    <label for="SRCH_jd_txt_start" id="SRCH_jd_lbl_start" >START (Pressure)<em>*</em></label>
+                    <label for="SRCH_jd_txt_start" id="SRCH_jd_lbl_start" >START (PRESSURE)</label>
                     <input type="text" class="form-control quantity"  id="SRCH_jd_txt_start" name="SRCH_jd_txt_start" placeholder="Start Pressure">
                 </div>
                 <div class="col-md-3">
-                    <label for="SRCH_jd_txt_end" id="SRCH_jd_lbl_end">END (Pressure)<em>*</em></label>
+                    <label for="SRCH_jd_txt_end" id="SRCH_jd_lbl_end">END (PRESSURE)</label>
                     <input type="text" class="form-control quantity" id="SRCH_jd_txt_end" name="SRCH_jd_txt_end" placeholder="End Pressure">
                 </div>
                 <div class="col-md-3">
@@ -1585,7 +1617,7 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">EMPLOYEE REPORT DETAILS<em>*</em></h3>
+        <h3 class="panel-title">EMPLOYEE REPORT DETAILS</h3>
     </div>
     <div class="panel-body">
         <!--        <form>-->
@@ -1614,20 +1646,20 @@ $(document).ready(function(){
         <fieldset hidden disabled>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label>DESIGNATION<em>*</em></label>
+                    <label>DESIGNATION</label>
                     <input class="form-control form-validation txtlen" id="SRCH_sv_txt_designation" placeholder="Designation"/>
                 </div>
                 <div class="col-md-3">
-                    <label>NAME<em>*</em></label>
+                    <label>NAME</label>
                     <input class="form-control form-validation txtlen" id="SRCH_sv_txt_name" placeholder="Name"/>
                 </div>
 
                 <div class="col-md-1">
-                    <label>START<em>*</em></label>
+                    <label>START</label>
                     <input type="text" class="form-control form-validation time-picker" id="SRCH_sv_txt_start" placeholder="Time">
                 </div>
                 <div class="col-md-1">
-                    <label>END<em>*</em></label>
+                    <label>END</label>
                     <input type="text" class="form-control form-validation time-picker" id="SRCH_sv_txt_end" placeholder="Time">
                 </div>
                 <div class="col-md-4">
@@ -1677,16 +1709,16 @@ $(document).ready(function(){
         <fieldset hidden disabled>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label>FROM (LORRY NO)<em>*</em></label>
+                    <label>FROM (LORRY NO)</label>
                     <input type="text" class="form-control SRCH_form-validation quantity" id="SRCH_mtranser_from" name="SRCH_mtranser_from" placeholder="From (Lorry No)">
                 </div>
                 <div class="col-md-3">
-                    <label>ITEM<em>*</em></label>
+                    <label>ITEM</label>
                     <input type="text" class="form-control SRCH_form-validation txtlen" id="SRCH_mtransfer_item" name="SRCH_mtransfer_item" placeholder="Item">
                 </div>
 
                 <div class="col-md-3">
-                    <label>TO (LORRY NO)<em>*</em></label>
+                    <label>TO (LORRY NO)</label>
                     <input type="text" class="form-control SRCH_form-validation quantity" id="SRCH_mtransfer_to"  name="SRCH_mtransfer_to" placeholder="To (Lorry No)">
                 </div>
 
@@ -1734,17 +1766,17 @@ $(document).ready(function(){
         <fieldset hidden disabled>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>MACHINERY TYPE<em>*</em></label>
+                    <label>MACHINERY TYPE</label>
                     <select class="form-control SRCH_machineryform-validation" id="SRCH_machinery_type" name="SRCH_machinery_type">
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label>START<em>*</em></label>
+                    <label>START</label>
                     <input type="text" class="form-control SRCH_machineryform-validation time-picker"  id="SRCH_machinery_start" name="SRCH_machinery_start" placeholder="Time">
                 </div>
 
                 <div class="col-md-2">
-                    <label>END<em>*</em></label>
+                    <label>END</label>
                     <input type="text" class="form-control SRCH_machineryform-validation time-picker"  id="SRCH_machinery_end"  name="SRCH_machinery_end" placeholder="Time">
                 </div>
 
@@ -1795,27 +1827,27 @@ $(document).ready(function(){
         <fieldset hidden disabled>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>LORRY NUMBER<em>*</em></label>
+                    <label>LORRY NUMBER</label>
                     <input type="text" class="form-control SRCH_rentalform-validation quantity lorryno" id="SRCH_rental_lorryno" name="SRCH_rental_lorryno" placeholder="Lorry Name">
                 </div>
                 <div class="col-md-4">
-                    <label>THROW EARTH(STORE)<em>*</em></label>
+                    <label>THROW EARTH(STORE)</label>
                     <input type="text" class="form-control SRCH_rentalform-validation decimal size" id="SRCH_rental_throwearthstore" name="SRCH_rental_throwearthstore" placeholder="Throw Earth(Store)">
                 </div>
 
                 <div class="col-md-4">
-                    <label>THROW EARTH(OUTSIDE)<em>*</em></label>
+                    <label>THROW EARTH(OUTSIDE)</label>
                     <input type="text" class="form-control SRCH_rentalform-validation decimal size" id="SRCH_rental_throwearthoutside" name="SRCH_rental_throwearthoutside" placeholder="Throwe Earth(Outside)">
                 </div>
             </div>
             <div class="row form-group">
                 <div class="col-md-2">
-                    <label>START TIME<em>*</em></label>
+                    <label>START TIME</label>
                     <input type="text" class="form-control SRCH_rentalform-validation time-picker" id="SRCH_rental_start" name="SRCH_rental_start" placeholder="Time">
                 </div>
 
                 <div class="col-md-2">
-                    <label>END TIME<em>*</em></label>
+                    <label>END TIME</label>
                     <input type="text" class="form-control SRCH_rentalform-validation  time-picker" id="SRCH_rental_end"  name="SRCH_rental_end" placeholder="Time">
                 </div>
 
@@ -1861,19 +1893,19 @@ $(document).ready(function(){
         <fieldset hidden disabled>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label>AIR-COMPRESSOR<em>*</em></label>
+                    <label>AIR-COMPRESSOR</label>
                     <input type="text" class="form-control SRCH_equipmentform-validation txtlen "  id="SRCH_equipment_aircompressor" name="SRCH_equipment_aircompressor" placeholder="Air-Compressor">
                 </div>
                 <div class="col-md-3">
-                    <label>LORRY NO(TRANSPORT)<em>*</em></label>
+                    <label>LORRY NO(TRANSPORT)</label>
                     <input type="text" class="form-control SRCH_equipmentform-validation quantity lorryno" id="SRCH_equipment_lorryno" name="SRCH_equipment_lorryno" placeholder="Lorry No(Transport)">
                 </div>
                 <div class="col-md-1">
-                    <label>START<em>*</em></label>
+                    <label>START</label>
                     <input type="text" class="form-control SRCH_equipmentform-validation time-picker" id="SRCH_equipment_start"  name="SRCH_equipment_start" placeholder="Time">
                 </div>
                 <div class="col-md-1">
-                    <label>END<em>*</em></label>
+                    <label>END</label>
                     <input type="text" class="form-control SRCH_equipmentform-validation time-picker" id="SRCH_equipment_end"  name="SRCH_equipment_end" placeholder="Time">
                 </div>
                 <div class="col-md-4">
@@ -1921,16 +1953,16 @@ $(document).ready(function(){
         <fieldset hidden disabled>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>ITEMS<em>*</em></label>
+                    <label>ITEMS</label>
                     <select class="form-control SRCH_fittingform-validation" id="SRCH_fitting_items" name="SRCH_fitting_items" placeholder="Items">
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label>SIZE<em>*</em></label>
+                    <label>SIZE</label>
                     <input type="text" class="form-control SRCH_fittingform-validation decimal size" id="SRCH_fitting_size" name="SRCH_fitting_size" placeholder="MM">
                 </div>
                 <div class="col-md-2">
-                    <label>QUANTITY<em>*</em></label>
+                    <label>QUANTITY</label>
                     <input type="text" class="form-control SRCH_fittingform-validation decimal size" id="SRCH_fitting_quantity" name="SRCH_fitting_quantity" placeholder="Quantity">
                 </div>
                 <div class="col-md-4">
@@ -1977,17 +2009,17 @@ $(document).ready(function(){
         <fieldset hidden disabled>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>ITEMS<em>*</em></label>
+                    <label>ITEMS</label>
                     <select class="form-control SRCH_materialform-validation" id="SRCH_material_items" name="SRCH_material_items" placeholder="Items">
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label>RECEIPT NO<em>*</em></label>
+                    <label>RECEIPT NO</label>
                     <input type="text" class="form-control SRCH_materialform-validation quantity" id="SRCH_material_receipt" name="SRCH_material_receipt" placeholder="Receipt No">
                 </div>
 
                 <div class="col-md-4">
-                    <label>QUANTITY<em>*</em></label>
+                    <label>QUANTITY</label>
                     <input type="text" class="form-control SRCH_materialform-validation decimal" id="SRCH_material_quantity" name="SRCH_material_quantity" placeholder="Quantity">
                     <input type="hidden" class="form-control" id="SRCH_material_id" name="SRCH_material_id">
                 </div>
@@ -2016,7 +2048,7 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">DRAWING AREA<em>*</em></h3>
+        <h3 class="panel-title">DRAWING AREA</h3>
     </div>
     <div class="panel-body">
             <div id="appendimg">

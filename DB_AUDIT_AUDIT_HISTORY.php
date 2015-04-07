@@ -9,9 +9,9 @@ if($_REQUEST['option']=="active_emp")
 {
     $TH_active_emp=get_active_emp_id();
     $TH_active_empname=array();
-    $TH_query=mysqli_query($con,"SELECT EMPLOYEE_NAME FROM VW_TS_ALL_EMPLOYEE_DETAILS ORDER BY EMPLOYEE_NAME ASC");
+    $TH_query=mysqli_query($con,"SELECT ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS where ULD_TERMINATE_FLAG IS NULL ORDER BY ULD_WORKER_NAME ASC");
     while($row=mysqli_fetch_array($TH_query)){
-        $TH_active_empname[]=$row["EMPLOYEE_NAME"];
+        $TH_active_empname[]=$row["ULD_WORKER_NAME"];
     }
     $errormessage=array();
     $errormsg=mysqli_query($con,"SELECT DISTINCT EMC_DATA FROM LMC_ERROR_MESSAGE_CONFIGURATION WHERE EMC_ID IN (73,74,75)");
@@ -24,7 +24,7 @@ if($_REQUEST['option']=="active_emp")
 if($_REQUEST['option']=="search")
 {
     $loginid=$_REQUEST['empid'];
-    $uld_id=mysqli_query($con,"select ULD_ID from VW_TS_ALL_EMPLOYEE_DETAILS where EMPLOYEE_NAME='$loginid'");
+    $uld_id=mysqli_query($con,"SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_WORKER_NAME='$loginid'");
     while($row=mysqli_fetch_array($uld_id)){
         $TH_uld_id=$row["ULD_ID"];
     }
@@ -34,7 +34,7 @@ if($_REQUEST['option']=="search")
     $result = $select->fetch_assoc();
     $temp_tickler_history= $result['@TEMP_UARD_TICKLER_HISTORY'];
     $TH_values=array();
-    $sqlquery=mysqli_query($con,"SELECT EVENT_TYPE,TABLE_NAME,TH_OLD_VALUE,TH_NEW_VALUE,TH_USERSTAMP,DATE_FORMAT(CONVERT_TZ(TH_TIMESTAMP,'+00:00','+08:00'),'%d-%m-%Y %T') AS T_TIMESTAMP FROM $temp_tickler_history ORDER BY TH_TIMESTAMP DESC ");
+    $sqlquery=mysqli_query($con,"SELECT EVENT_TYPE,TABLE_NAME,TH_OLD_VALUE,TH_NEW_VALUE,TH_USERSTAMP,DATE_FORMAT(TH_TIMESTAMP,'%d-%m-%Y %T') AS T_TIMESTAMP FROM $temp_tickler_history ORDER BY TH_TIMESTAMP DESC ");
     while($row=mysqli_fetch_array($sqlquery)){
         $TH_eventtype=$row["EVENT_TYPE"];
         $TH_tblename=$row["TABLE_NAME"];

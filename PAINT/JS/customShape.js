@@ -7,7 +7,9 @@ var canvas='';
 //document.getElementsByClassName('canvas-container')[0].style.maxHeight='100%';
 //document.getElementsByClassName('upper-canvas')[0].style.maxWidth='100%';
 //document.getElementsByClassName('upper-canvas')[0].style.maxHeight='100%';
-var mode, color = '#36bac9', fillColor = false, strokeWidth = 5, fontfamily = 'Times New Roman', fontunderline = null, fontsize = 5, fontbold = null, fontitalic = null, fontwidth = 20;
+//var mode, color = '#36bac9', fillColor = false, strokeWidth = 5, fontfamily = 'Times New Roman', fontunderline = null, fontsize = 5, fontbold = null, fontitalic = null, fontwidth = 20;
+var mode, color = '#36bac9', fillColor = false, strokeWidth = 5, fontfamily = 'Arial', fontunderline = null, fontsize = 5, fontbold = null, fontitalic = null, fontwidth = 20;
+
 bgcolor = '#F5F5F5';
 $('#drawing-color').change(function () {
     color = this.value;
@@ -20,11 +22,31 @@ $('#drawing-line').click(function () {
     fillColor = false;
     canvas.isDrawingMode = false;
 });
-$('#drawing-line-width').change(function () {
-    strokeWidth = parseInt(this.value, 10) || 1;
-    fontwidth = strokeWidth;
-    if (mode != 'line')
-        pencil();
+$('#drawing-line-width').keyup(function () {
+    alert(this.value)
+    alert(canvas.getActiveObject())
+    if(canvas.getActiveObject()!=undefined&&canvas.getActiveObject()!=null)
+    {
+        alert("inside")
+        canvas.getActiveObject().set('width', parseInt(this.value));
+        canvas.getActiveObject().set('height', parseInt(this.value));
+//        canvas.getActiveObject().set('strokeWidth', parseInt(this.value));
+        canvas.getActiveObject().set('strokeWidth', 10);
+
+    }
+    alert("width"+ canvas.getActiveObject().get('width'))
+    alert("height"+ canvas.getActiveObject().get('height'))
+
+
+    alert("before"+ canvas.getActiveObject().get('strokeWidth'))
+
+//    canvas.getActiveObject().str.get.strokeWidth=this.value
+//    strokeWidth = parseInt(this.value, 10) || 1;
+//    alert("after"+ canvas.getActiveObject().get('strokeWidth'))
+//    fontwidth = strokeWidth;
+    alert("final")
+//    if (mode != 'line')
+//        pencil();
 }); 
 
 function onObjectSelected(e)
@@ -66,7 +88,7 @@ function circle() {
         stroke: color,
         strokeWidth: strokeWidth,
         "hasControls": true,
-        "selectable": true,
+        "selectable": true
     }));
 }
 function textEditor1() {
@@ -83,7 +105,7 @@ function textEditor1() {
         fontWeight: fontbold,
         fontStyle: fontitalic,
         backgroundColor: 'transparent',
-        textDecoration: fontunderline,
+        textDecoration: fontunderline
     }));
 }
 function cut() {
@@ -126,9 +148,9 @@ function underline() {
         fontunderline = null;
     }
 }
-$('#font-family').change(function () {
-    fontfamily = this.value;
-});
+//$('#font-family').change(function () {
+//    fontfamily = this.value;
+//});
 function textEditor() {
     mode = 'text';
     fillColor = false;

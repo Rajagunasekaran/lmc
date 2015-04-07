@@ -17,7 +17,7 @@ if($_REQUEST['option']=="MENU")
             $login_id_role=$row["URC_DATA"];
         }
 
-        $main_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MNAME FROM LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp' and UA.ULD_ID=ULD.ULD_ID and UA.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID AND UA.UA_TERMINATE IS NULL ORDER BY MP.MP_ID ASC");
+        $main_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MNAME FROM LMC_USER_LOGIN_DETAILS ULD,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp' and ULD.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID AND ULD.ULD_TERMINATE_FLAG IS NULL ORDER BY MP.MP_ID ASC");
 
         $ure_values=array();
         $URSC_Main_menu_array=array();
@@ -25,18 +25,36 @@ if($_REQUEST['option']=="MENU")
         while($row=mysqli_fetch_array($main_menu_data)){
             $URSC_Main_menu_array[]=$row["MP_MNAME"];
 
-            $sub_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MSUB from LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp' and UA.ULD_ID=ULD.ULD_ID and UA.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID and MP.MP_MNAME='$URSC_Main_menu_array[$i]' ORDER BY MP_MSUB ASC");
-
+            $sub_menu_data= mysqli_query($con,"SELECT DISTINCT  MP_MSUB from LMC_USER_LOGIN_DETAILS ULD,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp'  and ULD.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID and MP.MP_MNAME='$URSC_Main_menu_array[$i]' ORDER BY MP_MSUB ASC");
             $URSC_sub_menu_row=array();
             $URSC_sub_sub_menu_row_col=array();
             $URSC_sub_sub_menu_row_col_data=array();
             $j=0;
             while($row=mysqli_fetch_array($sub_menu_data))  {
+                $file_name=array();
+//                if($row["MP_MSUB"]==null||$row["MP_MSUB"]==""){
+//                    $file_name[]=$row["MP_MFILENAME"];
+//                    continue;
+//                }
+
+//                $file_name[]=$row["MP_MFILENAME"];
+
+
                 $URSC_sub_menu_row[]=$row["MP_MSUB"];
-                $sub_sub_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MSUBMENU,MP_MFILENAME,MP_SCRIPT_FLAG FROM LMC_USER_LOGIN_DETAILS ULD,LMC_USER_ACCESS UA,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp' and UA.ULD_ID=ULD.ULD_ID and UA.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID and MP.MP_MNAME='$URSC_Main_menu_array[$i]' AND MP_MSUB='$URSC_sub_menu_row[$j]'  ORDER BY MP_MSUBMENU ASC");
+                if($row["MP_MSUB"]==null)
+                {
+                    $sub_menu_data1= mysqli_query($con,"SELECT DISTINCT  MP_MFILENAME from LMC_USER_LOGIN_DETAILS ULD,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp'  and ULD.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID and MP.MP_MNAME='$URSC_Main_menu_array[$i]' ORDER BY MP_MSUB ASC");
+                    while($row=mysqli_fetch_array($sub_menu_data1))  {
+                        $file_name=array();
+                        $file_name[]=$row["MP_MFILENAME"];
+                }
+                }
+
+
+                $sub_sub_menu_data= mysqli_query($con,"SELECT DISTINCT MP_MSUBMENU,MP_MFILENAME,MP_SCRIPT_FLAG FROM LMC_USER_LOGIN_DETAILS ULD,LMC_USER_MENU_DETAILS UMP,LMC_MENU_PROFILE MP where ULD_USERNAME='$UserStamp'  and ULD.RC_ID=UMP.RC_ID and MP.MP_ID=UMP.MP_ID and MP.MP_MNAME='$URSC_Main_menu_array[$i]' AND MP_MSUB='$URSC_sub_menu_row[$j]'  ORDER BY MP_MSUBMENU ASC");
                 $URSC_sub_sub_menu_row_data=array();
                 $script_flag=array();
-                $file_name=array();
+
                 while($row=mysqli_fetch_array($sub_sub_menu_data)){
 
                     $script_flag[]=$row["MP_SCRIPT_FLAG"];
@@ -46,12 +64,13 @@ if($_REQUEST['option']=="MENU")
 
                 }
                 $URSC_script_flag[]=$script_flag;
-                $URSRC_filename[]=$file_name;
+                $URSRC_filename[]=array_unique($file_name);
                 $URSC_sub_sub_menu_data_array[]=$URSC_sub_sub_menu_row_data;
                 $j++;
             }
 
             $URSC_sub_menu_array[]=$URSC_sub_menu_row;
+
             $i++;
         }
 

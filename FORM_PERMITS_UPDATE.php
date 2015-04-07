@@ -317,6 +317,7 @@ $(document).ready(function(){
 
 // CLICK EVENT FR RADIO BUTTON
     $(document).on('click','.USRC_UPD_class_radio',function(){
+        $("html, body").animate({ scrollTop: $(document).height() }, "slow");
         $('#SRC_radiosearchbtn').removeAttr('disabled').show();
         $('#SRC_entryform').hide();
         $('#backtotop').hide();
@@ -339,6 +340,7 @@ $(document).ready(function(){
                 if(value_array[8]!=null)
                 {
                     $('#SRC_Final_Update').show();
+                    $("html, body").animate({ scrollTop: $(document).height() }, "fast");
                     employee_name=value_array[0];
                     var sitevisit=value_array[1];
                     var mech_equip_transfer=value_array[2];
@@ -510,11 +512,11 @@ $(document).ready(function(){
 
                         if(employee_id==employee_name[i][0])
                         {
-                            var appendrow='<tr id="'+autoid+'" class="active"><td><div><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="'+emp_name+'" value="'+employee_name[i][1]+'"><input type="hidden" class="form-control" style="max-width: 100px" id="'+emp_id+'" value="'+employee_name[i][0]+'"></div></td><td><div class="col-lg-10"><input type="text" class="form-control time-picker stime" style="max-width: 100px" id="'+emp_start+'" value="'+employee_name[i][2]+'"></div></td><td><div class="col-lg-10"><input type="text" class="form-control time-picker etime" style="max-width: 100px" id="'+emp_end+'" value="'+employee_name[i][3]+'"></div></td><td><div class="col-lg-10"><input type="text" class="form-control decimal size ot" style="max-width: 100px" id="'+emp_ot+'" value="'+employee_name[i][4]+'"></div></td><td><div><textarea class="form-control remarklen removecap textareaaccinjured" rows="1" id="'+emp_remark+'">'+employee_name[i][5]+'</textarea></div></td></tr>';
+                            var appendrow='<tr id="'+autoid+'" class="active"><td><div><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="'+emp_name+'" value="'+employee_name[i][1]+'"><input type="hidden" class="form-control" style="max-width: 100px" id="'+emp_id+'" value="'+employee_name[i][0]+'"></div></td><td><div class="col-lg-10"><input type="text" class="form-control time-picker stime" style="max-width: 100px" id="'+emp_start+'" value="'+employee_name[i][2]+'"></div></td><td><div class="col-lg-10"><input type="text" class="form-control time-picker etime" style="max-width: 100px" id="'+emp_end+'" value="'+employee_name[i][3]+'"></div></td><td><div class="col-lg-10"><input type="text" class="form-control amountonly size ot" style="max-width: 100px" id="'+emp_ot+'" value="'+employee_name[i][4]+'"></div></td><td><div><textarea class="form-control remarklen removecap textareaaccinjured" rows="1" id="'+emp_remark+'">'+employee_name[i][5]+'</textarea></div></td></tr>';
                         }
                         else
                         {
-                            appendrow='<tr id="'+autoid+'" class="active"><td><div><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="'+emp_name+'" value="'+employee_name[i][1]+'"><input type="hidden" class="form-control" style="max-width: 100px" id="'+emp_id+'" value="'+employee_name[i][0]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker stime" style="max-width: 100px" id="'+emp_start+'" value="'+employee_name[i][2]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker etime" style="max-width: 100px" id="'+emp_end+'" value="'+employee_name[i][3]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control decimal size ot" style="max-width: 100px" id="'+emp_ot+'" value="'+employee_name[i][4]+'"></div></td><td><div><textarea readonly class="form-control remarklen removecap textareaaccinjured" rows="1" id="'+emp_remark+'">'+employee_name[i][5]+'</textarea></div></td></tr>';
+                            appendrow='<tr id="'+autoid+'" class="active"><td><div><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="'+emp_name+'" value="'+employee_name[i][1]+'"><input type="hidden" class="form-control" style="max-width: 100px" id="'+emp_id+'" value="'+employee_name[i][0]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker stime" style="max-width: 100px" id="'+emp_start+'" value="'+employee_name[i][2]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker etime" style="max-width: 100px" id="'+emp_end+'" value="'+employee_name[i][3]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control amountonly size ot" style="max-width: 100px" id="'+emp_ot+'" value="'+employee_name[i][4]+'"></div></td><td><div><textarea readonly class="form-control remarklen removecap textareaaccinjured" rows="1" id="'+emp_remark+'">'+employee_name[i][5]+'</textarea></div></td></tr>';
                         }
                         $('#SRC_Employee_table tr:last').after(appendrow);
                         $('.time-picker').datetimepicker({
@@ -534,6 +536,7 @@ $(document).ready(function(){
                             }
                             $(this).val(val);
                         });
+                        $(".amountonly").doValidation({rule:'numbersonly',prop:{realpart:1,imaginary:2}});
                         $(document).on("keyup",'.removecap',function() {
                             if (this.value.match(/[\^]/g)) {
                                 this.value = this.value.replace(/[\^]/g, '');
@@ -1562,150 +1565,153 @@ $(document).ready(function(){
 
 // form validation
     $(document).on('change blur','#SRC_entryform',function(){
-        var location=$('#SRC_tr_txt_location').val();
-        var contractno=$('#SRC_tr_txt_contractno').val();
-        var teamname=$('#SRC_tr_lb_team').val();
+//        var location=$('#SRC_tr_txt_location').val();
+//        var contractno=$('#SRC_tr_txt_contractno').val();
+//        var teamname=$('#SRC_tr_lb_team').val();
         var reportdate=$('#SRC_tr_txt_date').val();
-        var weather=$('#SRC_tr_txt_weather').val();
-        var reachsite=$('#SRC_tr_txt_reachsite').val();
-        var leavesite=$('#SRC_tr_txt_leavesite').val();
-        var jobtype=$("input[name=jobtype]").is(":checked");
-        var roadchk=$("input[id=SRC_jd_chk_road]").is(":checked");
-        var concchk=$("input[id=SRC_jd_chk_contc]").is(":checked");
-        var turfchk=$("input[id=SRC_jd_chk_truf]").is(":checked");
-        var roadm=$('#SRC_jd_chk_roadm').val();
-        var roadmm=$('#SRC_jd_chk_roadmm').val();
-        var concm=$('#SRC_jd_chk_concm').val();
-        var concmm=$('#SRC_jd_chk_concmm').val();
-        var trufm=$('#SRC_jd_chk_trufm').val();
-        var trufmm=$('#SRC_jd_chk_trufmm').val();
-        var pipetesting=$('#SRC_jd_txt_testing').val();
-        var startpressure=$('#SRC_jd_txt_start').val();
-        var endpressure=$('#SRC_jd_txt_end').val();
-        // pipelaid validation
-        if(roadchk==true){
-            $('#SRC_jd_chk_roadm').removeAttr('disabled');
-            $('#SRC_jd_chk_roadmm').removeAttr('disabled');
-        }
-        else{
-            $("#SRC_jd_chk_roadm").attr("disabled", "disabled");
-            $("#SRC_jd_chk_roadmm").attr("disabled", "disabled");
-            $("#SRC_jd_chk_roadm").val('');
-            $("#SRC_jd_chk_roadmm").val('');
-        }
-        if(concchk==true){
-            $('#SRC_jd_chk_concm').removeAttr('disabled');
-            $('#SRC_jd_chk_concmm').removeAttr('disabled');
-        }
-        else{
-            $("#SRC_jd_chk_concm").attr("disabled", "disabled");
-            $("#SRC_jd_chk_concmm").attr("disabled", "disabled");
-            $("#SRC_jd_chk_concm").val('');
-            $("#SRC_jd_chk_concmm").val('');
-        }
-        if(turfchk==true){
-            $('#SRC_jd_chk_trufm').removeAttr('disabled');
-            $('#SRC_jd_chk_trufmm').removeAttr('disabled');
-        }
-        else{
-            $("#SRC_jd_chk_trufm").attr("disabled", "disabled");
-            $("#SRC_jd_chk_trufmm").attr("disabled", "disabled");
-            $("#SRC_jd_chk_trufm").val('');
-            $("#SRC_jd_chk_trufmm").val('');
-        }
-        //weather time validation
-        if(weather!=''){
-            $('#SRC_tr_txt_wftime').removeAttr('disabled');
-            $('#SRC_tr_txt_wttime').removeAttr('disabled');
-        }
-        else{
-            $("#SRC_tr_txt_wftime").attr("disabled", "disabled");
-            $("#SRC_tr_txt_wttime").attr("disabled", "disabled");
-        }
-        if((location!=' ')&&(contractno!='') && (teamname!='SELECT') && (reportdate!='')  && (reachsite!='') && (leavesite!='') && (jobtype==true))
+//        var weather=$('#SRC_tr_txt_weather').val();
+//        var reachsite=$('#SRC_tr_txt_reachsite').val();
+//        var leavesite=$('#SRC_tr_txt_leavesite').val();
+//        var jobtype=$("input[name=jobtype]").is(":checked");
+//        var roadchk=$("input[id=SRC_jd_chk_road]").is(":checked");
+//        var concchk=$("input[id=SRC_jd_chk_contc]").is(":checked");
+//        var turfchk=$("input[id=SRC_jd_chk_truf]").is(":checked");
+//        var roadm=$('#SRC_jd_chk_roadm').val();
+//        var roadmm=$('#SRC_jd_chk_roadmm').val();
+//        var concm=$('#SRC_jd_chk_concm').val();
+//        var concmm=$('#SRC_jd_chk_concmm').val();
+//        var trufm=$('#SRC_jd_chk_trufm').val();
+//        var trufmm=$('#SRC_jd_chk_trufmm').val();
+//        var pipetesting=$('#SRC_jd_txt_testing').val();
+//        var startpressure=$('#SRC_jd_txt_start').val();
+//        var endpressure=$('#SRC_jd_txt_end').val();
+//        // pipelaid validation
+//        if(roadchk==true){
+//            $('#SRC_jd_chk_roadm').removeAttr('disabled');
+//            $('#SRC_jd_chk_roadmm').removeAttr('disabled');
+//        }
+//        else{
+//            $("#SRC_jd_chk_roadm").attr("disabled", "disabled");
+//            $("#SRC_jd_chk_roadmm").attr("disabled", "disabled");
+//            $("#SRC_jd_chk_roadm").val('');
+//            $("#SRC_jd_chk_roadmm").val('');
+//        }
+//        if(concchk==true){
+//            $('#SRC_jd_chk_concm').removeAttr('disabled');
+//            $('#SRC_jd_chk_concmm').removeAttr('disabled');
+//        }
+//        else{
+//            $("#SRC_jd_chk_concm").attr("disabled", "disabled");
+//            $("#SRC_jd_chk_concmm").attr("disabled", "disabled");
+//            $("#SRC_jd_chk_concm").val('');
+//            $("#SRC_jd_chk_concmm").val('');
+//        }
+//        if(turfchk==true){
+//            $('#SRC_jd_chk_trufm').removeAttr('disabled');
+//            $('#SRC_jd_chk_trufmm').removeAttr('disabled');
+//        }
+//        else{
+//            $("#SRC_jd_chk_trufm").attr("disabled", "disabled");
+//            $("#SRC_jd_chk_trufmm").attr("disabled", "disabled");
+//            $("#SRC_jd_chk_trufm").val('');
+//            $("#SRC_jd_chk_trufmm").val('');
+//        }
+//        //weather time validation
+//        if(weather!=''){
+//            $('#SRC_tr_txt_wftime').removeAttr('disabled');
+//            $('#SRC_tr_txt_wttime').removeAttr('disabled');
+//        }
+//        else{
+//            $("#SRC_tr_txt_wftime").attr("disabled", "disabled");
+//            $("#SRC_tr_txt_wttime").attr("disabled", "disabled");
+//        }
+//        if((location!=' ')&&(contractno!='') && (teamname!='SELECT') && (reportdate!='')  && (reachsite!='') && (leavesite!='') && (jobtype==true))
+//        {
+//            if((pipetesting!='') && (startpressure!='') && (endpressure!=''))
+//            {
+//                if(roadchk==true){
+//                    if((roadm!='') && (roadmm!='')){
+//                        var chkflag=1;
+//                    }
+//                    else{
+//                        var chkflag=0;
+//                    }
+//                }
+//                if(concchk==true){
+//                    if((concm!='') && (concmm!='')){
+//                        var chkflag=1;
+//                    }
+//                    else{
+//                        var chkflag=0;
+//                    }
+//                }
+//                if(turfchk==true){
+//                    if((trufm!='') && (trufmm!='')){
+//                        var chkflag=1;
+//                    }
+//                    else{
+//                        var chkflag=0;
+//                    }
+//                }
+//                if(concchk==true && turfchk==true){
+//                    if((trufm!='') && (trufmm!='') && (concm!='') && (concmm!='')){
+//                        var chkflag=1;
+//                    }
+//                    else{
+//                        var chkflag=0;
+//                    }
+//                }
+//                if(concchk==true && roadchk==true){
+//                    if((roadm!='') && (roadmm!='') && (concm!='') && (concmm!='')){
+//                        var chkflag=1;
+//                    }
+//                    else{
+//                        var chkflag=0;
+//                    }
+//                }
+//                if(roadchk==true && turfchk==true){
+//                    if((trufm!='') && (trufmm!='') && (roadm!='') && (roadmm!='')){
+//                        var chkflag=1;
+//                    }
+//                    else{
+//                        var chkflag=0;
+//                    }
+//                }
+//                if(roadchk==true && turfchk==true && concchk==true){
+//                    if((trufm!='') && (trufmm!='') && (roadm!='') && (roadmm!='') && (concm!='') && (concmm!='')){
+//                        var chkflag=1;
+//                    }
+//                    else{
+//                        var chkflag=0;
+//                    }
+//                }
+////                //EMPPLOYEE TABLE RECORDS
+//                var employeerowcount=$('#SRC_Employee_table tr').length;
+//                for(var j=0;j<employeerowcount-1;j++)
+//                {
+//                    var autoid=j+1;
+//                    var emp_id=$('#SRC_Emp_id'+autoid).val();
+//                    if(emp_id==employee_id)
+//                    {
+//                        var emp_name=$('#SRC_Emp_name'+autoid).val();
+//                        var emp_start=$('#SRC_Emp_starttime'+autoid).val();
+//                        var emp_end=$('#SRC_Emp_endtime'+autoid).val();
+//                    }
+//                }
+//                if((emp_id!='') && (emp_name!='') && (emp_start!='') && (emp_end!='')){
+//                    var chkflag=1;
+//                }else{
+//                    var chkflag=0;
+//                }
+//                if(chkflag==1){
+//                    $('#SRC_Final_Update').removeAttr('disabled');
+//                }else{
+//                    $('#SRC_Final_Update').attr('disabled','disabled');
+//                }
+//            }
+        if(reportdate!='')
         {
-            if((pipetesting!='') && (startpressure!='') && (endpressure!=''))
-            {
-                if(roadchk==true){
-                    if((roadm!='') && (roadmm!='')){
-                        var chkflag=1;
-                    }
-                    else{
-                        var chkflag=0;
-                    }
-                }
-                if(concchk==true){
-                    if((concm!='') && (concmm!='')){
-                        var chkflag=1;
-                    }
-                    else{
-                        var chkflag=0;
-                    }
-                }
-                if(turfchk==true){
-                    if((trufm!='') && (trufmm!='')){
-                        var chkflag=1;
-                    }
-                    else{
-                        var chkflag=0;
-                    }
-                }
-                if(concchk==true && turfchk==true){
-                    if((trufm!='') && (trufmm!='') && (concm!='') && (concmm!='')){
-                        var chkflag=1;
-                    }
-                    else{
-                        var chkflag=0;
-                    }
-                }
-                if(concchk==true && roadchk==true){
-                    if((roadm!='') && (roadmm!='') && (concm!='') && (concmm!='')){
-                        var chkflag=1;
-                    }
-                    else{
-                        var chkflag=0;
-                    }
-                }
-                if(roadchk==true && turfchk==true){
-                    if((trufm!='') && (trufmm!='') && (roadm!='') && (roadmm!='')){
-                        var chkflag=1;
-                    }
-                    else{
-                        var chkflag=0;
-                    }
-                }
-                if(roadchk==true && turfchk==true && concchk==true){
-                    if((trufm!='') && (trufmm!='') && (roadm!='') && (roadmm!='') && (concm!='') && (concmm!='')){
-                        var chkflag=1;
-                    }
-                    else{
-                        var chkflag=0;
-                    }
-                }
-//                //EMPPLOYEE TABLE RECORDS
-                var employeerowcount=$('#SRC_Employee_table tr').length;
-                for(var j=0;j<employeerowcount-1;j++)
-                {
-                    var autoid=j+1;
-                    var emp_id=$('#SRC_Emp_id'+autoid).val();
-                    if(emp_id==employee_id)
-                    {
-                        var emp_name=$('#SRC_Emp_name'+autoid).val();
-                        var emp_start=$('#SRC_Emp_starttime'+autoid).val();
-                        var emp_end=$('#SRC_Emp_endtime'+autoid).val();
-                    }
-                }
-                if((emp_id!='') && (emp_name!='') && (emp_start!='') && (emp_end!='')){
-                    var chkflag=1;
-                }else{
-                    var chkflag=0;
-                }
-                if(chkflag==1){
-                    $('#SRC_Final_Update').removeAttr('disabled');
-                }else{
-                    $('#SRC_Final_Update').attr('disabled','disabled');
-                }
-            }
+            $('#SRC_Final_Update').removeAttr('disabled');
         }
         else
         {
@@ -2022,40 +2028,45 @@ $(document).ready(function(){
         }
         var EmployeeDetails=[Employeeid,Start,End,OT,Remark];
 
-            var formelement =$('#SRC_entryform').serialize();
+        var formelement =$('#SRC_entryform').serialize();
 //            var dataURL = canvas.toDataURL();
-            var arraydata={"Option":"UpdateForm","SRC_MaterialDetails": materialusage_array,"SRC_FittingDetails":fittingusage_array,"SRC_EquipmentDetails":equipmentusage_array,"SRC_RentalDetails":rentalmechinery_array,"SRC_MechineryUsageDetails":mechineryusage_array,"SRC_MechEqptransfer":mech_eqp_array,"SRC_SiteVisit":SV_array,"SRC_MeetingDetails":meeting_array,"SRC_EmployeeDetails":EmployeeDetails,"imgData": imageData};
-            data=formelement + '&' + $.param(arraydata);
-            $.ajax({
-                type: "POST",
-                url: "DB_PERMITS_ENTRY.php",
-                data:data,
-                success: function(msg){
-                    $('.preloader').hide();
-                    var msg_alert=JSON.parse(msg);
-                    var spflag=msg_alert[0];
-                    var dirflag=msg_alert[1];
-                    if(spflag==1)
-                    {
-                        show_msgbox("REPORT SUBMISSION UPDATE",error_message[0],"success",false)
-                        $('#SRC_entryform').hide();
-                        datatable();
-                        $('#SRC_Final_Update').hide();
-                    }
-                    else if(spflag==0)
-                    {
-                        show_msgbox("REPORT SUBMISSION UPDATE",error_message[1],"error",false)
-                    }
-                    else if(dirflag==0)
-                    {
-                        show_msgbox("REPORT SUBMISSION UPDATE",error_message[7],"error",false)
-                    }
-                    else if(spflag!=0 && spflag!=1 && spflag!='')
-                    {
-                        show_msgbox("REPORT SUBMISSION UPDATE",spflag,"error",false)
-                    }
+        var arraydata={"Option":"UpdateForm","SRC_MaterialDetails": materialusage_array,"SRC_FittingDetails":fittingusage_array,"SRC_EquipmentDetails":equipmentusage_array,"SRC_RentalDetails":rentalmechinery_array,"SRC_MechineryUsageDetails":mechineryusage_array,"SRC_MechEqptransfer":mech_eqp_array,"SRC_SiteVisit":SV_array,"SRC_MeetingDetails":meeting_array,"SRC_EmployeeDetails":EmployeeDetails,"imgData": imageData};
+        data=formelement + '&' + $.param(arraydata);
+        $.ajax({
+            type: "POST",
+            url: "DB_PERMITS_ENTRY.php",
+            data:data,
+            success: function(msg){
+                $('.preloader').hide();
+                var msg_alert=JSON.parse(msg);
+                var spflag=msg_alert[0];
+                var dirflag=msg_alert[1];
+                var writeable=msg_alert[2];
+                if(spflag==1)
+                {
+                    show_msgbox("REPORT SUBMISSION UPDATE",error_message[0],"success",false)
+                    $('#SRC_entryform').hide();
+                    datatable();
+                    $('#SRC_Final_Update').hide();
                 }
-          });
+                else if(spflag==0)
+                {
+                    show_msgbox("REPORT SUBMISSION UPDATE",error_message[1],"error",false)
+                }
+                else if(dirflag==0)
+                {
+                    show_msgbox("REPORT SUBMISSION UPDATE",error_message[7],"error",false)
+                }
+                else if(writeable==0)
+                {
+                    show_msgbox("REPORT SUBMISSION UPDATE",error_message[10],"error",false)
+                }
+                else
+                {
+                    show_msgbox("REPORT SUBMISSION UPDATE",msg,"error",false)
+                }
+            }
+        });
     });
 //END OF FINAL SUBMIT FUNCTION
 
@@ -2073,7 +2084,7 @@ $(document).ready(function(){
 <div class="row form-group">
     <div class="col-md-1"></div>
     <div class="col-md-3 selectContainer">
-        <label id="tr_lbl_team">EMPLOYEE NAME<em>*</em></label>
+        <label id="tr_lbl_team">EMPLOYEE NAME</label>
         <select class="form-control" id="SRC_team_lb_empname" name="SRC_team_lb_empname">
         </select>
     </div>
@@ -2124,25 +2135,25 @@ $(document).ready(function(){
 <br><form id="SRC_entryform" class="form-horizontal">
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">TEAM REPORT<em>*</em></h3>
+        <h3 class="panel-title">TEAM REPORT</h3>
     </div>
     <div class="panel-body">
         <!--        <form id="teamreport" class="form-horizontal">-->
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label id="tr_lbl_location">LOCATION<em>*</em></label>
+                    <label id="tr_lbl_location">LOCATION</label>
                     <input type="text" class="form-control alphanumeric txtlen" id="SRC_tr_txt_location" name="SRC_tr_txt_location" placeholder="Location">
                 </div>
                 <div class="col-md-3">
-                    <label  id="tr_lbl_contactno">CONTRACT NO<em>*</em></label>
+                    <label  id="tr_lbl_contactno">CONTRACT NO</label>
                     <input type="text" class="form-control decimal quantity" id="SRC_tr_txt_contractno" name="SRC_tr_txt_contractno" placeholder="Contact No">
                 </div>
                 <div class="col-md-3 selectContainer">
-                    <label id="tr_lbl_team">TEAM<em>*</em></label>
+                    <label id="tr_lbl_team">TEAM</label>
                     <input type="text" class="form-control" id="SRC_tr_lb_team" name="SRC_tr_lb_team" readonly>
-<!--                    <select class="form-control" id="SRC_tr_lb_team" name="SRC_tr_lb_team">-->
-<!--                    </select>-->
+                    <!--                    <select class="form-control" id="SRC_tr_lb_team" name="SRC_tr_lb_team">-->
+                    <!--                    </select>-->
                 </div>
                 <div class="col-md-3">
                     <label id="tr_lbl_date">DATE<em>*</em></label>
@@ -2167,11 +2178,11 @@ $(document).ready(function(){
                     <input type="text" class="form-control time-picker" id="SRC_tr_txt_wttime" name="SRC_tr_txt_wttime" placeholder="Weather Time">
                 </div>
                 <div class="col-md-2">
-                    <label id="tr_lbl_reachsite">REACH SITE<em>*</em></label>
+                    <label id="tr_lbl_reachsite">REACH SITE</label>
                     <input type="text" class="form-control time-picker" id="SRC_tr_txt_reachsite"  name="SRC_tr_txt_reachsite" placeholder="Time">
                 </div>
                 <div class="col-md-2">
-                    <label id="tr_lbl_leavesite">LEAVE SITE<em>*</em></label>
+                    <label id="tr_lbl_leavesite">LEAVE SITE</label>
                     <input type="text" class="form-control time-picker" id="SRC_tr_txt_leavesite" name="SRC_tr_txt_leavesite" placeholder="Time">
                 </div>
             </div>
@@ -2188,19 +2199,19 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">MEETING</h3>
+        <h3 class="panel-title">TOOLBOX MEETING</h3>
     </div>
     <div class="panel-body">
         <!--        <form>-->
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label for="SRC_mt_lbl_topic" id="SRC_mt_lbl_topic">TOPIC<em>*</em></label>
+                    <label for="SRC_mt_lbl_topic" id="SRC_mt_lbl_topic">TOPIC</label>
                     <select class="form-control meetingform-validation" id="SRC_mt_lb_topic" name="SRC_mt_lb_topic">
                     </select>
                 </div>
                 <div class="col-md-8">
-                    <label for="SRC_mt_lbl_remark" id="SRC_mt_lbl_remark">REMARKS<em>*</em></label>
+                    <label for="SRC_mt_lbl_remark" id="SRC_mt_lbl_remark">REMARKS</label>
                     <textarea class="form-control meetingform-validation remarklen removecap" style="min-height: 35px;" rows="1" id="SRC_mt_ta_remark" name="SRC_mt_ta_remark" placeholder="Remarks"></textarea>
                 </div>
             </div>
@@ -2217,7 +2228,7 @@ $(document).ready(function(){
                 <button type="button" id="SRC_mt_btn_update" class="btn btn-info SRC_mt_btn_updaterow" disabled>UPDATE</button>
             </div>
         </fieldset>
-        <div>
+        <div class="table-responsive">
             <table class="table table-striped table-hover" id="SRC_meeting_table">
                 <thead>
                 <tr class="active">
@@ -2235,70 +2246,102 @@ $(document).ready(function(){
 </div>
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">JOB DONE<em>*</em></h3>
+        <h3 class="panel-title">JOB DONE</h3>
     </div>
     <div class="panel-body">
         <!--        <form id="jobdone" class="form-horizontal" role="form">-->
         <fieldset>
-            <div class="row form-group">
-                <label class="col-md-3" id="SRC_tr_lbl_pipelaid">PIPE LAID<em>*</em></label>
-                <div class="col-md-3">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="SRC_jd_chk_road" name="SRC_jd_chk_road"> ROAD
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="SRC_jd_chk_contc" name="SRC_jd_chk_contc"> CONC
-                        </label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="SRC_jd_chk_truf" name="SRC_jd_chk_truf"> TURF
-                        </label>
-                    </div>
-                </div>
-            </div>
-            <div class="row form-group">
-                <label class="col-md-2" id="SRC_tr_lbl_location">SIZE / LENGTH<em>*</em></label>
-                <div class="col-md-9 ">
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRC_jd_chk_roadm" name="SRC_jd_chk_roadm" placeholder="M">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRC_jd_chk_roadmm"  name="SRC_jd_chk_roadmm" placeholder="MM">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRC_jd_chk_concm"   name="SRC_jd_chk_concm" placeholder="M">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRC_jd_chk_concmm" name="SRC_jd_chk_concmm" placeholder="MM">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRC_jd_chk_trufm" name="SRC_jd_chk_trufm" placeholder="M">
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" class="form-control decimal size" id="SRC_jd_chk_trufmm" name="SRC_jd_chk_trufmm" placeholder="MM">
-                    </div>
-                </div>
+            <div class="table-responsive">
+                <table class="table" border="1" style="border: #ddd;">
+                    <tr>
+                        <td class="jobthl">
+                            <label style="padding-bottom: 15px"></label>
+                            <label id="SRC_tr_lbl_pipelaid">PIPE LAID</label>
+                        </td>
+                        <td colspan="2" style="text-align: center">
+                            <div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="SRC_jd_chk_road" name="SRC_jd_chk_road"> ROAD
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                        <td colspan="2" style="text-align: center">
+                            <div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="SRC_jd_chk_contc" name="SRC_jd_chk_contc"> CONC
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                        <td colspan="2" style="text-align: center">
+                            <div>
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="SRC_jd_chk_truf" name="SRC_jd_chk_truf"> TURF
+                                    </label>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="jobthl" style="border-top: 1px solid white;">
+                            <label style="padding-bottom: 15px"> </label>
+                            <label id="SRC_tr_lbl_location">SIZE/LENGTH</label>
+                        </td>
+                        <td class="jobtd" style="border-top: 1px solid white;">
+                            <div>
+                                <label>M</label>
+                                <input type="text" class="form-control decimal size" id="SRC_jd_chk_roadm" name="SRC_jd_chk_roadm" placeholder="M">
+                            </div>
+                        </td>
+                        <td style="border-top: 1px solid white;">
+                            <div>
+                                <label>MM</label>
+                                <input type="text" class="form-control decimal size" id="SRC_jd_chk_roadmm"  name="SRC_jd_chk_roadmm" placeholder="MM">
+                            </div>
+                        </td>
+                        <td class="jobtd" style="border-top: 1px solid white;">
+                            <div>
+                                <label>M</label>
+                                <input type="text" class="form-control decimal size" id="SRC_jd_chk_concm"   name="SRC_jd_chk_concm" placeholder="M">
+                            </div>
+                        </td>
+                        <td style="border-top: 1px solid white;">
+                            <div>
+                                <label>MM</label>
+                                <input type="text" class="form-control decimal size" id="SRC_jd_chk_concmm" name="SRC_jd_chk_concmm" placeholder="MM">
+                            </div>
+                        </td>
+                        <td class="jobtd" style="border-top: 1px solid white;">
+                            <div>
+                                <label>M</label>
+                                <input type="text" class="form-control decimal size" id="SRC_jd_chk_trufm" name="SRC_jd_chk_trufm" placeholder="M">
+                            </div>
+                        </td>
+                        <td class="jobthr" style="border-top: 1px solid white;">
+                            <div>
+                                <label>MM</label>
+                                <input type="text" class="form-control decimal size" id="SRC_jd_chk_trufmm" name="SRC_jd_chk_trufmm" placeholder="MM">
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label for="SRC_jd_txt_testing" id="SRC_jd_lbl_testing">PIPE TESTING<em>*</em></label>
+                    <label for="SRC_jd_txt_testing" id="SRC_jd_lbl_testing">PIPE TESTING</label>
                     <input type="text" class="form-control alphanumeric txtlen" id="SRC_jd_txt_pipetesting" name="SRC_jd_txt_pipetesting" placeholder="Pipe Testing">
                 </div>
                 <div class="col-md-3">
-                    <label for="SRC_jd_txt_start" id="SRC_jd_lbl_start" >START (Pressure)<em>*</em></label>
+                    <label for="SRC_jd_txt_start" id="SRC_jd_lbl_start" >START (PRESSURE)</label>
                     <input type="text" class="form-control alphanumeric quantity"  id="SRC_jd_txt_start" name="SRC_jd_txt_start" placeholder="Start Pressure">
                 </div>
                 <div class="col-md-3">
-                    <label for="SRC_jd_txt_end" id="SRC_jd_lbl_end">END (Pressure)<em>*</em></label>
+                    <label for="SRC_jd_txt_end" id="SRC_jd_lbl_end">END (PRESSURE)</label>
                     <input type="text" class="form-control alphanumeric quantity" id="SRC_jd_txt_end" name="SRC_jd_txt_end" placeholder="End Pressure">
                 </div>
                 <div class="col-md-3">
@@ -2313,16 +2356,16 @@ $(document).ready(function(){
 
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">EMPLOYEE REPORT DETAILS<em>*</em></h3>
+        <h3 class="panel-title">EMPLOYEE REPORT DETAILS</h3>
     </div>
     <div class="panel-body">
         <div class="table-responsive">
             <table class="table table-striped table-hover" id="SRC_Employee_table" name="SRC_Employee_table">
                 <thead>
                 <tr class="active">
-                    <th><div>NAME<em>*</em></div></th>
-                    <th><div class="col-lg-10">START TIME<em>*</em></div></th>
-                    <th><div class="col-lg-10">END TIME<em>*</em></div></th>
+                    <th><div>NAME</div></th>
+                    <th><div class="col-lg-10">START TIME</div></th>
+                    <th><div class="col-lg-10">END TIME</div></th>
                     <th><div class="col-lg-10">OT</div></th>
                     <th><div>REMARKS</div></th>
                 </tr>
@@ -2342,20 +2385,20 @@ $(document).ready(function(){
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label>DESIGNATION<em>*</em></label>
+                    <label>DESIGNATION</label>
                     <input class="form-control alphanumeric form-validation txtlen" id="SRC_sv_txt_designation" placeholder="Designation"/>
                 </div>
                 <div class="col-md-3">
-                    <label>NAME<em>*</em></label>
+                    <label>NAME</label>
                     <input class="form-control form-validation txtlen autosizealph" id="SRC_sv_txt_name" placeholder="Name"/>
                 </div>
 
                 <div class="col-md-1">
-                    <label>START<em>*</em></label>
+                    <label>START</label>
                     <input type="text" class="form-control form-validation time-picker" id="SRC_sv_txt_start" placeholder="Time">
                 </div>
                 <div class="col-md-1">
-                    <label>END<em>*</em></label>
+                    <label>END</label>
                     <input type="text" class="form-control form-validation time-picker" id="SRC_sv_txt_end" placeholder="Time">
                 </div>
                 <div class="col-md-4">
@@ -2406,16 +2449,16 @@ $(document).ready(function(){
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label>FROM (LORRY NO)<em>*</em></label>
+                    <label>FROM (LORRY NO)</label>
                     <input type="text" class="form-control SRC_form-validation quantity lorryno" id="SRC_mtranser_from" name="SRC_mtranser_from" placeholder="From (Lorry No)">
                 </div>
                 <div class="col-md-3">
-                    <label>ITEM<em>*</em></label>
+                    <label>ITEM</label>
                     <input type="text" class="form-control alphanumeric SRC_form-validation txtlen" id="SRC_mtransfer_item" name="SRC_mtransfer_item" placeholder="Item">
                 </div>
 
                 <div class="col-md-3">
-                    <label>TO (LORRY NO)<em>*</em></label>
+                    <label>TO (LORRY NO)</label>
                     <input type="text" class="form-control SRC_form-validation quantity lorryno" id="SRC_mtransfer_to"  name="SRC_mtransfer_to" placeholder="To (Lorry No)">
                 </div>
 
@@ -2450,7 +2493,7 @@ $(document).ready(function(){
                 <tbody>
                 </tbody>
             </table>
-       </div>
+        </div>
     </div>
 </div>
 
@@ -2464,17 +2507,17 @@ $(document).ready(function(){
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>MACHINERY TYPE<em>*</em></label>
+                    <label>MACHINERY TYPE</label>
                     <select class="form-control SRC_machineryform-validation" id="SRC_machinery_type" name="SRC_machinery_type">
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label>START<em>*</em></label>
+                    <label>START</label>
                     <input type="text" class="form-control SRC_machineryform-validation time-picker"  id="SRC_machinery_start" name="SRC_machinery_start" placeholder="Time">
                 </div>
 
                 <div class="col-md-2">
-                    <label>END<em>*</em></label>
+                    <label>END</label>
                     <input type="text" class="form-control SRC_machineryform-validation time-picker"  id="SRC_machinery_end"  name="SRC_machinery_end" placeholder="Time">
                 </div>
 
@@ -2525,27 +2568,27 @@ $(document).ready(function(){
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>LORRY NUMBER<em>*</em></label>
+                    <label>LORRY NUMBER</label>
                     <input type="text" class="form-control SRC_rentalform-validation quantity lorryno" id="SRC_rental_lorryno" name="SRC_rental_lorryno" placeholder="Lorry Name">
                 </div>
                 <div class="col-md-4">
-                    <label>THROW EARTH(STORE)<em>*</em></label>
+                    <label>THROW EARTH(STORE)</label>
                     <input type="text" class="form-control SRC_rentalform-validation decimal size" id="SRC_rental_throwearthstore" name="SRC_rental_throwearthstore" placeholder="Throw Earth(Store)">
                 </div>
 
                 <div class="col-md-4">
-                    <label>THROW EARTH(OUTSIDE)<em>*</em></label>
+                    <label>THROW EARTH(OUTSIDE)</label>
                     <input type="text" class="form-control SRC_rentalform-validation decimal size" id="SRC_rental_throwearthoutside" name="SRC_rental_throwearthoutside" placeholder="Throwe Earth(Outside)">
                 </div>
             </div>
             <div class="row form-group">
                 <div class="col-md-2">
-                    <label>START TIME<em>*</em></label>
+                    <label>START TIME</label>
                     <input type="text" class="form-control SRC_rentalform-validation time-picker" id="SRC_rental_start" name="SRC_rental_start" placeholder="Time">
                 </div>
 
                 <div class="col-md-2">
-                    <label>END TIME<em>*</em></label>
+                    <label>END TIME</label>
                     <input type="text" class="form-control SRC_rentalform-validation  time-picker" id="SRC_rental_end"  name="SRC_rental_end" placeholder="Time">
                 </div>
 
@@ -2591,19 +2634,19 @@ $(document).ready(function(){
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-3">
-                    <label>AIR-COMPRESSOR<em>*</em></label>
+                    <label>AIR-COMPRESSOR</label>
                     <input type="text" class="form-control alphanumeric SRC_equipmentform-validation txtlen "  id="SRC_equipment_aircompressor" name="SRC_equipment_aircompressor" placeholder="Air-Compressor">
                 </div>
                 <div class="col-md-3">
-                    <label>LORRY NO(TRANSPORT)<em>*</em></label>
+                    <label>LORRY NO(TRANSPORT)</label>
                     <input type="text" class="form-control SRC_equipmentform-validation quantity lorryno" id="SRC_equipment_lorryno" name="SRC_equipment_lorryno" placeholder="Lorry No(Transport)">
                 </div>
                 <div class="col-md-1">
-                    <label>START<em>*</em></label>
+                    <label>START</label>
                     <input type="text" class="form-control SRC_equipmentform-validation time-picker" id="SRC_equipment_start"  name="SRC_equipment_start" placeholder="Time">
                 </div>
                 <div class="col-md-1">
-                    <label>END<em>*</em></label>
+                    <label>END</label>
                     <input type="text" class="form-control SRC_equipmentform-validation time-picker" id="SRC_equipment_end"  name="SRC_equipment_end" placeholder="Time">
                 </div>
                 <div class="col-md-4">
@@ -2651,16 +2694,16 @@ $(document).ready(function(){
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>ITEMS<em>*</em></label>
+                    <label>ITEMS</label>
                     <select class="form-control SRC_fittingform-validation" id="SRC_fitting_items" name="SRC_fitting_items" placeholder="Items">
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label>SIZE<em>*</em></label>
+                    <label>SIZE</label>
                     <input type="text" class="form-control SRC_fittingform-validation decimal size" id="SRC_fitting_size" name="SRC_fitting_size" placeholder="MM">
                 </div>
                 <div class="col-md-2">
-                    <label>QUANTITY<em>*</em></label>
+                    <label>QUANTITY</label>
                     <input type="text" class="form-control SRC_fittingform-validation decimal size" id="SRC_fitting_quantity" name="SRC_fitting_quantity" placeholder="Quantity">
                 </div>
                 <div class="col-md-4">
@@ -2708,17 +2751,17 @@ $(document).ready(function(){
         <fieldset>
             <div class="row form-group">
                 <div class="col-md-4">
-                    <label>ITEMS<em>*</em></label>
+                    <label>ITEMS</label>
                     <select class="form-control SRC_materialform-validation" id="SRC_material_items" name="SRC_material_items" placeholder="Items">
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label>RECEIPT NO<em>*</em></label>
+                    <label>RECEIPT NO</label>
                     <input type="text" class="form-control alphanumeric SRC_materialform-validation quantity" id="SRC_material_receipt" name="SRC_material_receipt" placeholder="Receipt No">
                 </div>
 
                 <div class="col-md-4">
-                    <label>QUANTITY<em>*</em></label>
+                    <label>QUANTITY</label>
                     <input type="text" class="form-control SRC_materialform-validation decimal size" id="SRC_material_quantity" name="SRC_material_quantity" placeholder="Quantity">
                     <input type="hidden" class="form-control" id="SRC_material_id" name="SRC_material_id">
                 </div>
@@ -2748,7 +2791,7 @@ $(document).ready(function(){
 <!-- DRAWING SURFACE--->
 <div class="panel panel-primary">
     <div class="panel-heading">
-        <h3 class="panel-title">DRAWING AREA<em>*</em></h3>
+        <h3 class="panel-title">DRAWING AREA</h3>
     </div>
     <div class="panel-body">
     </div>
@@ -2772,69 +2815,69 @@ $(document).ready(function(){
                                     <a onClick="circle()"  class="btn primary a-img-btn-active" title='CIRCLE'><img src="PAINT/IMAGES/cir.png"  class="img-rounded"/></a>
                                     <a onClick="rectangle()" class="btn primary a-img-btn" title='RECTANGLE'><img src="PAINT/IMAGES/rectangle.png"  class="img-rounded"/></a>
                                     <a onClick="line()"  class<div class="general" style="background-color:#F5F5F5;border:1px solid lavender;">
-                                    <a onClick="setColor()"  class="btn primary a-img-btn" title='FILL WITH COLOR'><img src="PAINT/IMAGES/fill.jpg"  class="img-rounded"/></a>
-                                    <a onClick="eclipse()"   class="btn primary a-img-btn" title='ECLIPSE'><img src="PAINT/IMAGES/eclipse.jpg"  class="img-rounded"/></a>
-                                    <a onClick="triangle()"   class="btn primary a-img-btn" title='TRIANGLE'><img src="PAINT/IMAGES/triangle.jpg"  class="img-rounded"/></a>
-                                    <a onClick="circle()"  class="btn primary a-img-btn-active" title='CIRCLE'><img src="PAINT/IMAGES/cir.png"  class="img-rounded"/></a>
-                                    <a onClick="rectangle()" class="btn primary a-img-btn" title='RECTANGLE'><img src="PAINT/IMAGES/rectangle.png"  class="img-rounded"/></a>
-                                    <a onClick="drawLine()"  class="btn primary a-img-btn" title='LINE' id="drawing-line"><img src="PAINT/IMAGES/line.jpg"  class="img-rounded"/></a>
-                                    <a onClick="pencil()"  class="btn primary a-img-btn" title='PENCIL'><img src="PAINT/IMAGES/pencil.png"  class="img-rounded"/></a>
-                                    <a onClick="eraser()"  class="btn primary a-img-btn" title='ERASER'><img src="PAINT/IMAGES/eraser.jpg"  class="img-rounded"/></a>
-                                    <a onClick="textEditor1()"  class="btn primary a-img-btn" title='TEXTd'><img src="PAINT/IMAGES/text.jpg"  class="img-rounded"/></a>
-                                    <a onClick="clearCanvas()" class="btn primary a-img-btn" title='CLEAR'><img src="PAINT/IMAGES/cancel.jpg"  class="img-rounded"/></a>
-                                    <a onClick="selector()" class="btn primary a-img-btn" title='SELECTOR'><img src="PAINT/IMAGES/select.jpg"  class="img-rounded"/></a>
-                                    <a onClick="cut()" class="btn primary a-img-btn" title='REMOVE'><img src="PAINT/IMAGES/cut.jpg"  class="img-rounded"/></a>
-                                </div>
-                                <div class="font" style="background-color:#F5F5F5;"><br>
-                                    <label>Color:</label><input type="color" value="#36bac9" id="drawing-color" title="COLOR">&nbsp;&nbsp;&nbsp;&nbsp;
-                                    <label>Font Style:</label><select id="font-family" ><option value="Times New Roman">Times</option><option value="Agency FB">Agency FB</option><option value="Comic Sans">Comic Sans</option><option value="Courier">Courier</option><option value="Arial">Arial</option></select>
-                                    <input type="range" min="0" max="100" value="30" id="drawing-line-width" title="WIDTH">
-                                    <a onClick="bold()" class="btn primary a-img-btn-font-rem font" title='BOLD' id="fontbold"><img src="PAINT/IMAGES/bold.jpg"  class="img-rounded"/></a>
-                                    <a onClick="italic()" class="btn primary  a-img-btn-font-rem font" title='ITALIC' id="fontitalic"><img src="PAINT/IMAGES/italic.jpg"  class="img-rounded"/></a>
-                                    <a onClick="underline()" class="btn primary  a-img-btn-font-rem font" title='UNDERLINE' id="fontunderline"><img src="PAINT/IMAGES/underline.jpg"  class="img-rounded"/></a>
-                                </div>
-                                <div class="shapes" style="background-color:#F5F5F5;border:1px solid lavender;">
-                                    <a onClick="tappingTee1()"  class="btn primary a-img-btn" title='TAPPING TEE'><img src="PAINT/IMAGES/tappingtee.jpg"  class="img-rounded"/></a>
-                                    <a onClick="tJoint1()"  class="btn primary a-img-btn" title='T/JOINT'><img src="PAINT/IMAGES/tjoint.jpg"  class="img-rounded"/></a>
-                                    <a onClick="stubBlang1()"  class="btn primary a-img-btn" title='STUB FLANGE'><img src="PAINT/IMAGES/stubblang.jpg"  class="img-rounded"/></a>
-                                    <a onClick="reducer1()"  class="btn primary a-img-btn" title='REDUCER'><img src="PAINT/IMAGES/reducer.jpg"  class="img-rounded"/></a>
-                                    <a onClick="lastDegelbow1()"  class="btn primary a-img-btn" title='45/90 DEG ELBOW'><img src="PAINT/IMAGES/lastdegelbow.jpg"  class="img-rounded"/></a>
-                                    <a onClick="halfDegelbow1()"  class="btn primary a-img-btn" title='45 DEG ELBOW'><img src="PAINT/IMAGES/halfdegelbow.jpg"  class="img-rounded"/></a>
-                                    <a onClick="fullDegelbow1()"  class="btn primary a-img-btn" title='90 DEG ELBOW'><img src="PAINT/IMAGES/fulldegelbow.jpg"  class="img-rounded"/></a>
-                                    <a onClick="equalTee1()"  class="btn primary a-img-btn" title='EQUAL TEE'><img src="PAINT/IMAGES/equaltee.jpg"  class="img-rounded"/></a>
-                                    <a onClick="endCap1()"  class="btn primary a-img-btn" title='END CAP'><img src="PAINT/IMAGES/endcap.jpg"  class="img-rounded"/></a>
-                                    <a onClick="diTee1()"  class="btn primary a-img-btn" title='DI TEE'><img src="PAINT/IMAGES/ditee.jpg"  class="img-rounded"/></a>
-                                    <a onClick="diGatevalue1()"  class="btn primary a-img-btn" title='DI GATE VALVE'><img src="PAINT/IMAGES/digatevalue.jpg"  class="img-rounded"/></a>
-                                    <a onClick="diFlanging1()"  class="btn primary a-img-btn" title='DI FLANGE SPIGOT'><img src="PAINT/IMAGES/diflanging.jpg"  class="img-rounded"/></a>
-                                    <a onClick="diFlangesotcket1()" class="btn primary a-img-btn" title='DI FLANGE STOCKET'><img src="PAINT/IMAGES/diflangestocket.jpg"  class="img-rounded"/></a>
-                                    <a onClick="diColor1()"  class="btn primary a-img-btn" title='DI COLLAR'><img src="PAINT/IMAGES/dicolor.jpg"  class="img-rounded"/></a>
-                                    <a onClick="diCap1()"  class="btn primary a-img-btn" title='DI CAP'><img src="PAINT/IMAGES/dicap.jpg"  class="img-rounded"/></a>
-                                    <a onClick="coupler1()"  class="btn primary a-img-btn" title='COUPLER'><img src="PAINT/IMAGES/coupler.jpg"  class="img-rounded"/></a>
-                                    <a onClick="beEndCateValue1()"  class="btn primary a-img-btn" title='PE END GATE VALUE'><img src="PAINT/IMAGES/beendcatevalue.jpg"  class="img-rounded"/></a>
-                                    <a onClick="di90degElbow()"  class="btn primary a-img-btn" title='DI 90 DEG ELBOW'><img src="PAINT/IMAGES/90degElbow.jpg"  class="img-rounded"/></a>
-                                    <a onClick="di45DegElbow()"  class="btn primary a-img-btn" title='DI 45 DEG ELBOW'><img src="PAINT/IMAGES/di45DegElbow.jpg"  class="img-rounded"/></a>
-                                    <a onClick="diReducer()"  class="btn primary a-img-btn" title='DI REDUCER'><img src="PAINT/IMAGES/diReducer.jpg"  class="img-rounded"/></a>
-                                </div></div>
+                                        <a onClick="setColor()"  class="btn primary a-img-btn" title='FILL WITH COLOR'><img src="PAINT/IMAGES/fill.jpg"  class="img-rounded"/></a>
+                                        <a onClick="eclipse()"   class="btn primary a-img-btn" title='ECLIPSE'><img src="PAINT/IMAGES/eclipse.jpg"  class="img-rounded"/></a>
+                                        <a onClick="triangle()"   class="btn primary a-img-btn" title='TRIANGLE'><img src="PAINT/IMAGES/triangle.jpg"  class="img-rounded"/></a>
+                                        <a onClick="circle()"  class="btn primary a-img-btn-active" title='CIRCLE'><img src="PAINT/IMAGES/cir.png"  class="img-rounded"/></a>
+                                        <a onClick="rectangle()" class="btn primary a-img-btn" title='RECTANGLE'><img src="PAINT/IMAGES/rectangle.png"  class="img-rounded"/></a>
+                                        <a onClick="drawLine()"  class="btn primary a-img-btn" title='LINE' id="drawing-line"><img src="PAINT/IMAGES/line.jpg"  class="img-rounded"/></a>
+                                        <a onClick="pencil()"  class="btn primary a-img-btn" title='PENCIL'><img src="PAINT/IMAGES/pencil.png"  class="img-rounded"/></a>
+                                        <a onClick="eraser()"  class="btn primary a-img-btn" title='ERASER'><img src="PAINT/IMAGES/eraser.jpg"  class="img-rounded"/></a>
+                                        <a onClick="textEditor1()"  class="btn primary a-img-btn" title='TEXTd'><img src="PAINT/IMAGES/text.jpg"  class="img-rounded"/></a>
+                                        <a onClick="clearCanvas()" class="btn primary a-img-btn" title='CLEAR'><img src="PAINT/IMAGES/cancel.jpg"  class="img-rounded"/></a>
+                                        <a onClick="selector()" class="btn primary a-img-btn" title='SELECTOR'><img src="PAINT/IMAGES/select.jpg"  class="img-rounded"/></a>
+                                        <a onClick="cut()" class="btn primary a-img-btn" title='REMOVE'><img src="PAINT/IMAGES/cut.jpg"  class="img-rounded"/></a>
+                                    </div>
+                                    <div class="font" style="background-color:#F5F5F5;"><br>
+                                        <label>Color:</label><input type="color" value="#36bac9" id="drawing-color" title="COLOR">&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <label>Font Style:</label><select id="font-family" ><option value="Times New Roman">Times</option><option value="Agency FB">Agency FB</option><option value="Comic Sans">Comic Sans</option><option value="Courier">Courier</option><option value="Arial">Arial</option></select>
+                                        <input type="range" min="0" max="100" value="30" id="drawing-line-width" title="WIDTH">
+                                        <a onClick="bold()" class="btn primary a-img-btn-font-rem font" title='BOLD' id="fontbold"><img src="PAINT/IMAGES/bold.jpg"  class="img-rounded"/></a>
+                                        <a onClick="italic()" class="btn primary  a-img-btn-font-rem font" title='ITALIC' id="fontitalic"><img src="PAINT/IMAGES/italic.jpg"  class="img-rounded"/></a>
+                                        <a onClick="underline()" class="btn primary  a-img-btn-font-rem font" title='UNDERLINE' id="fontunderline"><img src="PAINT/IMAGES/underline.jpg"  class="img-rounded"/></a>
+                                    </div>
+                                    <div class="shapes" style="background-color:#F5F5F5;border:1px solid lavender;">
+                                        <a onClick="tappingTee1()"  class="btn primary a-img-btn" title='TAPPING TEE'><img src="PAINT/IMAGES/tappingtee.jpg"  class="img-rounded"/></a>
+                                        <a onClick="tJoint1()"  class="btn primary a-img-btn" title='T/JOINT'><img src="PAINT/IMAGES/tjoint.jpg"  class="img-rounded"/></a>
+                                        <a onClick="stubBlang1()"  class="btn primary a-img-btn" title='STUB FLANGE'><img src="PAINT/IMAGES/stubblang.jpg"  class="img-rounded"/></a>
+                                        <a onClick="reducer1()"  class="btn primary a-img-btn" title='REDUCER'><img src="PAINT/IMAGES/reducer.jpg"  class="img-rounded"/></a>
+                                        <a onClick="lastDegelbow1()"  class="btn primary a-img-btn" title='45/90 DEG ELBOW'><img src="PAINT/IMAGES/lastdegelbow.jpg"  class="img-rounded"/></a>
+                                        <a onClick="halfDegelbow1()"  class="btn primary a-img-btn" title='45 DEG ELBOW'><img src="PAINT/IMAGES/halfdegelbow.jpg"  class="img-rounded"/></a>
+                                        <a onClick="fullDegelbow1()"  class="btn primary a-img-btn" title='90 DEG ELBOW'><img src="PAINT/IMAGES/fulldegelbow.jpg"  class="img-rounded"/></a>
+                                        <a onClick="equalTee1()"  class="btn primary a-img-btn" title='EQUAL TEE'><img src="PAINT/IMAGES/equaltee.jpg"  class="img-rounded"/></a>
+                                        <a onClick="endCap1()"  class="btn primary a-img-btn" title='END CAP'><img src="PAINT/IMAGES/endcap.jpg"  class="img-rounded"/></a>
+                                        <a onClick="diTee1()"  class="btn primary a-img-btn" title='DI TEE'><img src="PAINT/IMAGES/ditee.jpg"  class="img-rounded"/></a>
+                                        <a onClick="diGatevalue1()"  class="btn primary a-img-btn" title='DI GATE VALVE'><img src="PAINT/IMAGES/digatevalue.jpg"  class="img-rounded"/></a>
+                                        <a onClick="diFlanging1()"  class="btn primary a-img-btn" title='DI FLANGE SPIGOT'><img src="PAINT/IMAGES/diflanging.jpg"  class="img-rounded"/></a>
+                                        <a onClick="diFlangesotcket1()" class="btn primary a-img-btn" title='DI FLANGE STOCKET'><img src="PAINT/IMAGES/diflangestocket.jpg"  class="img-rounded"/></a>
+                                        <a onClick="diColor1()"  class="btn primary a-img-btn" title='DI COLLAR'><img src="PAINT/IMAGES/dicolor.jpg"  class="img-rounded"/></a>
+                                        <a onClick="diCap1()"  class="btn primary a-img-btn" title='DI CAP'><img src="PAINT/IMAGES/dicap.jpg"  class="img-rounded"/></a>
+                                        <a onClick="coupler1()"  class="btn primary a-img-btn" title='COUPLER'><img src="PAINT/IMAGES/coupler.jpg"  class="img-rounded"/></a>
+                                        <a onClick="beEndCateValue1()"  class="btn primary a-img-btn" title='PE END GATE VALUE'><img src="PAINT/IMAGES/beendcatevalue.jpg"  class="img-rounded"/></a>
+                                        <a onClick="di90degElbow()"  class="btn primary a-img-btn" title='DI 90 DEG ELBOW'><img src="PAINT/IMAGES/90degElbow.jpg"  class="img-rounded"/></a>
+                                        <a onClick="di45DegElbow()"  class="btn primary a-img-btn" title='DI 45 DEG ELBOW'><img src="PAINT/IMAGES/di45DegElbow.jpg"  class="img-rounded"/></a>
+                                        <a onClick="diReducer()"  class="btn primary a-img-btn" title='DI REDUCER'><img src="PAINT/IMAGES/diReducer.jpg"  class="img-rounded"/></a>
+                                    </div></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" id="closeImage" data-dismiss="modal">CLOSE</button>
-                        <button type="button" class="btn btn-primary" id="saveImage">SAVE CHANGES</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="closeImage" data-dismiss="modal">CLOSE</button>
+                            <button type="button" class="btn btn-primary" id="saveImage">SAVE CHANGES</button>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- Button HTML (to Trigger Modal) -->
+            <input type="button" class="btn btn-lg btn-primary open-modal" value="SHOW DRAW TOOL">
         </div>
-        <!-- Button HTML (to Trigger Modal) -->
-        <input type="button" class="btn btn-lg btn-primary open-modal" value="SHOW DRAW TOOL">
+        <div id="divImage"></div>
     </div>
-    <div id="divImage"></div>
-</div>
-<!-- ENDING DRAWING SURFACE--->
-<div class="col-lg-offset-10">
-    <button type="button" id="SRC_Final_Update" class="btn btn-info btn-lg" disabled>UPDATE</button>
-</div>
-<script src="PAINT/JS/customShape.js"> </script>
+    <!-- ENDING DRAWING SURFACE--->
+    <div class="col-lg-offset-10">
+        <button type="button" id="SRC_Final_Update" class="btn btn-info btn-lg" disabled>UPDATE</button>
+    </div>
+    <script src="PAINT/JS/customShape.js"> </script>
 </div>
 <div class="form-group-sm" id="backtotop">
     <ul class="nav-pills">

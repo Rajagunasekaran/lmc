@@ -58,19 +58,37 @@ $(document).ready(function(){
     $("#ENT_filetableuploads div").remove();
     $('#ENT_attachafile').text('Attach a file');
     //remove file upload row
-    $(document).on('click', '.removebutton', function () {
+    var filecnt;
+    $(document).on('click', 'button.removebutton', function () {
         $(this).closest('div').remove();
         ENT_upload_count=ENT_upload_count-1;
-        var rowCount = $('#ENT_filetableuploads > div').length;
-        if(rowCount!=0)
+        var rowcnt = $('#ENT_filetableuploads > div').length;
+        if(rowcnt!=0)
         {
             $('#ENT_attachafile').text('Attach another file');
-            $('#docupload').removeAttr('disabled');
+            filecnt=$('#temptextbox').val();
+            var count=0;
+            for(var j=1;j<=filecnt;j++)
+            {
+                var data= $('#ENT_upload_filename'+j).val();
+                if(data!='' && data!=undefined && data!=null)
+                {
+                    count++;
+                }
+            }
+            if(rowcnt==count)
+            {
+                $('#docupload').removeAttr("disabled");
+            }
+            else
+            {
+                $('#docupload').attr("disabled", "disabled");
+            }
         }
-        else
+        if(rowcnt==0)
         {
             $('#ENT_attachafile').text('Attach a file');
-            $('#docupload').attr('disabled','disabled');
+            $('#docupload').attr("disabled", "disabled");
         }
         return false;
     });
@@ -82,9 +100,10 @@ $(document).ready(function(){
             var datasplit=data.split('.');
             var old_loginid=$('#URSRC_lb_selectloginid').val();
             var ext=datasplit[1].toUpperCase();
-            if(ext!='PDF' && ext!='JPG' && ext!='PNG' && ext!='GIF' && ext!='JPEG' && ext!='XLS' && ext!='XLSX' && data!=undefined && data!="")
-            {
-                show_msgbox("DOCUMENTATION",errormessage[0],"error",false)
+            if(ext=='PDF'|| ext=='JPG'|| ext=='PNG' || ext=='JPEG' || ext=='GIF' || data==undefined || data==""){
+            }
+            else{
+                show_msgbox("DOCUMENTATION ENTRY",errormessage[0],"error",false)
                 reset_field($('#ENT_upload_filename'+i));
             }
         }
@@ -110,7 +129,7 @@ $(document).ready(function(){
             uploadfileid="ENT_upload_filename"+rowcount;
             $('#temptextbox').val(rowcount);
         }
-        var appendfile='<div class="col-sm-12"><label class="inline"><input type="file" style="max-width:250px " class="fileextensionchk form-control" id='+uploadfileid+' name='+uploadfileid+'></label><label class="inline" ><button  class="removebutton" value="-" title="Remove this row" style="background-color:red;color:white;font-size:10;font-weight: bold;"></button></label></div>';
+        var appendfile='<div class="col-sm-10" style="padding-bottom: 8px"><label class="inline"><input type="file" style="max-width:250px " class="fileextensionchk form-control" id='+uploadfileid+' name='+uploadfileid+'></label><label class="inline" ><button  class="removebutton" value="-" title="Remove this row" style="background-color:red;color:white;font-size:9;font-weight: bold;"></button></label></div>';
         $('#ENT_filetableuploads').append(appendfile);
         var rowCount =$("#ENT_filetableuploads > div").length
         ENT_upload_count++;
@@ -146,7 +165,7 @@ $(document).ready(function(){
                 {
                     var msg=errormessage[3].toString().replace("[CATEGORY]",categoryname);
                     var errmsg=msg.toString().replace("[DATE]",date);
-                    show_msgbox("DOCUMENTATION",errmsg,"error",false)
+                    show_msgbox("DOCUMENTATION ENTRY",errmsg,"error",false)
                     $('#doc_lb_category').val('SELECT').show();
                     $('#doc_date').val('').show();
                 }
@@ -201,16 +220,16 @@ $(document).ready(function(){
                 $('.preloader').hide();
                 var filename=xmlhttp.responseText;
                 if(filename==1){
-                    show_msgbox("DOCUMENTATION",errormessage[1],"success",false)
+                    show_msgbox("DOCUMENTATION ENTRY",errormessage[1],"success",false)
                     form_clear();
                 }
                 else if(filename==0)
                 {
-                    show_msgbox("DOCUMENTATION",errormessage[2],"error",false)
+                    show_msgbox("DOCUMENTATION ENTRY",errormessage[2],"error",false)
                 }
                 else
                 {
-                    show_msgbox("DOCUMENTATION",filename,"error",false)
+                    show_msgbox("DOCUMENTATION ENTRY",filename,"error",false)
                 }
             }
         }
@@ -227,7 +246,7 @@ $(document).ready(function(){
     <div class="container">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <h2 class="panel-title">DOCUMENTATION</h2>
+                <h2 class="panel-title">DOCUMENTATION ENTRY</h2>
             </div>
             <div class="panel-body">
                 <div class="panel panel-primary">
@@ -250,22 +269,20 @@ $(document).ready(function(){
                                     </div>
                                 </div>
                             </div>
-                            <div class="row form-group">
-                                <div>
-                                    <div><input type="hidden" id="temptextbox" name="temptextbox"></div>
-                                    <div ID="ENT_filetableuploads"></div>
-                                    <div>
-                                        <div id="ENT_attachprompt" class="col-sm-3"><img width="15" height="15" src="image/paperclip.gif" border="0">
-                                            <a href="javascript:_addAttachmentFields('attachmentarea')" id="ENT_attachafile">Attach a file</a>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div>
+                                <div><input type="hidden" id="temptextbox" name="temptextbox"></div>
+                                <div ID="ENT_filetableuploads" class="form-group"></div>
                             </div>
-                            <div class="col-lg-offset-10">
-                                <a class="btn btn-primary btn-lg" type="button" id="docupload" name="docupload" disabled >UPLOAD</a>
+                            <div class="form-group">
+                                <div id="ENT_attachprompt" class="col-sm-3"><img width="15" height="15" src="image/paperclip.gif" border="0">
+                                    <a href="javascript:_addAttachmentFields('attachmentarea')" id="ENT_attachafile">Attach a file</a>
+                                </div>
                             </div>
                         </fieldset>
                     </div>
+                </div>
+                <div class="col-lg-offset-10">
+                    <a class="btn btn-primary btn-lg" type="button" id="docupload" name="docupload" disabled >UPLOAD</a>
                 </div>
             </div>
         </div>

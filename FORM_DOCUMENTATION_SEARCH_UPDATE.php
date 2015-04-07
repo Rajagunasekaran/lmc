@@ -94,7 +94,7 @@ $(document).ready(function(){
             $('#DT_searchbtn').hide();
             $('#DT_div_tablecontainer').hide();
         }
-        else if(listvalue=='FILENAME')
+        else if(listvalue=='FILE NAME')
         {
             $('#srch_filename').show();
             $('#DT_srch_filename').val('').show();
@@ -108,7 +108,7 @@ $(document).ready(function(){
             $('#DT_searchbtn').attr('disabled','disabled').show();
             $('#DT_div_tablecontainer').hide();
         }
-        else if(listvalue=='DATERANGE')
+        else if(listvalue=='DATE RANGE')
         {
             $('#srch_filename').hide();
             $('#DT_srch_filename').val('').hide();
@@ -233,6 +233,7 @@ $(document).ready(function(){
                         "sPaginationType":"full_numbers"
                     });
                     $('#DT_searchbtn').attr('disabled','disabled');
+                    $('#DT_div_tablecontainer').show();
                 }
                 else
                 {
@@ -242,7 +243,6 @@ $(document).ready(function(){
                 }
             }
         }
-        $('#DT_div_tablecontainer').show();
         var option="search_data";
         xmlhttp.open("GET","DB_DOCUMENTATION_SEARCH_UPDATE.php?option="+option+"&filename="+filename+"&startdate="+startdate+"&enddate="+enddate+"&category="+category);
         xmlhttp.send();
@@ -257,6 +257,7 @@ $(document).ready(function(){
         $('#DT_srch_upt').hide();
         $('#form_update').hide();
         $('#temptextbox').val('');
+        $("html, body").animate({ scrollTop: $(document).height() }, "slow");
     });
 //CLICK EVENT FOR SEARCH BUTTON
     var DT_idradiovalue;
@@ -266,6 +267,7 @@ $(document).ready(function(){
         $('#DT_filetableuploads').empty();
         $('#DT_attachafile').text('Attach a file');
         $('#DT_radiosearchbtn').attr('disabled','disabled');
+        $("html, body").animate({ scrollTop: $(document).height() }, "slow");
         DT_idradiovalue=$('input:radio[name=DT_UPD_rd_flxtbl]:checked').attr('id');
         for(var j=0;j<value_array.length;j++){
             var id=value_array[j].id;
@@ -282,13 +284,13 @@ $(document).ready(function(){
         for(var j=0;j<filenameinarray.length;j++){
             var name=filenameinarray[j];
             var filecount="filecount"+j;
-            if(rolename=='ADMIN')
+            if(rolename=='ADMIN' || rolename=='SUPER ADMIN')
             {
-                var appendfile=' <div class="col-sm-offset-2 col-sm-10" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a>&nbsp;&nbsp;<input type="button" id="ibtnDel"  class="updatebtn" value="X" style="background-color:red;color:white;font-size:10;font-weight: bold;"/></div></br>';
+                var appendfile=' <div class="col-sm-offset-2 col-sm-10" style="padding-bottom: 5px" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a>&nbsp;&nbsp;<input type="button" id="ibtnDel"  class="updatebtn" value="X" style="background-color:red;color:white;font-size:10;font-weight: bold;"/></div></br>';
             }
             else
             {
-                var appendfile=' <div class="col-sm-offset-2 col-sm-10" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a></div></br>';
+                var appendfile=' <div class="col-sm-offset-2 col-sm-10" style="padding-bottom: 5px" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a></div></br>';
                 $('#DT_attachprompt').hide();
                 $('#DT_docupload').hide();
             }
@@ -299,6 +301,18 @@ $(document).ready(function(){
     //CLICK EVENT DELETE BUTTON
     $(document).on("click", "#ibtnDel", function (){
         $(this).closest("div").remove();
+        var Count = $('#DT_filetableuploads > div').length;
+        if(Count==0)
+        {
+            $('#DT_attachafile').text('Attach a file');
+            $('#DT_docupload').attr('disabled','disabled');
+        }
+        else
+        {
+            $('#DT_attachafile').text('Attach another file');
+            $('#DT_docupload').removeAttr('disabled');
+        }
+
         var divcount=$('#DT_exsistingfiletable > div').length;
         var oldfilename;
         if(divcount>=0){
@@ -327,19 +341,37 @@ $(document).ready(function(){
         }
     });
 //CLICK EVENT FOR  REMOVEBUTTON
-    $(document).on('click', '.removebutton', function () {
+    var filecnt;
+    $(document).on('click', 'button.removebutton', function () {
         $(this).closest('div').remove();
         DT_upload_count=DT_upload_count-1;
-        var rowCount = $('#DT_filetableuploads > div').length;
-        if(rowCount!=0)
+        var rowcnt = $('#DT_filetableuploads > div').length;
+        if(rowcnt!=0)
         {
             $('#DT_attachafile').text('Attach another file');
-            $('#DT_docupload').removeAttr('disabled');
+            filecnt=$('#temptextbox').val();
+            var count=0;
+            for(var j=1;j<=filecnt;j++)
+            {
+                var data= $('#DT_upload_filename'+j).val();
+                if(data!='' && data!=undefined && data!=null)
+                {
+                    count++;
+                }
+            }
+            if(rowcnt==count)
+            {
+                $('#DT_docupload').removeAttr("disabled");
+            }
+            else
+            {
+                $('#DT_docupload').attr("disabled", "disabled");
+            }
         }
-        else
+        if(rowcnt==0)
         {
             $('#DT_attachafile').text('Attach a file');
-            $('#DT_docupload').attr('disabled','disabled');
+            $('#DT_docupload').attr("disabled", "disabled");
         }
         return false;
     });
@@ -351,11 +383,13 @@ $(document).ready(function(){
             var datasplit=data.split('.');
             var old_loginid=$('#URSRC_lb_selectloginid').val();
             var ext=datasplit[1].toUpperCase();
-            if(ext!='PDF' && ext!='JPG' && ext!='PNG' && ext!='GIF' && ext!='JPEG' && ext!='XLS' && ext!='XLSX' && data!=undefined && data!="")
-            {
+            if(ext=='PDF'|| ext=='JPG'|| ext=='PNG' || ext=='JPEG' || ext=='GIF' || data==undefined || data==""){
+            }
+            else{
                 show_msgbox("DOCUMENTATION SEARCH UPDATE",error_message[1],"error",false)
                 reset_field($('#DT_upload_filename'+i));
             }
+
         }
     });
 //file upload reset
@@ -379,7 +413,7 @@ $(document).ready(function(){
             uploadfileid="DT_upload_filename"+rowcount;
             $('#temptextbox').val(rowcount);
         }
-        var appendfile='<div class="col-sm-offset-2 col-sm-10"><label class="inline"><input type="file" style="max-width:250px " class="fileextensionchk form-control" id='+uploadfileid+' name='+uploadfileid+'></label><label class="inline" ><button  class="removebutton" value="-" title="Remove this row" style="background-color:red;color:white;font-size:10;font-weight: bold;"></button></label></div>';
+        var appendfile='<div class="col-sm-offset-2 col-sm-5" style="padding-bottom: 8px"><label class="inline"><input type="file" style="max-width:250px " class="fileextensionchk form-control" id='+uploadfileid+' name='+uploadfileid+'></label><label class="inline" ><button  class="removebutton" value="-" title="Remove this row" style="background-color:red;color:white;font-size:9;font-weight: bold;"></button></label></div>';
         $('#DT_filetableuploads').append(appendfile);
         var rowCount =$("#DT_filetableuploads > div").length
         DT_upload_count++;
@@ -395,6 +429,7 @@ $(document).ready(function(){
 
 // button validation
     var finalrow;
+    var final_row;
     $(document).on('change blur','#form_update',function(){
         var rowCount=$("#DT_filetableuploads > div").length;
         finalrow=$('#temptextbox').val();
@@ -423,10 +458,24 @@ $(document).ready(function(){
         var fileuploadCount = $('#DT_filetableuploads > div').length;
         if(existdivcount!=0 || fileuploadCount!=0)
         {
-            $('#DT_docupload').removeAttr('disabled');
-        }
-        else{
-            $('#DT_docupload').attr('disabled','disabled');
+            final_row=$('#temptextbox').val();
+            var count=0;
+            for(var j=1;j<=final_row;j++)
+            {
+                var data= $('#DT_upload_filename'+j).val();
+                if(data!='' && data!=undefined && data!=null)
+                {
+                    count++;
+                }
+            }
+            if(fileuploadCount==count)
+            {
+                $('#DT_docupload').removeAttr("disabled");
+            }
+            else
+            {
+                $('#DT_docupload').attr("disabled", "disabled");
+            }
         }
     });
 //CHANGE EVENT FOR CATEGORY LIST BOX & DATE
@@ -467,7 +516,8 @@ $(document).ready(function(){
                 $('.preloader').hide();
                 var filename=xmlhttp.responseText;
                 if(filename==1){
-                    show_msgbox("DOCUMENTATION SEARCH UPDATE",error_message[2],"success",false)
+                    show_msgbox("DOCUMENTATION SEARCH UPDATE",error_message[2],"success",false);
+                    removedfilename='undefined';
                     $('#form_update').hide();
                     DT_table();
                     DT_upload_count=0;
@@ -490,9 +540,6 @@ $(document).ready(function(){
     });
 });
 </script>
-
-
-
 </head>
 <body>
 <form id="documentupdate" class="form-horizontal">
@@ -508,8 +555,8 @@ $(document).ready(function(){
                     <div class="col-sm-3">
                         <select class="form-control" id="DT_srch_by" name="DT_srch_by" >
                             <option>SELECT</option>
-                            <option>FILENAME</option>
-                            <option>DATERANGE</option>
+                            <option>FILE NAME</option>
+                            <option>DATE RANGE</option>
                             <option>CATEGORY</option>
                         </select>
                     </div>
@@ -560,35 +607,39 @@ $(document).ready(function(){
                 </div>
                 <br>
                 <div id="form_update" hidden>
-                    <div class="form-group">
-                        <label class="col-sm-2">CATEGORY<em>*</em></label>
-                        <div class="col-sm-3">
-                            <input type="text" class="form-control existctegry" id="DT_doc_lb_category" name="DT_doc_lb_category" readonly />
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">ATTACHMENTS</h3>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="col-sm-2">DATE<em>*</em></label>
-                        <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control  datemandtry existctegry" id="DT_doc_date" name="DT_doc_date" placeholder="Date" readonly>
-                                <!--                        <label for="DT_doc_date" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span></label>-->
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div>
-                            <div ID="DT_exsistingfiletable" class="form-group row">
+                        <div class="panel-body">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label class="col-sm-2">CATEGORY<em>*</em></label>
+                                    <div class="col-sm-3">
+                                        <input type="text" class="form-control existctegry" id="DT_doc_lb_category" name="DT_doc_lb_category" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2">DATE<em>*</em></label>
+                                    <div class="col-sm-2">
+                                        <input type="text" class="form-control  datemandtry existctegry" id="DT_doc_date" name="DT_doc_date" placeholder="Date" readonly>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div>
+                                        <div ID="DT_exsistingfiletable" class="form-group row"></div>
+                                        <div><input type="hidden" id="temptextbox" name="temptextbox"></div>
+                                        <div ID="DT_filetableuploads" class="form-group row">
 
-                            </div>
-                            <div><input type="hidden" id="temptextbox" name="temptextbox"></div>
-                            <div ID="DT_filetableuploads" class="form-group row">
-
-                            </div>
-                        </div>
-                        <div>
-                            <div id="DT_attachprompt" class="col-sm-offset-2 col-sm-10"><img width="15" height="15" src="image/paperclip.gif" border="0">
-                                <a href="javascript:_addAttachmentFields('attachmentarea')" id="DT_attachafile">Attach a file</a>
-                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div id="DT_attachprompt" class="col-sm-offset-2 col-sm-2"><img width="15" height="15" src="image/paperclip.gif" border="0">
+                                            <a href="javascript:_addAttachmentFields('attachmentarea')" id="DT_attachafile">Attach a file</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
                         </div>
                     </div>
                     <div class="col-lg-offset-10">
@@ -596,7 +647,6 @@ $(document).ready(function(){
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </form>

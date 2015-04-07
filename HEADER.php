@@ -56,6 +56,9 @@
     <style>
         <?php include 'CSS/StyleSheet.css'; ?>
     </style>
+    <meta charset="utf-8">
+    <link rel="shortcut icon" type="image/ico" href="image/create_thumb.png">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
     <style>
         .dropdown-menu{
             font-size: 8px;
@@ -81,7 +84,17 @@
         .panel-title{
             font-weight: bold !important;
         }
+        .jobtd{
+            border-right: 1px solid white;
+        }
+        .jobthl{
+            border-left: 1px solid #ddd;
+        }
+        .jobthr{
+            border-right: 1px solid #ddd;
+        }
     </style>
+
 </head>
 
 <html>

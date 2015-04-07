@@ -4,14 +4,16 @@ include "CONNECTION.php";
 include "GET_USERSTAMP.php";
 include "COMMON.php";
 require_once('mpdf571/mpdf571/mpdf.php');
-require 'PHPMailer-master/PHPMailerAutoload.php';
+include("PHPMailer-master/class.phpmailer.php");
+include("PHPMailer-master/class.smtp.php");
 require_once('PHPExcel/Classes/PHPExcel.php');
 $dir=dirname(__FILE__).DIRECTORY_SEPARATOR;
 date_default_timezone_set('Asia/Singapore');
 $parentfolder=get_parentfolder_id();
+chmod($parentfolder,0777);
 // Create new PHPExcel object
 $objPHPExcel = new PHPExcel();
-// Set document properties
+// Set document propertiesz
 $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
     ->setLastModifiedBy("Maarten Balliauw")
     ->setTitle("Office 2007 XLSX Test Document")
@@ -20,10 +22,10 @@ $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
     ->setKeywords("office 2007 openxml php")
     ->setCategory("Test result file");
 /** Create a new PHPExcel object 1.0 */
-$activeempname=mysqli_query($con,"SELECT EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS ACTIVE_EMPLOYEE_NAME FROM LMC_EMPLOYEE_DETAILS E,LMC_USER_LOGIN_DETAILS U WHERE E.ULD_ID=U.ULD_ID AND U.ULD_USERNAME='$UserStamp'");
+$activeempname=mysqli_query($con,"SELECT ULD_ID,ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS  WHERE ULD_USERNAME='$UserStamp'");
 if($row=mysqli_fetch_array($activeempname))
 {
-    $activeemp=$row["EMP_ID"];
+    $activeemp=$row["ULD_ID"];
 }
 if($_REQUEST['option']=='COMMON_DATA')
 {
@@ -33,7 +35,7 @@ if($_REQUEST['option']=='COMMON_DATA')
         $topicname[]=$row["MT_TOPIC"];
     }
 //TEAM CREATION
-    $team=mysqli_query($con,"SELECT TC.TEAM_NAME FROM LMC_EMPLOYEE_DETAILS ED JOIN LMC_TEAM_CREATION TC WHERE TC.TC_ID = ED.TC_ID AND ED.ULD_ID=$activeemp");
+    $team=mysqli_query($con,"SELECT TC.TEAM_NAME FROM LMC_EMPLOYEE_TEAM_DETAILS ED JOIN LMC_TEAM_CREATION TC WHERE TC.TC_ID = ED.TC_ID AND ED.ULD_ID=$activeemp");
     if($row=mysqli_fetch_array($team)){
         $teamname[]=$row["TEAM_NAME"];
     }
@@ -58,13 +60,13 @@ if($_REQUEST['option']=='COMMON_DATA')
         $joptype[]=array($row["TOJ_JOB"],$row['TOJ_ID']);
     }
     //EMPLOYEE NAME
-    $empname=mysqli_query($con,"SELECT EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS EMPNAME FROM LMC_EMPLOYEE_DETAILS ORDER BY EMPNAME ASC ");
+    $empname=mysqli_query($con,"SELECT ULD_ID,ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS ORDER BY ULD_WORKER_NAME ASC ");
     while($row=mysqli_fetch_array($empname)){
-        $employeename[]=array($row["EMPNAME"],$row['EMP_ID']);
+        $employeename[]=array($row["ULD_WORKER_NAME"],$row['ULD_ID']);
     }
     //ERRPOR MESSAGE
-    $errormsg=get_error_msg('3,6,7,21,143,144,145,147,148');
-    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename,$topicname);
+    $errormsg=get_error_msg('3,6,7,21,143,144,145,147,148,151,152');
+    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename,$topicname,$UserStamp);
     echo JSON_encode($values);
 }
 if($_REQUEST['option']=="checktopic"){
@@ -158,14 +160,24 @@ elseif($_REQUEST['Option']=='InputForm')
         $daterep=str_replace('-','',$reportdate);
         $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
         $userfolderid=get_emp_folderid($EmployeeReport[0]);
+        chmod($userfolderid,0777);
         $path=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
+//        $path='LMC_REPORT_IMAGE'.DIRECTORY_SEPARATOR.'RENU_01042015_180754'.DIRECTORY_SEPARATOR;
+        if ( ! is_writable($path))
+        {
+            $writable=0;
+        } else {
+
+            $writable=1;
+        }
+
         if(is_dir($path)){
             $dirflag=1;
         }
         else{
             $dirflag=0;
         }
-        if($dirflag==1){
+        if($dirflag==1 && $writable==1){
             $uploadpath=$path.$imgfilename;
             try{
                 $data=str_replace('data:image/png;base64,','',$imagedata);
@@ -196,7 +208,7 @@ elseif($_REQUEST['Option']=='InputForm')
         $weathertime='';
     }
 //TEAM REPORT DETAILS
-    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB SEPARATOR ' / ') AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($typeofjob)");
+    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB SEPARATOR ' / ') AS JOB FROM LMC_TYPE_OF_JOB WHERE TOJ_ID IN($typeofjob)");
     while($row=mysqli_fetch_array($jobname)){
         $jobnames=$row["JOB"];
     }
@@ -770,37 +782,37 @@ elseif($_REQUEST['Option']=='InputForm')
     }
     if($flag==1){
 
-        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=12");
+        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_ID=1");
         if($row=mysqli_fetch_array($select_to)){
-            $toaddress=$row["URC_DATA"];
+            $toaddress=$row["ULD_EMAIL_ID"];
         }
-        $select_cc=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=13");
+        $select_cc=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=10");
         if($row=mysqli_fetch_array($select_cc)){
             $ccaddress=$row["URC_DATA"];
         }
-        $select_host=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=17");
+        $select_host=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=14");
         if($row=mysqli_fetch_array($select_host)){
             $host=$row["URC_DATA"];
         }
-        $select_username=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=14");
+        $select_username=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=11");
         if($row=mysqli_fetch_array($select_username)){
             $username=$row["URC_DATA"];
         }
-        $select_password=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=15");
+        $select_password=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=12");
         if($row=mysqli_fetch_array($select_password)){
             $password=$row["URC_DATA"];
         }
 
-        $select_smtpsecure=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=16");
+        $select_smtpsecure=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=13");
         if($row=mysqli_fetch_array($select_smtpsecure)){
             $smtpsecure=$row["URC_DATA"];
         }
 
-        $select_from=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=18");
-        if($row=mysqli_fetch_array($select_from)){
-            $from=$row["URC_DATA"];
-        }
-        $select_emailtemp=mysqli_query($con,"SELECT ETD_EMAIL_SUBJECT, ETD_EMAIL_BODY FROM LMC_EMAIL_TEMPLATE_DETAILS where ETD_ID=6");
+//        $select_from=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=18");
+//        if($row=mysqli_fetch_array($select_from)){
+//            $from=$row["URC_DATA"];
+//        }
+        $select_emailtemp=mysqli_query($con,"SELECT ETD_EMAIL_SUBJECT, ETD_EMAIL_BODY FROM LMC_EMAIL_TEMPLATE_DETAILS where ETD_ID=3");
         if($row=mysqli_fetch_array($select_emailtemp)){
             $sub=$row["ETD_EMAIL_SUBJECT"];
             $msgbody=$row["ETD_EMAIL_BODY"];
@@ -815,7 +827,8 @@ elseif($_REQUEST['Option']=='InputForm')
         $mail->Username = $username;
         $mail->Password = $password;
         $mail->SMTPSecure = $smtpsecure;
-        $mail->From = $from;
+        $mail->Port=587;
+//        $mail->From = $from;
         $mail->FromName = 'LMC';
         $mail->addAddress($toaddress);
         $mail->WordWrap = 50;
@@ -836,7 +849,7 @@ elseif($_REQUEST['Option']=='InputForm')
         $mail->AddStringAttachment($entry_exldata,$xlreportfilename);
         $mail->Send();
     }
-    $flagvalues=array($flag,$dirflag);
+    $flagvalues=array($flag,$dirflag,$writable);
     echo JSON_encode($flagvalues);
 }
 elseif($_REQUEST['option']=='EMPLOYEE_NAME')
@@ -844,22 +857,22 @@ elseif($_REQUEST['option']=='EMPLOYEE_NAME')
     $teamname=$_REQUEST['teamname'];
     $date=date('Y-m-d',strtotime($_REQUEST['date']));
 
-    $reportdetails=mysqli_query($con,"SELECT EMP_ID,TERD_START_TIME,TERD_END_TIME,TERD_OT,TERD_REMARK FROM lmc_team_employee_report_details WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE TC_ID=(SELECT TC_ID FROM LMC_TEAM_CREATION WHERE TEAM_NAME='$teamname')AND TRD_DATE='$date')");
+    $reportdetails=mysqli_query($con,"SELECT ULD_ID,TERD_START_TIME,TERD_END_TIME,TERD_OT,TERD_REMARK FROM lmc_team_employee_report_details WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE TC_ID=(SELECT TC_ID FROM LMC_TEAM_CREATION WHERE TEAM_NAME='$teamname')AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($reportdetails)){
-        $report_details[]=array($row["EMP_ID"],$row["TERD_START_TIME"],$row["TERD_END_TIME"],$row["TERD_OT"],$row["TERD_REMARK"]);
+        $report_details[]=array($row["ULD_ID"],$row["TERD_START_TIME"],$row["TERD_END_TIME"],$row["TERD_OT"],$row["TERD_REMARK"]);
     }
     //EMPLOYEE NAME
-    $empname=mysqli_query($con,"select concat(EMP_FIRST_NAME,' ',EMP_LAST_NAME) as EMPLOYEE_NAME,EMP_ID from LMC_EMPLOYEE_DETAILS where TC_ID=(select distinct TC_ID  from LMC_TEAM_CREATION where TEAM_NAME='$teamname')");
+    $empname=mysqli_query($con,"SELECT DISTINCT ULD.ULD_WORKER_NAME,ULD.ULD_ID FROM LMC_USER_LOGIN_DETAILS ULD JOIN LMC_EMPLOYEE_TEAM_DETAILS EMP ON ULD.ULD_ID=EMP.ULD_ID WHERE EMP.TC_ID=(select distinct TC_ID  from LMC_TEAM_CREATION where TEAM_NAME='$teamname')");
     while($row=mysqli_fetch_array($empname)){
-        $employeename[]=array($row["EMPLOYEE_NAME"],$row["EMP_ID"]);
+        $employeename[]=array($row["ULD_WORKER_NAME"],$row["ULD_ID"]);
     }
     //CURRENT EMPLOYEE NAME
-    $activeempname=mysqli_query($con,"SELECT EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS ACTIVE_EMPLOYEE_NAME FROM LMC_EMPLOYEE_DETAILS E,LMC_USER_LOGIN_DETAILS U WHERE E.ULD_ID=U.ULD_ID AND U.ULD_USERNAME='$UserStamp'");
+    $activeempname=mysqli_query($con,"SELECT ULD_ID,ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$UserStamp'");
     if($row=mysqli_fetch_array($activeempname))
     {
-        $activeemp_name[]=array($row["EMP_ID"]);
+        $activeemp_name[]=array($row["ULD_ID"]);
     }
-    $sql="SELECT * FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$date' AND TC_ID=(SELECT TC_ID FROM LMC_TEAM_CREATION WHERE TEAM_NAME='$teamname') AND EMP_ID='$activeemp'";
+    $sql="SELECT * FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$date' AND TC_ID=(SELECT TC_ID FROM LMC_TEAM_CREATION WHERE TEAM_NAME='$teamname') AND ULD_ID='$activeemp'";
     $sql_result= mysqli_query($con,$sql);
     $row=mysqli_num_rows($sql_result);
     if($row>0)
@@ -878,7 +891,7 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
     $team=$_REQUEST['team'];
     $date=date('Y-m-d',strtotime($_REQUEST['date']));
     //TEAM REPORT DETAILS
-    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_DATE='$date' AND L.EMP_ID='$activeemp'");
+    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_DATE='$date' AND L.ULD_ID='$activeemp'");
     while($row=mysqli_fetch_array($teamreport_details))
     {
         $jobid=$row["TOJ_ID"];
@@ -894,61 +907,61 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
         $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
     }
     //JOB ID DETAILS
-    $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($jobid)");
+    $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM LMC_TYPE_OF_JOB WHERE TOJ_ID IN($jobid)");
     if($row=mysqli_fetch_array($jobdetails))
     {
         $job_details=$row["JOB"];
     }
     //EMPLOYEE DETAILS
-    $empdetails=mysqli_query($con,"SELECT L.EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS EMPNAME,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TERD_OT,L1.TERD_REMARK FROM LMC_EMPLOYEE_DETAILS L LEFT JOIN lmc_team_employee_report_details L1  ON L.EMP_ID=L1.EMP_ID AND TRD_ID IN (SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$date') and L.EMP_ID='$activeemp'");
+    $empdetails=mysqli_query($con,"SELECT L.ULD_ID,L.ULD_WORKER_NAME,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TERD_OT,L1.TERD_REMARK FROM LMC_USER_LOGIN_DETAILS L INNER JOIN LMC_TEAM_EMPLOYEE_REPORT_DETAILS L1  ON L.ULD_ID=L1.ULD_ID AND TRD_ID IN (SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$date') and L.ULD_ID='$activeemp'");
     while($row=mysqli_fetch_array($empdetails))
     {
-        $employeedetails[]=array($row["EMP_ID"],$row["EMPNAME"],$row["STARTTIME"],$row["ENDTIME"],$row["TERD_OT"],$row["TERD_REMARK"]);
+        $employeedetails[]=array($row["ULD_ID"],$row["ULD_WORKER_NAME"],$row["STARTTIME"],$row["ENDTIME"],$row["TERD_OT"],$row["TERD_REMARK"]);
     }
     //SITE VISIT DETAILS
-    $sitevisitdetails=mysqli_query($con,"SELECT SVD_ID,SVD_NAME,SVD_DESIGNATION,DATE_FORMAT(SVD_START_TIME,'%H:%i' ) AS SVDSTARTTIME,DATE_FORMAT(SVD_END_TIME,'%H:%i' ) AS SVDENDTIME,SVD_REMARK FROM lmc_site_visit_details WHERE TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $sitevisitdetails=mysqli_query($con,"SELECT SVD_ID,SVD_NAME,SVD_DESIGNATION,DATE_FORMAT(SVD_START_TIME,'%H:%i' ) AS SVDSTARTTIME,DATE_FORMAT(SVD_END_TIME,'%H:%i' ) AS SVDENDTIME,SVD_REMARK FROM LMC_SITE_VISIT_DETAILS WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($sitevisitdetails))
     {
         $sitevisit_details[]=array($row["SVD_ID"],$row["SVD_NAME"],$row["SVD_DESIGNATION"],$row["SVDSTARTTIME"],$row["SVDENDTIME"],$row["SVD_REMARK"]);
     }
     //MACHINERY_EQUIPMENT DETAILS
-    $mech_equip_details=mysqli_query($con,"SELECT MET_ID,MET_FROM_LORRY_NO,MET_TO_LORRY_NO,MET_ITEM,MET_REMARK FROM LMC_MACHINERY_EQUIPMENT_TRANSFER WHERE TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $mech_equip_details=mysqli_query($con,"SELECT MET_ID,MET_FROM_LORRY_NO,MET_TO_LORRY_NO,MET_ITEM,MET_REMARK FROM LMC_MACHINERY_EQUIPMENT_TRANSFER WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($mech_equip_details))
     {
         $mechequip_details[]=array($row["MET_ID"],$row["MET_FROM_LORRY_NO"],$row["MET_TO_LORRY_NO"],$row["MET_ITEM"],$row["MET_REMARK"]);
     }
     //MACHINERY USAGE DETAILS
-    $machineryusage_details=mysqli_query($con,"SELECT MAC_ID,MCU_MACHINERY_TYPE,DATE_FORMAT(MAC_START_TIME,'%H:%i' ) AS MACSTARTTIME,DATE_FORMAT(MAC_END_TIME,'%H:%i' ) AS MACENDTIME,MAC_REMARK FROM lmc_machinery_usage_details LMUD,lmc_machinery_usage LMU WHERE LMUD.MCU_ID=LMU.MCU_ID AND TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $machineryusage_details=mysqli_query($con,"SELECT MAC_ID,MCU_MACHINERY_TYPE,DATE_FORMAT(MAC_START_TIME,'%H:%i' ) AS MACSTARTTIME,DATE_FORMAT(MAC_END_TIME,'%H:%i' ) AS MACENDTIME,MAC_REMARK FROM LMC_MACHINERY_USAGE_DETAILS LMUD,LMC_MACHINERY_USAGE LMU WHERE LMUD.MCU_ID=LMU.MCU_ID AND TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($machineryusage_details))
     {
         $machinery_usage_details[]=array($row["MAC_ID"],$row["MCU_MACHINERY_TYPE"],$row["MACSTARTTIME"],$row["MACENDTIME"],$row["MAC_REMARK"]);
     }
     //RENTAL MACHINERY USAGE DETAILS
-    $rental_machinery_details=mysqli_query($con,"SELECT RMD_ID,RMD_LORRY_NO,RMD_THROWEARTH_STORE,RMD_THROWEARTH_OUTSIDE,DATE_FORMAT(RMD_START_TIME,'%H:%i' ) AS RMDSTARTTIME,DATE_FORMAT(RMD_END_TIME,'%H:%i' ) AS RMDENDTIME,RMD_REMARK FROM lmc_rental_machinery_details WHERE TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $rental_machinery_details=mysqli_query($con,"SELECT RMD_ID,RMD_LORRY_NO,RMD_THROWEARTH_STORE,RMD_THROWEARTH_OUTSIDE,DATE_FORMAT(RMD_START_TIME,'%H:%i' ) AS RMDSTARTTIME,DATE_FORMAT(RMD_END_TIME,'%H:%i' ) AS RMDENDTIME,RMD_REMARK FROM LMC_RENTAL_MACHINERY_DETAILS WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($rental_machinery_details))
     {
         $rentalmachinery_details[]=array($row["RMD_ID"],$row["RMD_LORRY_NO"],$row["RMD_THROWEARTH_STORE"],$row["RMD_THROWEARTH_OUTSIDE"],$row["RMDSTARTTIME"],$row["RMDENDTIME"],$row["RMD_REMARK"]);
     }
     //EQUIPMENT USAGE DETAILS
-    $equipment_usage_details=mysqli_query($con,"SELECT EUD_ID,EUD_EQUIPMENT,EUD_LORRY_NO,DATE_FORMAT(EUD_START_TIME,'%H:%i' ) AS EUDSTARTTIME,DATE_FORMAT(EUD_END_TIME,'%H:%i' ) AS EUDENDTIME,EUD_REMARK FROM lmc_equipment_usage_details WHERE TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $equipment_usage_details=mysqli_query($con,"SELECT EUD_ID,EUD_EQUIPMENT,EUD_LORRY_NO,DATE_FORMAT(EUD_START_TIME,'%H:%i' ) AS EUDSTARTTIME,DATE_FORMAT(EUD_END_TIME,'%H:%i' ) AS EUDENDTIME,EUD_REMARK FROM LMC_EQUIPMENT_USAGE_DETAILS WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($equipment_usage_details))
     {
         $equipmentusage_details[]=array($row["EUD_ID"],$row["EUD_EQUIPMENT"],$row["EUD_LORRY_NO"],$row["EUDSTARTTIME"],$row["EUDENDTIME"],$row["EUD_REMARK"]);
     }
     //FITTING USAGE DETAILS
-    $fitting_usage_details=mysqli_query($con,"SELECT FUD_ID,FU_ITEMS,FUD_SIZE,FUD_QUANTITY,FUD_REMARK FROM lmc_fitting_usage_details LFUD,lmc_fitting_usage LFU WHERE LFUD.FU_ID=LFU.FU_ID AND TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $fitting_usage_details=mysqli_query($con,"SELECT FUD_ID,FU_ITEMS,FUD_SIZE,FUD_QUANTITY,FUD_REMARK FROM LMC_FITTING_USAGE_DETAILS LFUD,LMC_FITTING_USAGE LFU WHERE LFUD.FU_ID=LFU.FU_ID AND TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($fitting_usage_details))
     {
         $fittingusage_details[]=array($row["FUD_ID"],$row["FU_ITEMS"],$row["FUD_SIZE"],$row["FUD_QUANTITY"],$row["FUD_REMARK"]);
     }
     //MATERIAL USAGE DETAILS
-    $material_usage_details=mysqli_query($con,"SELECT MUD_ID,MU_ITEMS,MUD_RECEIPT_NO,MUD_QUANTITY FROM lmc_material_usage_details LMUD,lmc_material_usage LMU WHERE LMUD.MU_ID=LMU.MU_ID AND TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $material_usage_details=mysqli_query($con,"SELECT MUD_ID,MU_ITEMS,MUD_RECEIPT_NO,MUD_QUANTITY FROM LMC_MATERIAL_USAGE_DETAILS LMUD,LMC_MATERIAL_USAGE LMU WHERE LMUD.MU_ID=LMU.MU_ID AND TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($material_usage_details))
     {
         $materialusage_details[]=array($row["MUD_ID"],$row["MU_ITEMS"],$row["MUD_RECEIPT_NO"],$row["MUD_QUANTITY"]);
     }
     // MEETING DETAILS
-    $meetingdetails=mysqli_query($con,"SELECT MD_ID,MT_TOPIC,MD_REMARKS FROM LMC_MEETING_DETAILS MD, LMC_MEETING_TOPIC MT WHERE MD.MT_ID=MT.MT_ID AND TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $meetingdetails=mysqli_query($con,"SELECT MD_ID,MT_TOPIC,MD_REMARKS FROM LMC_MEETING_DETAILS MD, LMC_MEETING_TOPIC MT WHERE MD.MT_ID=MT.MT_ID AND TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($meetingdetails)){
         $meeting_details[]=array($row["MD_ID"],$row["MT_TOPIC"],$row['MD_REMARKS']);
     }
@@ -958,13 +971,13 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
         $joptype[]=array($row["TOJ_JOB"],$row['TOJ_ID']);
     }
     //CURRENT EMPLOYEE NAME
-    $activeempname=mysqli_query($con,"SELECT EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS ACTIVE_EMPLOYEE_NAME FROM LMC_EMPLOYEE_DETAILS E,LMC_USER_LOGIN_DETAILS U WHERE E.ULD_ID=U.ULD_ID AND U.ULD_USERNAME='$UserStamp'");
+    $activeempname=mysqli_query($con,"SELECT ULD_ID,ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS  WHERE ULD_USERNAME='$UserStamp'");
     if($row=mysqli_fetch_array($activeempname))
     {
-        $activeemp_name[]=array($row["EMP_ID"]);
+        $activeemp_name[]=array($row["ULD_ID"]);
     }
     //JOB DONE
-    $jobdonedetails=mysqli_query($con,"SELECT GROUP_CONCAT(TJ_PIPE_LAID) as PIPELAID,GROUP_CONCAT(TJ_SIZE) AS SIZE,GROUP_CONCAT(TJ_LENGTH) AS LENGTH FROM lmc_team_job WHERE TRD_ID=(SELECT TRD_ID FROM lmc_team_report_details WHERE EMP_ID='$activeemp' AND TRD_DATE='$date')");
+    $jobdonedetails=mysqli_query($con,"SELECT GROUP_CONCAT(TJ_PIPE_LAID) as PIPELAID,GROUP_CONCAT(TJ_SIZE) AS SIZE,GROUP_CONCAT(TJ_LENGTH) AS LENGTH FROM LMC_TEAM_JOB WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($jobdonedetails)){
         $jobdone_pipelaid[]=array($row["PIPELAID"]);
         $jobdone_size[]=array($row['SIZE']);
@@ -986,10 +999,10 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH_DATA')
     $fromdate=date('Y-m-d',strtotime($_REQUEST['fromdate']));
     $todate=date('Y-m-d',strtotime($_REQUEST['todate']));
     //EMPLOYEE DETAILS
-    $empdetails=mysqli_query($con," SELECT L1.EMP_ID,DATE_FORMAT(TRD.TRD_DATE,'%d-%m-%Y') AS TRD_DATE,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TRD_ID,L1.TERD_OT,L1.TERD_REMARK,ULD.ULD_USERNAME,DATE_FORMAT(L1.TERD_TIMESTAMP,'%d-%m-%Y %T') AS TERD_TIMESTAMP FROM LMC_TEAM_EMPLOYEE_REPORT_DETAILS L1,LMC_TEAM_REPORT_DETAILS TRD,LMC_USER_LOGIN_DETAILS ULD WHERE TRD.TRD_DATE BETWEEN '$fromdate' AND '$todate' AND TRD.EMP_ID='$emp' AND L1.TRD_ID=TRD.TRD_ID AND TRD.ULD_ID=ULD.ULD_ID ORDER BY TRD.TRD_DATE ASC ");
+    $empdetails=mysqli_query($con," SELECT L1.ULD_ID,DATE_FORMAT(TRD.TRD_DATE,'%d-%m-%Y') AS TRD_DATE,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TRD_ID,L1.TERD_OT,L1.TERD_REMARK,ULD.ULD_USERNAME,DATE_FORMAT(L1.TERD_TIMESTAMP,'%d-%m-%Y %T') AS TERD_TIMESTAMP FROM LMC_TEAM_EMPLOYEE_REPORT_DETAILS L1,LMC_TEAM_REPORT_DETAILS TRD,LMC_USER_LOGIN_DETAILS ULD WHERE TRD.TRD_DATE BETWEEN '$fromdate' AND '$todate' AND TRD.ULD_ID='$emp' AND L1.TRD_ID=TRD.TRD_ID AND TRD.ULD_ID=ULD.ULD_ID ORDER BY TRD.TRD_DATE ASC ");
     while($row=mysqli_fetch_array($empdetails))
     {
-        $employeedetails[]=array($row['EMP_ID'],$row["TRD_DATE"],$row["STARTTIME"],$row["ENDTIME"],$row["TRD_ID"],$row["TERD_OT"],$row['TERD_REMARK'],$row['ULD_USERNAME'],$row['TERD_TIMESTAMP']);
+        $employeedetails[]=array($row['ULD_ID'],$row["TRD_DATE"],$row["STARTTIME"],$row["ENDTIME"],$row["TRD_ID"],$row["TERD_OT"],$row['TERD_REMARK'],$row['ULD_USERNAME'],$row['TERD_TIMESTAMP']);
     }
 //ERRPOR MESSAGE
     $errormsg=get_error_msg('4,17,21,83,133,143,144');
@@ -1020,19 +1033,19 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $team_report_details1=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
     }
     //JOB ID DETAILS
-    $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($jobid)");
+    $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM LMC_TYPE_OF_JOB WHERE TOJ_ID IN($jobid)");
     if($row=mysqli_fetch_array($jobdetails))
     {
         $job_details=$row["JOB"];
     }
     //EMPLOYEE DETAILS
-    $empdetails=mysqli_query($con,"SELECT L.EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS EMPNAME,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TERD_OT,L1.TERD_REMARK FROM LMC_EMPLOYEE_DETAILS L LEFT JOIN lmc_team_employee_report_details L1  ON L.EMP_ID=L1.EMP_ID AND TRD_ID='$trdid'");
+    $empdetails=mysqli_query($con,"SELECT L.ULD_ID,L.ULD_WORKER_NAME,DATE_FORMAT(L1.TERD_START_TIME,'%H:%i' ) AS STARTTIME,DATE_FORMAT(L1.TERD_END_TIME,'%H:%i' ) AS ENDTIME,L1.TERD_OT,L1.TERD_REMARK FROM LMC_USER_LOGIN_DETAILS L INNER JOIN LMC_TEAM_EMPLOYEE_REPORT_DETAILS L1  ON L.ULD_ID=L1.ULD_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($empdetails))
     {
-        $employeedetails[]=array($row["EMP_ID"],$row["EMPNAME"],$row["STARTTIME"],$row["ENDTIME"],$row["TERD_OT"],$row["TERD_REMARK"]);
+        $employeedetails[]=array($row["ULD_ID"],$row["ULD_WORKER_NAME"],$row["STARTTIME"],$row["ENDTIME"],$row["TERD_OT"],$row["TERD_REMARK"]);
     }
     //SITE VISIT DETAILS
-    $sitevisitdetails=mysqli_query($con,"SELECT SVD_ID,SVD_NAME,SVD_DESIGNATION,DATE_FORMAT(SVD_START_TIME,'%H:%i' ) AS SVDSTARTTIME,DATE_FORMAT(SVD_END_TIME,'%H:%i' ) AS SVDENDTIME,SVD_REMARK FROM lmc_site_visit_details WHERE TRD_ID='$trdid'");
+    $sitevisitdetails=mysqli_query($con,"SELECT SVD_ID,SVD_NAME,SVD_DESIGNATION,DATE_FORMAT(SVD_START_TIME,'%H:%i' ) AS SVDSTARTTIME,DATE_FORMAT(SVD_END_TIME,'%H:%i' ) AS SVDENDTIME,SVD_REMARK FROM LMC_SITE_VISIT_DETAILS WHERE TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($sitevisitdetails))
     {
         $sitevisit_details[]=array($row["SVD_ID"],$row["SVD_DESIGNATION"],$row["SVD_NAME"],$row["SVDSTARTTIME"],$row["SVDENDTIME"],$row["SVD_REMARK"]);
@@ -1044,31 +1057,31 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $mechequip_details[]=array($row["MET_ID"],$row["MET_FROM_LORRY_NO"],$row["MET_TO_LORRY_NO"],$row["MET_ITEM"],$row["MET_REMARK"]);
     }
     //MACHINERY USAGE DETAILS
-    $machineryusage_details=mysqli_query($con,"SELECT MAC_ID,MCU_MACHINERY_TYPE,DATE_FORMAT(MAC_START_TIME,'%H:%i' ) AS MACSTARTTIME,DATE_FORMAT(MAC_END_TIME,'%H:%i' ) AS MACENDTIME,MAC_REMARK FROM lmc_machinery_usage_details LMUD,lmc_machinery_usage LMU WHERE LMUD.MCU_ID=LMU.MCU_ID AND TRD_ID='$trdid'");
+    $machineryusage_details=mysqli_query($con,"SELECT MAC_ID,MCU_MACHINERY_TYPE,DATE_FORMAT(MAC_START_TIME,'%H:%i' ) AS MACSTARTTIME,DATE_FORMAT(MAC_END_TIME,'%H:%i' ) AS MACENDTIME,MAC_REMARK FROM LMC_MACHINERY_USAGE_DETAILS LMUD,LMC_MACHINERY_USAGE LMU WHERE LMUD.MCU_ID=LMU.MCU_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($machineryusage_details))
     {
         $machinery_usage_details[]=array($row["MAC_ID"],$row["MCU_MACHINERY_TYPE"],$row["MACSTARTTIME"],$row["MACENDTIME"],$row["MAC_REMARK"]);
     }
     //RENTAL MACHINERY USAGE DETAILS
-    $rental_machinery_details=mysqli_query($con,"SELECT RMD_ID,RMD_LORRY_NO,RMD_THROWEARTH_STORE,RMD_THROWEARTH_OUTSIDE,DATE_FORMAT(RMD_START_TIME,'%H:%i' ) AS RMDSTARTTIME,DATE_FORMAT(RMD_END_TIME,'%H:%i' ) AS RMDENDTIME,RMD_REMARK FROM lmc_rental_machinery_details WHERE TRD_ID='$trdid'");
+    $rental_machinery_details=mysqli_query($con,"SELECT RMD_ID,RMD_LORRY_NO,RMD_THROWEARTH_STORE,RMD_THROWEARTH_OUTSIDE,DATE_FORMAT(RMD_START_TIME,'%H:%i' ) AS RMDSTARTTIME,DATE_FORMAT(RMD_END_TIME,'%H:%i' ) AS RMDENDTIME,RMD_REMARK FROM LMC_RENTAL_MACHINERY_DETAILS WHERE TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($rental_machinery_details))
     {
         $rentalmachinery_details[]=array($row["RMD_ID"],$row["RMD_LORRY_NO"],$row["RMD_THROWEARTH_STORE"],$row["RMD_THROWEARTH_OUTSIDE"],$row["RMDSTARTTIME"],$row["RMDENDTIME"],$row["RMD_REMARK"]);
     }
     //EQUIPMENT USAGE DETAILS
-    $equipment_usage_details=mysqli_query($con,"SELECT EUD_ID,EUD_EQUIPMENT,EUD_LORRY_NO,DATE_FORMAT(EUD_START_TIME,'%H:%i' ) AS EUDSTARTTIME,DATE_FORMAT(EUD_END_TIME,'%H:%i' ) AS EUDENDTIME,EUD_REMARK FROM lmc_equipment_usage_details WHERE TRD_ID='$trdid'");
+    $equipment_usage_details=mysqli_query($con,"SELECT EUD_ID,EUD_EQUIPMENT,EUD_LORRY_NO,DATE_FORMAT(EUD_START_TIME,'%H:%i' ) AS EUDSTARTTIME,DATE_FORMAT(EUD_END_TIME,'%H:%i' ) AS EUDENDTIME,EUD_REMARK FROM LMC_EQUIPMENT_USAGE_DETAILS WHERE TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($equipment_usage_details))
     {
         $equipmentusage_details[]=array($row["EUD_ID"],$row["EUD_EQUIPMENT"],$row["EUD_LORRY_NO"],$row["EUDSTARTTIME"],$row["EUDENDTIME"],$row["EUD_REMARK"]);
     }
     //FITTING USAGE DETAILS
-    $fitting_usage_details=mysqli_query($con,"SELECT FUD_ID,FU_ITEMS,FUD_SIZE,FUD_QUANTITY,FUD_REMARK FROM lmc_fitting_usage_details LFUD,lmc_fitting_usage LFU WHERE LFUD.FU_ID=LFU.FU_ID AND TRD_ID='$trdid'");
+    $fitting_usage_details=mysqli_query($con,"SELECT FUD_ID,FU_ITEMS,FUD_SIZE,FUD_QUANTITY,FUD_REMARK FROM LMC_FITTING_USAGE_DETAILS LFUD,LMC_FITTING_USAGE LFU WHERE LFUD.FU_ID=LFU.FU_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($fitting_usage_details))
     {
         $fittingusage_details[]=array($row["FUD_ID"],$row["FU_ITEMS"],$row["FUD_SIZE"],$row["FUD_QUANTITY"],$row["FUD_REMARK"]);
     }
     //MATERIAL USAGE DETAILS
-    $material_usage_details=mysqli_query($con,"SELECT MUD_ID,MU_ITEMS,MUD_RECEIPT_NO,MUD_QUANTITY FROM lmc_material_usage_details LMUD,lmc_material_usage LMU WHERE LMUD.MU_ID=LMU.MU_ID AND TRD_ID='$trdid'");
+    $material_usage_details=mysqli_query($con,"SELECT MUD_ID,MU_ITEMS,MUD_RECEIPT_NO,MUD_QUANTITY FROM LMC_MATERIAL_USAGE_DETAILS LMUD,LMC_MATERIAL_USAGE LMU WHERE LMUD.MU_ID=LMU.MU_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($material_usage_details))
     {
         $materialusage_details[]=array($row["MUD_ID"],$row["MU_ITEMS"],$row["MUD_RECEIPT_NO"],$row["MUD_QUANTITY"]);
@@ -1084,10 +1097,10 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $joptype[]=array($row["TOJ_JOB"],$row['TOJ_ID']);
     }
     //CURRENT EMPLOYEE NAME
-    $activeempname=mysqli_query($con,"SELECT EMP_ID,CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME) AS ACTIVE_EMPLOYEE_NAME FROM LMC_EMPLOYEE_DETAILS E,LMC_USER_LOGIN_DETAILS U WHERE E.ULD_ID=U.ULD_ID AND E.EMP_ID='$empid'");
+    $activeempname=mysqli_query($con,"SELECT ULD_ID,ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS  WHERE ULD_ID='$empid'");
     if($row=mysqli_fetch_array($activeempname))
     {
-        $activeemp_name[]=array($row["EMP_ID"]);
+        $activeemp_name[]=array($row["ULD_ID"]);
     }
     //JOB DONE
     $jobdonedetails=mysqli_query($con,"SELECT GROUP_CONCAT(TJ_PIPE_LAID) as PIPELAID,GROUP_CONCAT(TJ_SIZE) AS SIZE,GROUP_CONCAT(TJ_LENGTH) AS LENGTH FROM LMC_TEAM_JOB WHERE TRD_ID='$trdid'");
@@ -1098,7 +1111,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
     }
 
     //ERRPOR MESSAGE
-    $errormsg=get_error_msg('4,17,21,83,133,143,144,145,147,148');
+    $errormsg=get_error_msg('4,17,21,83,133,143,144,145,147,148,152');
     $folderid=mysqli_query($con,"SELECT EMP_IMAGE_FOLDER_ID FROM LMC_EMPLOYEE_DETAILS WHERE EMP_ID='$empid'");
     if($row=mysqli_fetch_array($folderid))
     {
@@ -1381,14 +1394,23 @@ elseif($_REQUEST['Option']=='UpdateForm')
         $daterep=str_replace('-','',$reportdate);
         $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
         $userfolderid=get_emp_folderid($EmployeeReport[0]);
+        chmod($userfolderid,0777);
         $path=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
+//        $path='LMC_REPORT_IMAGE'.DIRECTORY_SEPARATOR.'RENU_01042015_180754'.DIRECTORY_SEPARATOR;
+        if ( ! is_writable($path))
+        {
+            $writable=0;
+        } else {
+
+            $writable=1;
+        }
         if(is_dir($path)){
             $dirflag=1;
         }
         else{
             $dirflag=0;
         }
-        if($dirflag==1){
+        if($dirflag==1 && $writable==1){
             $uploadpath=$path.$imgfilename;
             try{
                 $data=str_replace('data:image/png;base64,','',$imagedata);
@@ -1419,11 +1441,11 @@ elseif($_REQUEST['Option']=='UpdateForm')
         $weathertime='';
     }
     //TEAM REPORT DETAILS
-    $emp_name=mysqli_query($con,"SELECT CONCAT(EMP_FIRST_NAME,' ',EMP_LAST_NAME)AS EMP_NAME FROM LMC_EMPLOYEE_DETAILS WHERE EMP_ID=$EmployeeReport[0]");
+    $emp_name=mysqli_query($con,"SELECT ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS WHERE ULD_ID=$EmployeeReport[0]");
     while($row=mysqli_fetch_array($emp_name)){
-        $empnames=$row["EMP_NAME"];
+        $empnames=$row["ULD_WORKER_NAME"];
     }
-    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB SEPARATOR ' / ') AS JOB FROM lmc_TYPE_OF_job WHERE TOJ_ID IN($typeofjob)");
+    $jobname=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB SEPARATOR ' / ') AS JOB FROM LMC_TYPE_OF_JOB WHERE TOJ_ID IN($typeofjob)");
     while($row=mysqli_fetch_array($jobname)){
         $jobnames=$row["JOB"];
     }
@@ -2057,38 +2079,32 @@ elseif($_REQUEST['Option']=='UpdateForm')
     }
     if($flag==1)
     {
-        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=12");
+        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_ID=1");
         if($row=mysqli_fetch_array($select_to)){
-            $toaddress=$row["URC_DATA"];
+            $toaddress=$row["ULD_EMAIL_ID"];
         }
-
-        $select_cc=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=13");
+        $select_cc=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=10");
         if($row=mysqli_fetch_array($select_cc)){
             $ccaddress=$row["URC_DATA"];
         }
-        $select_host=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=17");
+        $select_host=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=14");
         if($row=mysqli_fetch_array($select_host)){
             $host=$row["URC_DATA"];
         }
-        $select_username=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=14");
+        $select_username=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=11");
         if($row=mysqli_fetch_array($select_username)){
             $username=$row["URC_DATA"];
         }
-        $select_password=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=15");
+        $select_password=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=12");
         if($row=mysqli_fetch_array($select_password)){
             $password=$row["URC_DATA"];
         }
 
-        $select_smtpsecure=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=16");
+        $select_smtpsecure=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=13");
         if($row=mysqli_fetch_array($select_smtpsecure)){
             $smtpsecure=$row["URC_DATA"];
         }
-
-        $select_from=mysqli_query($con,"SELECT * FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=18");
-        if($row=mysqli_fetch_array($select_from)){
-            $from=$row["URC_DATA"];
-        }
-        $select_emailtemp=mysqli_query($con,"SELECT ETD_EMAIL_SUBJECT, ETD_EMAIL_BODY FROM LMC_EMAIL_TEMPLATE_DETAILS where ETD_ID=9");
+        $select_emailtemp=mysqli_query($con,"SELECT ETD_EMAIL_SUBJECT, ETD_EMAIL_BODY FROM LMC_EMAIL_TEMPLATE_DETAILS where ETD_ID=4");
         if($row=mysqli_fetch_array($select_emailtemp)){
             $sub=$row["ETD_EMAIL_SUBJECT"];
             $msgbody=$row["ETD_EMAIL_BODY"];
@@ -2122,7 +2138,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
         $mail->AddStringAttachment($update_exldata,$xlreportfilename);
         $mail->Send();
     }
-    $flagvalues=array($flag,$dirflag);
+    $flagvalues=array($flag,$dirflag,$writable);
     echo JSON_encode($flagvalues);
 }
 

@@ -57,10 +57,16 @@ $(document).ready(function(){
     $(document).on("click",'.btnclass', function (){
         Page_url =$(this).attr('page');
         var attr_id=$(this).attr("id");
-        if(attr_id==undefined){
+         if(attr_id==undefined){
             attr_id='';
         }
+        if(attr_id==$(this).text())
+        {
+            show_msgbox("MENU CONFIRMATION","Do You Want to Open "+attr_id+" ?","success",true);
+        }
+        else{
         show_msgbox("MENU CONFIRMATION","Do You Want to Open "+attr_id+" "+$(this).text()+" ?","success",true);
+        }
         return false;
     });
     function init () {
@@ -135,9 +141,9 @@ $(document).ready(function(){
             var main='mainmenu'+i
             var submen='submenu'+i;
             var filename=filelist[count]+'.php';
-            if(ARCMENU_first_submenu.length==0)
+            if(ARCMENU_first_submenu[i].length==1)
             {
-                mainmenuItem='<li><a page="'+filename+'" href="#"  id="'+ACRMENU_mainmenu[i]+'" >'+ACRMENU_mainmenu[i]+'</a></li>'
+                mainmenuItem='<li><a class="btnclass" page="'+filename+'" href="#"  id="'+ACRMENU_mainmenu[i]+'" >'+ACRMENU_mainmenu[i]+'</a></li>'
 
             }
             else
@@ -201,6 +207,9 @@ $(document).ready(function(){
 });
 </script>
 <title>LIH MING CONSTRUCTION PTE LTD</title>
+<meta charset="utf-8">
+<link rel="shortcut icon" type="image/ico" href="image/LMCico.png">
+<meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
 </head>
 <body >
 
@@ -235,17 +244,17 @@ $(document).ready(function(){
             </div>
             <div class="collapse navbar-collapse" id="menu" >
                 <ul class="nav navbar-nav" id="ACRMENU_ulclass_mainmenu">
-                    <li ><a href="MENU.php">DASH BOARD</a></li>
+<!--                    <li ><a href="MENU.php">DASH BOARD</a></li>-->
                 </ul>
             </div>
         </nav>
 
 
-    <div  id="buttondiv"  >
-        <button type="button" class="btn  btn-info" name="AE" id="AE"  value="ACCIDENT ENTRY"><a page="FORM_ACCIDENT_ENTRY.php" href="#" class="btnclass" style="color:white">ACCIDENT ENTRY</a></button>
-        <button id="RPT" class="btn btn-info" name="RPT" value="REPORT PERMISSION ENTRY"  ><a page="FORM_PERMITS_ENTRY.php" href="#" class="btnclass" style="color:white">REPORT SUBMISSION ENTRY</a></button>
-
-    </div>
+<!--    <div  id="buttondiv"  >-->
+<!--        <button type="button" class="btn  btn-info" name="AE" id="AE"  value="ACCIDENT ENTRY"><a page="FORM_ACCIDENT_ENTRY.php" href="#" class="btnclass" style="color:white">ACCIDENT ENTRY</a></button>-->
+<!--        <button id="RPT" class="btn btn-info" name="RPT" value="REPORT PERMISSION ENTRY"  ><a page="FORM_PERMITS_ENTRY.php" href="#" class="btnclass" style="color:white">REPORT SUBMISSION ENTRY</a></button>-->
+<!---->
+<!--    </div>-->
     <br><label id="ACRMENU_lbl_errormsg" class="errormsg" hidden ></label>
     <div id="menu_frame" name="iframe_a" ></div>
 </div>

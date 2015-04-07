@@ -36,27 +36,25 @@ function get_joindate($ure_uld_id){
     }
     return  $min_date;
 }
-
-function get_docfolder_id(){
-    global $con;
-    $docid=mysqli_query($con,"SELECT URC_DATA FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=9 AND CGN_ID=9");
-    while($row=mysqli_fetch_array($docid)){
-        $docfolder_id=$row["URC_DATA"];
-    }
-    return  $docfolder_id;
-}
-
 function get_parentfolder_id(){
     global $con;
-    $parentid=mysqli_query($con,"SELECT URC_DATA FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=8 AND CGN_ID=8");
+    $parentid=mysqli_query($con,"SELECT URC_DATA FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=5");
     while($row=mysqli_fetch_array($parentid)){
         $parentfolder_id=$row["URC_DATA"];
     }
     return  $parentfolder_id;
 }
+function get_docfolder_id(){
+    global $con;
+    $docid=mysqli_query($con,"SELECT URC_DATA FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=6");
+    while($row=mysqli_fetch_array($docid)){
+        $docfolder_id=$row["URC_DATA"];
+    }
+    return  $docfolder_id;
+}
 function get_reportdocfolder_id(){
     global $con;
-    $docparentid=mysqli_query($con,"SELECT URC_DATA FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=19 AND CGN_ID=17");
+    $docparentid=mysqli_query($con,"SELECT URC_DATA FROM LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=15");
     while($row=mysqli_fetch_array($docparentid)){
         $reportdocfolder=$row["URC_DATA"];
     }
@@ -64,9 +62,9 @@ function get_reportdocfolder_id(){
 }
 function get_emp_folderid($ULD_ID){
     global $con;
-    $select_folderid=mysqli_query($con,"SELECT EMP_IMAGE_FOLDER_ID FROM LMC_EMPLOYEE_DETAILS WHERE ULD_ID='$ULD_ID'");
+    $select_folderid=mysqli_query($con,"SELECT ULD_IMAGE_FOLDER_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_ID='$ULD_ID'");
     if($row=mysqli_fetch_array($select_folderid)){
-        $folder_id=$row["EMP_IMAGE_FOLDER_ID"];
+        $folder_id=$row["ULD_IMAGE_FOLDER_ID"];
     }
     return $folder_id;
 }
@@ -114,7 +112,7 @@ function get_nonactive_emp_id(){
 function get_company_start_date(){
 
     global $con;
-    $comp_sdate=mysqli_query($con,"SELECT * from LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=7");
+    $comp_sdate=mysqli_query($con,"SELECT * from LMC_USER_RIGHTS_CONFIGURATION WHERE URC_ID=4");
     while($row=mysqli_fetch_array($comp_sdate)){
         $comp_startdate=$row["URC_DATA"];
     }

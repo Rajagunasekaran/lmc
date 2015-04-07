@@ -211,23 +211,23 @@ include "NEW_MENU.php";
         <div class="panel-body">
             <form id="ET_ENTRY_form_template" name="ET_ENTRY_form_template" class="form-horizontal" role="form">
                 <div class="form-group">
-                    <label name="ET_ENTRY_lbl_scriptname" id="ET_ENTRY_lbl_scriptname" class="control-label col-sm-2">SCRIPT NAME<em>*</em></label>
+                    <label name="ET_ENTRY_lbl_scriptname" id="ET_ENTRY_lbl_scriptname" class="control-label col-sm-2">EMAIL TEMPLATE NAME<em>*</em></label>
                     <div class="col-sm-3">
-                        <input  type="text" name="ET_ENTRY_tb_scriptname" id="ET_ENTRY_tb_scriptname" placeholder="Script Name" class="autosize form-control" >
+                        <input  type="text" name="ET_ENTRY_tb_scriptname" id="ET_ENTRY_tb_scriptname" placeholder="Email Template Name" class="autosize form-control" >
                         <label id="ET_ENTRY_lbl_validid" name="ET_ENTRY_lbl_validid" class="errormsg" disabled=""></label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label name="ET_ENTRY_lbl_subject" id="ET_ENTRY_lbl_subject" class="control-label col-sm-2">SUBJECT<em>*</em></label>
                     <div class="col-sm-10">
-                        <textarea class="form-control tarea maxlength"   rows="8" cols="10"  name="ET_ENTRY_ta_subject" id="ET_ENTRY_ta_subject" placeholder="Subject" >
+                        <textarea class="form-control tarea maxlength"   rows="8" cols="10"  title="Email Template Subject" name="ET_ENTRY_ta_subject" id="ET_ENTRY_ta_subject" placeholder="Subject" >
                         </textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <label name="ET_ENTRY_lbl_body" id="ET_ENTRY_lbl_body" class="control-label col-sm-2">BODY<em>*</em></label>
                     <div class="col-sm-10">
-                        <textarea class="form-control tarea maxlength" rows="8"  name="ET_ENTRY_ta_body" id="ET_ENTRY_ta_body" placeholder="Body" >
+                        <textarea class="form-control tarea maxlength" rows="8"  title="Email Template Body" name="ET_ENTRY_ta_body" id="ET_ENTRY_ta_body" placeholder="Body" >
                         </textarea>
                     </div>
                 </div>

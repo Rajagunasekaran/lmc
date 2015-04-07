@@ -10,7 +10,7 @@ $inputValTwo=$_GET['inputValTwo'];
 $inputValThree=$_GET['inputValThree'];
 $inputValFour=$_GET['inputValFour'];
 $inputValFive=$_GET['inputValFive'];
-$arrcall=array(3=>"CALL SP_TS_AUDIT_HISTORY((select ULD_ID from VW_TS_ALL_EMPLOYEE_DETAILS where EMPLOYEE_NAME='$inputValOne'),'$USERSTAMP',@TEMP_TABLE)");
+$arrcall=array(3=>"CALL SP_TS_AUDIT_HISTORY((select ULD_ID from LMC_USER_LOGIN_DETAILS where ULD_WORKER_NAME='$inputValOne'),'$USERSTAMP',@TEMP_TABLE)");
 
 //ALIGNMENT CENTER OR LEFT
 $arrAlignment=array(1=>array('left','center','center','center','center','left','center','left','center'),

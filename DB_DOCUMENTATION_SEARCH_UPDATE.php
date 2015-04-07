@@ -3,6 +3,7 @@ error_reporting(0);
 include "CONNECTION.php";
 include "GET_USERSTAMP.php";
 include "COMMON.php";
+date_default_timezone_set('Asia/Singapore');
 $parentdocfolder=get_reportdocfolder_id();
 if($_REQUEST['option']=='common_data')
 {$filearray=array();
@@ -23,7 +24,7 @@ if($_REQUEST['option']=='common_data')
         $attachcategory[]=array($row["RDC_CATEGORY"],$row['RDC_ID']);
     }
 
-    $select_role=mysqli_query($con,"select URC_DATA from vw_access_rights_terminate_loginid where ULD_USERNAME='$UserStamp'");
+    $select_role=mysqli_query($con,"select URC_DATA from VW_TS_ALL_ACTIVE_EMPLOYEE_DETAILS where ULD_USERNAME='$UserStamp'");
 
     if($row=mysqli_fetch_array($select_role)){
         $rolename=$row["URC_DATA"];
@@ -78,7 +79,7 @@ elseif($_REQUEST['option']=='search_data')
     $select = $con->query('SELECT @FINALTABLENAME');
     $result = $select->fetch_assoc();
     $temp_table= $result['@FINALTABLENAME'];
-    $data=mysqli_query($con,"select RAD_ID,RAD_CATEGORY,DATE_FORMAT(RAD_DATE, '%d-%m-%Y') as RAD_DATE,RAD_DOC_FILE_NAME,RAD_USERSTAMP,DATE_FORMAT(CONVERT_TZ(RAD_TIMESTAMP,'+00:00','+08:00'),'%d-%m-%Y %T') AS TIMESTAMP FROM  $temp_table ORDER BY RAD_DATE ");
+    $data=mysqli_query($con,"select RAD_ID,RAD_CATEGORY,DATE_FORMAT(RAD_DATE, '%d-%m-%Y') as RAD_DATE,RAD_DOC_FILE_NAME,RAD_USERSTAMP,DATE_FORMAT(RAD_TIMESTAMP,'%d-%m-%Y %T') AS TIMESTAMP FROM  $temp_table ORDER BY RAD_DATE ");
     while($row=mysqli_fetch_array($data)){
         $rowid=$row['RAD_ID'];
         $category=$row["RAD_CATEGORY"];

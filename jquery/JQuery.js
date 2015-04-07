@@ -529,6 +529,8 @@ function show_msgbox(title,msg,status,confirmation)
     }
     $(".msgboxcontent").text(msg);
     $(".msgbox").show();
+    $('.msgconfirm').focus();
+    $('.menuconfirm').focus();
 }
 $(document).on("click",'.msgcancel,.msgconfirm,.menuconfirm', function (){
     $(".msgbox").hide();

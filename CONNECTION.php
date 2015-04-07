@@ -1,4 +1,3 @@
 <?php
-
-
-$con=mysqli_connect("localhost","root","","LMC");
+$con=mysqli_connect("localhost","LMC","LMC","LMC");
+?>

@@ -32,11 +32,11 @@ include 'COMMON.php';
 if ($_POST['choice'] == "resetPassword") {
 
     $username = $_POST['username'];
-    $username = stripslashes($username);
-    $username = mysql_real_escape_string($username);
-    $password = stripslashes($_POST['password']);
-    $password = mysql_real_escape_string($password);
-    $password = md5($password);
+//    $username = stripslashes($username);
+    $username = $con->real_escape_string($username);
+    $password = ($_POST['password']);
+    $password = $con->real_escape_string($password);
+    $password = base64_encode($password);
     $sql = "UPDATE LMC_USER_LOGIN_DETAILS SET ULD_PASSWORD='$password' WHERE (ULD_USERNAME='$username')";
     if (!mysqli_query($con, $sql)) {
         die('Error: ' . mysqli_error($con));

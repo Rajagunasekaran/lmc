@@ -253,7 +253,7 @@ $(document).ready(function(){
         <div class="panel-body">
             <form id="ET_SRC_UPD_DEL_form_emailtemplate" name="ET_SRC_UPD_DEL_form_emailtemplate" class="form-horizontal" role="form">
                 <div class="form-group row" >
-                    <label  name="ET_SRC_UPD_DEL_lbl_scriptname" id="ET_SRC_UPD_DEL_lbl_scriptname" class="col-sm-2 control-label">SCRIPT NAME<em>*</em></label>
+                    <label  name="ET_SRC_UPD_DEL_lbl_scriptname" id="ET_SRC_UPD_DEL_lbl_scriptname" class="col-sm-2 control-label">EMAIL TEMPLATE NAME<em>*</em></label>
                     <div class="col-sm-10">
                         <select name="ET_SRC_UPD_DEL_lb_scriptname" id="ET_SRC_UPD_DEL_lb_scriptname" class="form-control" style="width:305px">
                             <option>SELECT</option>
@@ -271,7 +271,7 @@ $(document).ready(function(){
                 </div>
                     <div id="ET_SRC_UPD_DEL_div_update" name="ET_SRC_UPD_DEL_div_update"  hidden>
                     <div class="form-group">
-                        <label name="ET_SRC_UPD_DEL_lbl_scriptupd" id="ET_SRC_UPD_DEL_lbl_scriptupd" class="control-label col-sm-2">SCRIPT NAME<em>*</em></label>
+                        <label name="ET_SRC_UPD_DEL_lbl_scriptupd" id="ET_SRC_UPD_DEL_lbl_scriptupd" class="control-label col-sm-2">EMAIL TEMPLATE NAME<em>*</em></label>
                         <div class="col-sm-10">
                             <input  type="text" name="ET_SRC_UPD_DEL_tb_script" id="ET_SRC_UPD_DEL_tb_script" class="rdonly" readonly>
                         </div>
@@ -280,14 +280,14 @@ $(document).ready(function(){
                     <div class="form-group">
                         <label name="ET_SRC_UPD_DEL_lbl_subjectupd" id="ET_SRC_UPD_DEL_lbl_subjectupd" class="control-label col-sm-2">SUBJECT<em>*</em></label>
                         <div class="col-sm-10">
-                            <textarea  class="form-control  textareaupd validation uppercase maxlength"  name="ET_SRC_UPD_DEL_ta_updsubject" id="ET_SRC_UPD_DEL_ta_updsubject" >
+                            <textarea  class="form-control  textareaupd validation uppercase maxlength"  name="ET_SRC_UPD_DEL_ta_updsubject" title="Email Template Subject" id="ET_SRC_UPD_DEL_ta_updsubject" >
                             </textarea>
                         </div>
                     </div>
                     <div class="form-group">
                         <label name="ET_SRC_UPD_DEL_lbl_bodyupd" id="ET_SRC_UPD_DEL_lbl_bodyupd" class="control-label col-sm-2">BODY<em>*</em></label>
                         <div class="col-sm-10">
-                            <textarea   class="form-control textareaupd validation uppercase maxlength" rows="10" cols="50"  name="ET_SRC_UPD_DEL_ta_updbody" id="ET_SRC_UPD_DEL_ta_updbody">
+                            <textarea   class="form-control textareaupd validation uppercase maxlength" rows="10" cols="50"  name="ET_SRC_UPD_DEL_ta_updbody" title="Email Template Body" id="ET_SRC_UPD_DEL_ta_updbody">
                             </textarea>
                         </div>
                     </div>

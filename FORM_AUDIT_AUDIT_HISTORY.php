@@ -124,7 +124,7 @@ include "NEW_MENU.php";
                         var msg=TH_err_msg[1].toString().replace("[LOGINID]",emp_id);
                         $('#TH_lbl_heading').text(msg).show();
                         $('#TH_btn_pdf').show();
-                        var TH_table_header='<table id="TH_tble_flextble" border="1"  cellspacing="0" class="srcresult" style="width:1200px" ><thead  bgcolor="#6495ed" style="color:white"><tr><th  style="width:880px;text-align:center">HISTORY</th><th  style="width:100;text-align:center">USERSTAMP</th><th style="width:120;text-align:center" class="uk-timestp-column">TIMESTAMP</th></tr></thead><tbody>'
+                        var TH_table_header='<table id="TH_tble_flextble" border="1"  cellspacing="0" class="srcresult" width="100%" ><thead  bgcolor="#6495ed" style="color:white"><tr><th  style="width:700px;text-align:center">HISTORY</th><th  style="text-align:center">USERSTAMP</th><th style="text-align:center" class="uk-timestp-column">TIMESTAMP</th></tr></thead><tbody>'
                         for(var i=0;i<values_array.length;i++){
                             var TH_tptype=values_array[i].tptype;
                             var TH_ttipdata=values_array[i].ttipdata;

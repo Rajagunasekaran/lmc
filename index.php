@@ -71,6 +71,7 @@ $(document).on('click','#reset_btn',function(){
                var user_name=$("#username").val();
                 xmlhttp.onreadystatechange=function() {
                     if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+
                         var value_array=JSON.parse(xmlhttp.responseText);
                        var  errmsg=value_array[1];
                         var no_user=value_array[0];

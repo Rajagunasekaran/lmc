@@ -275,6 +275,7 @@ $(document).ready(function(){
     }
     // CLICK EVENT FR RADIO BUTTON
     $(document).on('click','.USRC_UPD_class_radio',function(){
+        $("html, body").animate({ scrollTop: $(document).height() }, "slow");
         $('#SRC_radiosearchbtn').removeAttr('disabled').show();
         $('#SRC_entryform').hide();
         $('#SRC_Final_Update').hide();
