@@ -377,19 +377,16 @@ $(document).ready(function(){
     });
 //file extension validation
     $(document).on("change",'.fileextensionchk', function (){
-        for(var i=1;i<25;i++)
-        {
-            var data= $('#DT_upload_filename'+i).val();
-            var datasplit=data.split('.');
-            var old_loginid=$('#URSRC_lb_selectloginid').val();
-            var ext=datasplit[1].toUpperCase();
-            if(ext=='PDF'|| ext=='JPG'|| ext=='PNG' || ext=='JPEG' || ext=='GIF' || data==undefined || data==""){
-            }
-            else{
-                show_msgbox("DOCUMENTATION SEARCH UPDATE",error_message[1],"error",false)
-                reset_field($('#DT_upload_filename'+i));
-            }
-
+        var fileid=$(this).attr("id");
+        var data= $('#'+fileid).val();
+        var datasplit=data.split('.');
+        var ext=datasplit[1].toUpperCase();
+        if(ext=='PDF'|| ext=='JPG'|| ext=='PNG' || ext=='JPEG' || ext=='GIF' || data==undefined || data==""){
+        }
+        else{
+            show_msgbox("DOCUMENTATION SEARCH UPDATE",error_message[1],"error",false)
+            reset_field($('#'+fileid));
+            $('#DT_docupload').attr("disabled", "disabled");
         }
     });
 //file upload reset
