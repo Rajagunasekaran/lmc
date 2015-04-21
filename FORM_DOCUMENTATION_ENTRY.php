@@ -100,12 +100,11 @@ $(document).ready(function(){
         var ext=datasplit[1].toUpperCase();
         if(ext=='PDF'|| ext=='JPG'|| ext=='PNG' || ext=='JPEG' || ext=='GIF' || data==undefined || data==""){
         }
-            else{
-                show_msgbox("DOCUMENTATION ENTRY",errormessage[0],"error",false)
-                reset_field($('#'+fileid));
-                $('#docupload').attr('disabled','disabled');
-            }
-
+        else{
+            show_msgbox("DOCUMENTATION ENTRY",errormessage[0],"error",false)
+            reset_field($('#'+fileid));
+            $('#docupload').attr('disabled','disabled');
+        }
     });
     //file upload reset
     function reset_field(e) {

@@ -287,11 +287,11 @@ $(document).ready(function(){
             var filecount="filecount"+j;
             if(rolename=='ADMIN' || rolename=='SUPER ADMIN')
             {
-                var appendfile=' <div class="col-sm-offset-2 col-sm-10" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a>&nbsp;&nbsp;<input type="button" id="ibtnDel"  class="updatebtn" value="X" style="background-color:red;color:white;font-size:10;font-weight: bold;"/></div></br>';
+                var appendfile=' <div class="col-sm-offset-2 col-sm-10" style="padding-bottom: 5px" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a>&nbsp;&nbsp;<input type="button" id="ibtnDel"  class="updatebtn" value="X" style="background-color:red;color:white;font-size:10;font-weight: bold;"/></div>';
             }
             else
             {
-                var appendfile=' <div class="col-sm-offset-2 col-sm-10" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a></div></br>';
+                var appendfile=' <div class="col-sm-offset-2 col-sm-10" style="padding-bottom: 5px" id='+filecount+'><a href="downloadpdf.php?filename='+name+'" class="links">'+filenameinarray[j]+'</a></div>';
                 $('#DTS_attachprompt').hide();
                 $('#DTS_docupload').hide();
             }
