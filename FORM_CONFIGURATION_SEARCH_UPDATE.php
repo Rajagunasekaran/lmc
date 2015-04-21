@@ -91,31 +91,33 @@ $(document).ready(function(){
         var id=cid.split('_');
         combineid=id[1];
         tdvalue=$(this).text();
-            if(($('#CONFIG_SRCH_UPD_lb_type').val()=='16') || ($('#CONFIG_SRCH_UPD_lb_type').val()=='14'))
+            if(($('#CONFIG_SRCH_UPD_lb_type').val()=='14') || ($('#CONFIG_SRCH_UPD_lb_type').val()=='16') || ($('#CONFIG_SRCH_UPD_lb_type').val()=='17') || ($('#CONFIG_SRCH_UPD_lb_type').val()=='18') || ($('#CONFIG_SRCH_UPD_lb_type').val()=='19') || ($('#CONFIG_SRCH_UPD_lb_type').val()=='20'))
             {
-                $('#'+cid).replaceWith("<td class='new' id='"+previous_id+"'><input type='text' id='CONFIG_SRCH_UPD_tb_data' name='CONFIG_SRCH_data' class='reports update form-control alphabets'  maxlength='50'  value='"+tdvalue+"'>");
+                $('#'+cid).replaceWith("<td class='new' id='"+previous_id+"'><input type='text' id='CONFIG_SRCH_UPD_tb_data' name='CONFIG_SRCH_data' class='form-control update reports' maxlength='50' value='"+tdvalue+"'>");
             }
             else if($('#CONFIG_SRCH_UPD_lb_type').val()=='13')
             {
-                $('#'+cid).replaceWith("<td class='new' id='"+previous_id+"'><input type='text' id='CONFIG_SRCH_UPD_tb_data' name='CONFIG_SRCH_data' class='form-control update upper'  maxlength='50'  value='"+tdvalue+"'>");
+                $('#'+cid).replaceWith("<td class='new' id='"+previous_id+"'><input type='text' id='CONFIG_SRCH_UPD_tb_data' name='CONFIG_SRCH_data' class='form-control update upper' maxlength='25' value='"+tdvalue+"'>");
             }
-//        $('#CONFIG_SRCH_UPD_tb_data').attr("size",final_data_length+3);
-//        $(".alphabets").doValidation({rule:'alphabets',prop:{whitespace:true,uppercase:true,autosize:true}});
-//        $(".autosize").doValidation({rule:'general',prop:{autosize:true,whitespace:true,uppercase:false}});
+            else
+            {
+                $('#'+cid).replaceWith("<td class='new' id='"+previous_id+"'><input type='text' id='CONFIG_SRCH_UPD_tb_data' name='CONFIG_SRCH_data' class='form-control update' maxlength='50' value='"+tdvalue+"'>");
+            }
+
         $(".reports").doValidation({rule:'alphanumeric',prop:{autosize:true,whitespace:true,uppercase:true}});
         $(document).on("keyup",'.upper',function() {
             if (this.value.match(/[^a-zA-Z0-9\-]/g)) {
                 this.value = this.value.replace(/[^a-zA-Z0-9\-]/g, '');
             }
-            $('#CONFIG_SRCH_UPD_tb_data').val($('#CONFIG_SRCH_UPD_tb_data').val().toUpperCase())
+            $('#CONFIG_SRCH_UPD_tb_data').val($('#CONFIG_SRCH_UPD_tb_data').val().toUpperCase());
         });
-
     });
 
     //CHANGE FUNCTION FOR DATA
-    $(document).on('change blur','.update',function(){
-        var txt_area=$(this).val().trim();
+    $(document).on('change','.update',function(){
+        var txt_area=$("#CONFIG_SRCH_UPD_tb_data").val().trim();
         var listboxtype=$('#CONFIG_SRCH_UPD_lb_type').val();
+        $('#CONFIG_SRCH_UPD_lb_data').removeClass('invalid');
         if((txt_area!='')){
             $('.preloader').show();
             var xmlhttp=new XMLHttpRequest();
@@ -128,12 +130,13 @@ $(document).ready(function(){
                     if(numrow>=1)
                     {
                        show_msgbox("VIEW/UPDATE SETTINGS",CONFIG_SRCH_UPD_errmsg[8].replace('[TYPE]',$("#CONFIG_SRCH_UPD_lb_type option:selected").text()),"error",false);
-                        $(this).addClass('invalid');
+                        $('#CONFIG_SRCH_UPD_tb_data').addClass('invalid');
                     }
                     else if(updateflag==1)
                     {
                         var msg=CONFIG_SRCH_UPD_errmsg[4].toString().replace("[MODULE NAME]",$("#CONFIG_SRCH_UPD_lb_type option:selected").text());
                         show_msgbox("VIEW/UPDATE SETTINGS",msg,"success",false);
+                        $('#CONFIG_SRCH_UPD_lb_data').removeClass('invalid');
                         CONFIG_SRCH_UPD_fetch_configdata();
                     }
                 }

@@ -37,15 +37,12 @@
     <!--Message box-->
     <link rel="stylesheet" type="text/css" href="msgbox/jquery-confirm.css">
     <script type="text/javascript" src="msgbox/jquery-confirm.js"></script>
-<!--    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.css">-->
-<!--    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">-->
-<!--    <script type="text/javascript" src="//cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>-->
-<!--    <!--DATA TABLE -->
-    <link rel="stylesheet" href="DATA_TABLE_10.5/dataTables.tableTools.css">
-    <link rel="stylesheet" href="DATA_TABLE_10.5/jquery.dataTables.css">
-<!---->
-    <script type="text/javascript" src="DATA_TABLE_10.5/DataTable1.10.5.js"></script>
-    <script type="text/javascript" src="DATA_TABLE_10.5/jquery.dataTables.min.js"></script>
+
+    <!--DATA TABLE-->
+    <link rel="stylesheet" href="Data_table-10.6/media/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="Data_table-10.6/media/css/jquery.dataTables.min.css">
+    <script type="text/javascript" src="Data_table-10.6/media/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="Data_table-10.6/media/js/jquery.dataTables.js"></script>
     <!--DATA TABLE -->
 
     <link rel="stylesheet" href="menu/bootstrap-submenu.min.css">

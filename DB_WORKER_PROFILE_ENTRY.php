@@ -97,7 +97,7 @@ if($_REQUEST['option']=='save'){
     if($upload_filename==''){
         $upload_filename='null';
         $insert_query="INSERT INTO LMC_USER_LOGIN_DETAILS(ULD_USERNAME,ULD_PASSWORD,RC_ID,ULD_WORKER_NAME,ULD_WORKER_NO,ULD_IMAGE_FOLDER_ID,ULD_DOC_FOLDER_ID,ULD_DOC_FILE_NAME,ULD_EMAIL_ID,ULD_ADDRESS,ULD_NRIC_NO,ULD_MOBILE_NUMBER,ULD_USERSTAMP)
-        VALUES ('$logid','$password','$role','$empname','$empnum','$subfoldername','$attach_sub_folder_name','$upload_filename','$emailid','$address','$nricno','$contactno',$activeemp)";
+        VALUES ('$logid','$password','$role','$empname','$empnum','$subfoldername','$attach_sub_folder_name',$upload_filename,'$emailid','$address','$nricno','$contactno',$activeemp)";
     }
     else{
         $insert_query="INSERT INTO LMC_USER_LOGIN_DETAILS(ULD_USERNAME,ULD_PASSWORD,RC_ID,ULD_WORKER_NAME,ULD_WORKER_NO,ULD_IMAGE_FOLDER_ID,ULD_DOC_FOLDER_ID,ULD_DOC_FILE_NAME,ULD_EMAIL_ID,ULD_ADDRESS,ULD_NRIC_NO,ULD_MOBILE_NUMBER,ULD_USERSTAMP)

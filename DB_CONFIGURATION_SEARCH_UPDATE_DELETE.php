@@ -25,7 +25,7 @@ if(isset($_REQUEST)){
     {
         $CONFIG_SRCH_UPD_mod=$_REQUEST['module'];
         //CONFIG TYPE LIST
-        $CONFIG_SRCH_UPD_type = mysqli_query($con,"SELECT * FROM LMC_CONFIGURATION WHERE CNP_ID='2' AND (CGN_NON_IP_FLAG != 'XX' or CGN_NON_IP_FLAG is null)  ORDER BY CGN_TYPE ASC");
+        $CONFIG_SRCH_UPD_type = mysqli_query($con,"SELECT * FROM LMC_CONFIGURATION WHERE CGN_ID IN (9,10,11,12,13,14,16,17,18,19,20) ORDER BY CGN_TYPE ASC");
         $CONFIG_SRCH_UPD_arr_type=array();
         while($row=mysqli_fetch_array($CONFIG_SRCH_UPD_type)){
             $CONFIG_SRCH_UPD_arr_type[]=array($row[0],$row[2]);
@@ -37,17 +37,8 @@ if(isset($_REQUEST)){
     //LOAD DATA FOR FLEX TABLE
     if($_REQUEST['option']=="CONFIG_SRCH_UPD_load_data")
     {
-        $flag=$_REQUEST['CONFIG_SRCH_UPD_lb_module'];
-        $CONFIG_SRCH_UPD_data=$_REQUEST['CONFIG_SRCH_UPD_tb_data'];
         $CONFIG_SRCH_UPD_type=$_REQUEST['CONFIG_SRCH_UPD_lb_type'];
-        $arrTableWidth=array(3=>900,16=>1500);
-        $arrHeaderWidth=array(3=>array(300),5=>array(100));
-        $CONFIG_SRCH_UPD_arr_data=array(3=>array("LMC_USER_RIGHTS_CONFIGURATION","URC_DATA","DT.URC_ID,DT.URC_DATA,DT.URC_USERSTAMP,DATE_FORMAT((DT.URC_TIMESTAMP),'%d-%m-%Y %T'),DT.URC_INITIALIZE_FLAG"));
-        if($flag==3)
-        {
-            $CONFIG_SRCH_UPD_sql_data = mysqli_query($con, "SELECT ". $CONFIG_SRCH_UPD_arr_data[$flag][2]. " AS TIMESTAMP FROM ". $CONFIG_SRCH_UPD_arr_data[$flag][0]. " DT,LMC_CONFIGURATION C,LMC_CONFIGURATION_PROFILE CP WHERE  CP.CNP_ID='$flag' AND DT.CGN_ID=C.CGN_ID AND C.CGN_ID= '$CONFIG_SRCH_UPD_type' ORDER BY DT. ". $CONFIG_SRCH_UPD_arr_data[$flag][1]. " ASC");
-        }
-        else if($CONFIG_SRCH_UPD_type==13)
+        if($CONFIG_SRCH_UPD_type==13)
         {
             $CONFIG_SRCH_UPD_sql_data = mysqli_query($con,"SELECT LTC.TC_ID,LTC.TEAM_NAME,ULD.ULD_USERNAME,DATE_FORMAT((LTC.TC_TIMESTAMP),'%d-%m-%Y %T') AS TC_TIMESTAMP  FROM LMC_TEAM_CREATION LTC ,LMC_USER_LOGIN_DETAILS ULD WHERE LTC.ULD_ID=ULD.ULD_ID ORDER BY LTC.TEAM_NAME");
         }
@@ -59,14 +50,35 @@ if(isset($_REQUEST)){
         {
             $CONFIG_SRCH_UPD_sql_data = mysqli_query($con,"SELECT RDC.RDC_ID,RDC.RDC_CATEGORY,ULD.ULD_USERNAME,DATE_FORMAT((RDC.RDC_TIMESTAMP),'%d-%m-%Y %T') AS RDC_TIMESTAMP FROM LMC_REPORT_DOCUMENT_CATEGORY RDC,LMC_USER_LOGIN_DETAILS ULD WHERE RDC.ULD_ID=ULD.ULD_ID ORDER BY RDC.RDC_CATEGORY");
         }
-        else{
-            $CONFIG_SRCH_UPD_sql_data = mysqli_query($con, "SELECT ". $CONFIG_SRCH_UPD_arr_data[$flag][2]. " AS TIMESTAMP FROM ". $CONFIG_SRCH_UPD_arr_data[$flag][0]. " DT,LMC_CONFIGURATION C,LMC_CONFIGURATION_PROFILE CP,LMC_USER_LOGIN_DETAILS ULD WHERE  ULD.ULD_ID=DT.ULD_ID AND CP.CNP_ID='$flag' AND DT.CGN_ID=C.CGN_ID AND C.CGN_ID= '$CONFIG_SRCH_UPD_type' ORDER BY DT. ". $CONFIG_SRCH_UPD_arr_data[$flag][1]. " ASC");
+        else if($CONFIG_SRCH_UPD_type==17)
+        {
+            $CONFIG_SRCH_UPD_sql_data = mysqli_query($con,"SELECT MI.MI_ID,MI.MI_ITEM,ULD.ULD_USERNAME,DATE_FORMAT((MI.MI_TIMESTAMP),'%d-%m-%Y %T') AS MI_TIMESTAMP FROM LMC_MACHINERY_ITEM MI,LMC_USER_LOGIN_DETAILS ULD WHERE MI.ULD_ID=ULD.ULD_ID ORDER BY MI.MI_ITEM");
         }
-        $appendTable="<br><div id='CONFIG_SRCH_UPD_div_errmsg'></div><br><table id='CONFIG_SRCH_UPD_tble_config' border=1 cellspacing='0' class='srcresult' width='".$arrTableWidth[$flag]."px'><thead  bgcolor='#6495ed' style='color:white'><tr class='head'><th style='text-align:center;' width=350>DATA</th><th style='text-align:center;' width=150>USERSTAMP</th><th style='text-align:center;' width=130>TIMESTAMP</th></tr></thead><tbody>";
+        else if($CONFIG_SRCH_UPD_type==18)
+        {
+            $CONFIG_SRCH_UPD_sql_data = mysqli_query($con,"SELECT MUC.MCU_ID,MUC.MCU_MACHINERY_TYPE,ULD.ULD_USERNAME,DATE_FORMAT((MUC.MCU_TIMESTAMP),'%d-%m-%Y %T') AS MUC_TIMESTAMP FROM LMC_MACHINERY_USAGE MUC,LMC_USER_LOGIN_DETAILS ULD WHERE MUC.ULD_ID=ULD.ULD_ID ORDER BY MUC.MCU_MACHINERY_TYPE");
+        }
+        else if($CONFIG_SRCH_UPD_type==19)
+        {
+            $CONFIG_SRCH_UPD_sql_data = mysqli_query($con,"SELECT LFT.FU_ID,LFT.FU_ITEMS,ULD.ULD_USERNAME,DATE_FORMAT((LFT.FU_TIMESTAMP),'%d-%m-%Y %T') AS FU_TIMESTAMP FROM LMC_FITTING_USAGE LFT,LMC_USER_LOGIN_DETAILS ULD WHERE LFT.ULD_ID=ULD.ULD_ID ORDER BY LFT.FU_ITEMS");
+        }
+        else if($CONFIG_SRCH_UPD_type==20)
+        {
+            $CONFIG_SRCH_UPD_sql_data = mysqli_query($con,"SELECT MU.MU_ID,MU.MU_ITEMS,ULD.ULD_USERNAME,DATE_FORMAT((MU.MU_TIMESTAMP),'%d-%m-%Y %T') AS MU_TIMESTAMP FROM LMC_MATERIAL_USAGE MU,LMC_USER_LOGIN_DETAILS ULD WHERE MU.ULD_ID=ULD.ULD_ID ORDER BY MU.MU_ITEMS");
+        }
+        else{
+            $CONFIG_SRCH_UPD_sql_data = mysqli_query($con, "SELECT URC_ID,URC_DATA,URC_USERSTAMP,URC_TIMESTAMP FROM LMC_USER_RIGHTS_CONFIGURATION WHERE CGN_ID='$CONFIG_SRCH_UPD_type'");
+        }
+        $appendTable="<br><div id='CONFIG_SRCH_UPD_div_errmsg'></div><br><table id='CONFIG_SRCH_UPD_tble_config' border=1 cellspacing='0' class='srcresult'><thead  bgcolor='#6495ed' style='color:white'><tr class='head'><th style='text-align:center;' width=350>DATA</th><th style='text-align:center;' width=150>USERSTAMP</th><th style='text-align:center;' width=130>TIMESTAMP</th></tr></thead><tbody>";
         while($row=mysqli_fetch_array($CONFIG_SRCH_UPD_sql_data)){
             $appendTable .='<tr  id='.$row[0].'><td id='.'CONFIG_'.$row[0].' class="data">'.$row[1].'</td>';
             for($x = 2; $x < 4; $x++) {
-                $appendTable .="<td width='".$arrHeaderWidth[$flag][$x]."px'  >".$row[$x]."</td>";
+                if($x == 3){
+                    $appendTable .="<td style='text-align:center;'>".$row[$x]."</td>";
+                }
+                else{
+                    $appendTable .="<td>".$row[$x]."</td>";
+                }
             }
         }
         $appendTable .='</tbody></table>';
@@ -130,15 +142,13 @@ if(isset($_REQUEST)){
     //CHECK DUPLICATE DATA
     if($_REQUEST['option']=="update")
     {
-
-        $CONFIG_SRCH_UPD_arr_config=array(3=>array("LMC_USER_RIGHTS_CONFIGURATION","URC_DATA"));
-        $CONFIG_ENTRY_arr_type=array(14=>array("LMC_MEETING_TOPIC","MT_TOPIC"),16=>array("LMC_REPORT_DOCUMENT_CATEGORY","RDC_CATEGORY"),13=>array("LMC_TEAM_CREATION","TEAM_NAME"));
-        $flag=$_REQUEST['lbmodule'];
+        $CONFIG_ENTRY_arr_type=array(14=>array("LMC_MEETING_TOPIC","MT_TOPIC"),16=>array("LMC_REPORT_DOCUMENT_CATEGORY","RDC_CATEGORY"),13=>array("LMC_TEAM_CREATION","TEAM_NAME"),
+            17=>array("LMC_MACHINERY_ITEM","MI_ITEM"),18=>array("LMC_MACHINERY_USAGE","MCU_MACHINERY_TYPE"),19=>array("LMC_FITTING_USAGE","FU_ITEMS"),20=>array("LMC_MATERIAL_USAGE","MU_ITEMS"));
         $CONFIG_SRCH_UPD_type=$_REQUEST['listboxtype'];
         $CONFIG_SRCH_UPD_data=$_REQUEST['CONFIG_SRCH_UPD_tb_data'];
+        $CONFIG_SRCH_UPD_data=$con->real_escape_string($CONFIG_SRCH_UPD_data);
         $CONFIG_rowid=$_REQUEST['rowid'];
         $sql= "SELECT ".$CONFIG_ENTRY_arr_type[$CONFIG_SRCH_UPD_type][1]." FROM ".$CONFIG_ENTRY_arr_type[$CONFIG_SRCH_UPD_type][0]." CCN WHERE  ".$CONFIG_ENTRY_arr_type[$CONFIG_SRCH_UPD_type][1]."='$CONFIG_SRCH_UPD_data'";
-
         $sql_result= mysqli_query($con,$sql);
         $numrow=mysqli_num_rows($sql_result);
         if($numrow==0)
@@ -152,13 +162,28 @@ if(isset($_REQUEST)){
             else if($CONFIG_SRCH_UPD_type==16){
                 $updatesql="UPDATE LMC_REPORT_DOCUMENT_CATEGORY SET RDC_CATEGORY='$CONFIG_SRCH_UPD_data',ULD_ID=(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP') WHERE RDC_ID='$CONFIG_rowid' ";
             }
-        if (!mysqli_query($con,$updatesql)) {
-            die('Error: ' . mysqli_error($con));
-            $updadeflag=0;
-        }
-        else{
-            $updadeflag=1;
-        }
+            else if($CONFIG_SRCH_UPD_type==17){
+                $updatesql="UPDATE LMC_MACHINERY_ITEM SET MI_ITEM='$CONFIG_SRCH_UPD_data',ULD_ID=(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP') WHERE MI_ID='$CONFIG_rowid' ";
+            }
+            else if($CONFIG_SRCH_UPD_type==18){
+                $updatesql="UPDATE LMC_MACHINERY_USAGE SET MCU_MACHINERY_TYPE='$CONFIG_SRCH_UPD_data',ULD_ID=(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP') WHERE MCU_ID='$CONFIG_rowid' ";
+            }
+            else if($CONFIG_SRCH_UPD_type==19){
+                $updatesql="UPDATE LMC_FITTING_USAGE SET FU_ITEMS='$CONFIG_SRCH_UPD_data',ULD_ID=(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP') WHERE FU_ID='$CONFIG_rowid' ";
+            }
+            else if($CONFIG_SRCH_UPD_type==20){
+                $updatesql="UPDATE LMC_MATERIAL_USAGE SET MU_ITEMS='$CONFIG_SRCH_UPD_data',ULD_ID=(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP') WHERE MU_ID='$CONFIG_rowid' ";
+            }
+            else{
+                $updatesql="UPDATE LMC_USER_RIGHTS_CONFIGURATION  SET URC_DATA='$CONFIG_SRCH_UPD_data',ULD_ID=(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP') WHERE URC_ID='$CONFIG_rowid' ";
+            }
+            if (!mysqli_query($con,$updatesql)) {
+                $updadeflag=0;
+                die('Error: ' . mysqli_error($con));
+            }
+            else{
+                $updadeflag=1;
+            }
         }
         $values=array($numrow,$updadeflag);
         echo json_encode($values);

@@ -21,6 +21,17 @@ $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
     ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
     ->setKeywords("office 2007 openxml php")
     ->setCategory("Test result file");
+// for exl logo
+$objDrawing = new PHPExcel_Worksheet_Drawing();
+$objDrawing->setName('PHPExcel logo');
+$objDrawing->setDescription('PHPExcel logo');
+$objDrawing->setPath('image/LOGO.png');
+$objDrawing->setWidthAndHeight(200,100);
+$objDrawing->setResizeProportional(true);
+$objDrawing->setCoordinates('E1');
+$objDrawing->setOffsetX(6);
+$objDrawing->setOffsetY(8);
+$objDrawing->setWorksheet($objPHPExcel->getActiveSheet());
 /** Create a new PHPExcel object 1.0 */
 $activeempname=mysqli_query($con,"SELECT ULD_ID,ULD_WORKER_NAME FROM LMC_USER_LOGIN_DETAILS  WHERE ULD_USERNAME='$UserStamp'");
 if($row=mysqli_fetch_array($activeempname))
@@ -64,9 +75,14 @@ if($_REQUEST['option']=='COMMON_DATA')
     while($row=mysqli_fetch_array($empname)){
         $employeename[]=array($row["ULD_WORKER_NAME"],$row['ULD_ID']);
     }
+    //MACHINERY EQUIPEMENT/TRANSFER ITEM
+    $mtitem=mysqli_query($con,"select MI_ITEM from LMC_MACHINERY_ITEM ORDER BY MI_ITEM ASC");
+    while($row=mysqli_fetch_array($mtitem)){
+        $mtransferitem[]=$row["MI_ITEM"];
+    }
     //ERRPOR MESSAGE
-    $errormsg=get_error_msg('3,6,7,21,143,144,145,147,148,151,152');
-    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename,$topicname,$UserStamp);
+    $errormsg=get_error_msg('3,6,7,21,143,144,145,147,148,151,152,156,157');
+    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename,$topicname,$UserStamp,$mtransferitem);
     echo JSON_encode($values);
 }
 if($_REQUEST['option']=="checktopic"){
@@ -156,7 +172,8 @@ elseif($_REQUEST['Option']=='InputForm')
     $SV_details=$_POST["SiteVisit"];
     $EmployeeReport=$_POST["EmployeeDetails"];
     $imagedata=$_POST['imgData'];
-    if($imagedata!='' && $reportdate!='' && $EmployeeReport[0]!='' && $teamname!=''){
+    $uploadpath;
+    if($imagedata!='' && $reportdate!='' && $EmployeeReport[0] && $teamname!=''){
         $daterep=str_replace('-','',$reportdate);
         $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
         $userfolderid=get_emp_folderid($EmployeeReport[0]);
@@ -177,6 +194,7 @@ elseif($_REQUEST['Option']=='InputForm')
         else{
             $dirflag=0;
         }
+
         if($dirflag==1 && $writable==1){
             $uploadpath=$path.$imgfilename;
             try{
@@ -197,8 +215,8 @@ elseif($_REQUEST['Option']=='InputForm')
             $imgfilename='';
         }
     }
-    elseif($imagedata=='' || $reportdate=='' || $EmployeeReport[0]=='' || $teamname==''){
-        $imgflag=0;
+    elseif($imagedata==''){
+        $imgflag=1;
         $imgfilename='';
     }
     if($weather!=''){
@@ -224,7 +242,7 @@ elseif($_REQUEST['Option']=='InputForm')
     $finaltable='<html><body><table><tr><td style="text-align: center;"><div><img id=imaglogo src="image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">'.$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr>';
 
 // FOR EXCEL
-    $sheettitle="LIH MING CONSTRUCTION PTE LTD\nTIME SHEET REPORT FOR ".$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($reportdate));
+    $sheettitle="TIME SHEET REPORT FOR ".$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($reportdate));
     $objPHPExcel->getActiveSheet()->setTitle('REPORT SUBMISSION ENTRY')->setCellValue('A1', $sheettitle)->setCellValue('A2', 'TEAM REPORT')
         ->setCellValue('A3', 'LOCATION')->setCellValue('B3',$teamlocation)->setCellValue('C3', 'CONTRACT NO')->setCellValue('D3', $contractno)->setCellValue('F3', 'TEAM')->setCellValue('G3', $teamname)
         ->setCellValue('A4', 'DATE') ->setCellValue('B4', $reportdate) ->setCellValue('C4','WEATHER')->setCellValue('D4',$weathertime)
@@ -239,21 +257,24 @@ elseif($_REQUEST['Option']=='InputForm')
     $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(13);
     $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(13);
+    $objPHPExcel->getActiveSheet()->freezePane('A2');
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('A1:G1');
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D3:E3');
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D4:G4');
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D5:G5');
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B6:G6');
-    $objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(35);
+    $objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(50);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setWrapText(true);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('A2')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('E3')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A:E')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+//    $objPHPExcel->getActiveSheet()->getStyle('A:E')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('D1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('D1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('D3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
     $objPHPExcel->getActiveSheet()->getStyle('A2:A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->getColor()->setRGB('FFFAFA');
@@ -740,7 +761,14 @@ elseif($_REQUEST['Option']=='InputForm')
     $entry_exldata = ob_get_contents();
     ob_end_clean();
 
+    if($uploadpath!='')
+    {
     $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
+    }
+    else
+    {
+        $finaltable=$finaltable.'</table></body></html>';
+    }
 // final table end
     $teamremarks=$con->real_escape_string($teamremarks);
     $SV_remarks=$con->real_escape_string($SV_remarks);
@@ -755,7 +783,7 @@ elseif($_REQUEST['Option']=='InputForm')
 //Save Part
     if($imgflag==1){
         $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(1,'$teamname','$EmployeeReport[0]',
-       '$reportdate','$teamlocation',$contractno,'$reachsite','$leavesite','$typeofjob','$weather',
+       '$reportdate','$teamlocation','$contractno','$reachsite','$leavesite','$typeofjob','$weather',
        '$weatherfrom','$weatherto','$pipetesting','$pressurestart','$pressureend','$teamremarks','$imgfilename',
        '$pipelaid','$size','$length',
        '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$Employeeremark',
@@ -782,7 +810,7 @@ elseif($_REQUEST['Option']=='InputForm')
     }
     if($flag==1){
 
-        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_ID=1");
+        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE RC_ID=2");
         if($row=mysqli_fetch_array($select_to)){
             $toaddress=$row["ULD_EMAIL_ID"];
         }
@@ -831,6 +859,7 @@ elseif($_REQUEST['Option']=='InputForm')
 //        $mail->From = $from;
         $mail->FromName = 'LMC';
         $mail->addAddress($toaddress);
+        $mail->addCC($ccaddress);
         $mail->WordWrap = 50;
         $mail->isHTML(true);
         $mail->Subject =$sub;
@@ -925,10 +954,10 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
         $sitevisit_details[]=array($row["SVD_ID"],$row["SVD_NAME"],$row["SVD_DESIGNATION"],$row["SVDSTARTTIME"],$row["SVDENDTIME"],$row["SVD_REMARK"]);
     }
     //MACHINERY_EQUIPMENT DETAILS
-    $mech_equip_details=mysqli_query($con,"SELECT MET_ID,MET_FROM_LORRY_NO,MET_TO_LORRY_NO,MET_ITEM,MET_REMARK FROM LMC_MACHINERY_EQUIPMENT_TRANSFER WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
+    $mech_equip_details=mysqli_query($con,"SELECT MET_ID,MET_FROM_LORRY_NO,MET_TO_LORRY_NO,MI_ITEM,MET_REMARK FROM LMC_MACHINERY_EQUIPMENT_TRANSFER MET,LMC_MACHINERY_ITEM MI WHERE MET.MI_ID = MI.MI_ID AND TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($mech_equip_details))
     {
-        $mechequip_details[]=array($row["MET_ID"],$row["MET_FROM_LORRY_NO"],$row["MET_TO_LORRY_NO"],$row["MET_ITEM"],$row["MET_REMARK"]);
+        $mechequip_details[]=array($row["MET_ID"],$row["MET_FROM_LORRY_NO"],$row["MET_TO_LORRY_NO"],$row["MI_ITEM"],$row["MET_REMARK"]);
     }
     //MACHINERY USAGE DETAILS
     $machineryusage_details=mysqli_query($con,"SELECT MAC_ID,MCU_MACHINERY_TYPE,DATE_FORMAT(MAC_START_TIME,'%H:%i' ) AS MACSTARTTIME,DATE_FORMAT(MAC_END_TIME,'%H:%i' ) AS MACENDTIME,MAC_REMARK FROM LMC_MACHINERY_USAGE_DETAILS LMUD,LMC_MACHINERY_USAGE LMU WHERE LMUD.MCU_ID=LMU.MCU_ID AND TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
@@ -1051,10 +1080,10 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $sitevisit_details[]=array($row["SVD_ID"],$row["SVD_DESIGNATION"],$row["SVD_NAME"],$row["SVDSTARTTIME"],$row["SVDENDTIME"],$row["SVD_REMARK"]);
     }
     //MACHINERY_EQUIPMENT DETAILS
-    $mech_equip_details=mysqli_query($con,"SELECT MET_ID,MET_FROM_LORRY_NO,MET_TO_LORRY_NO,MET_ITEM,MET_REMARK FROM LMC_MACHINERY_EQUIPMENT_TRANSFER WHERE TRD_ID='$trdid'");
+    $mech_equip_details=mysqli_query($con,"SELECT MET_ID,MET_FROM_LORRY_NO,MET_TO_LORRY_NO,MI_ITEM,MET_REMARK FROM LMC_MACHINERY_EQUIPMENT_TRANSFER MET,LMC_MACHINERY_ITEM MI WHERE MET.MI_ID = MI.MI_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($mech_equip_details))
     {
-        $mechequip_details[]=array($row["MET_ID"],$row["MET_FROM_LORRY_NO"],$row["MET_TO_LORRY_NO"],$row["MET_ITEM"],$row["MET_REMARK"]);
+        $mechequip_details[]=array($row["MET_ID"],$row["MET_FROM_LORRY_NO"],$row["MET_TO_LORRY_NO"],$row["MI_ITEM"],$row["MET_REMARK"]);
     }
     //MACHINERY USAGE DETAILS
     $machineryusage_details=mysqli_query($con,"SELECT MAC_ID,MCU_MACHINERY_TYPE,DATE_FORMAT(MAC_START_TIME,'%H:%i' ) AS MACSTARTTIME,DATE_FORMAT(MAC_END_TIME,'%H:%i' ) AS MACENDTIME,MAC_REMARK FROM LMC_MACHINERY_USAGE_DETAILS LMUD,LMC_MACHINERY_USAGE LMU WHERE LMUD.MCU_ID=LMU.MCU_ID AND TRD_ID='$trdid'");
@@ -1111,7 +1140,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
     }
 
     //ERRPOR MESSAGE
-    $errormsg=get_error_msg('4,17,21,83,133,143,144,145,147,148,152');
+    $errormsg=get_error_msg('4,17,21,83,133,143,144,145,147,148,152,156,157');
     $folderid=mysqli_query($con,"SELECT EMP_IMAGE_FOLDER_ID FROM LMC_EMPLOYEE_DETAILS WHERE EMP_ID='$empid'");
     if($row=mysqli_fetch_array($folderid))
     {
@@ -1390,6 +1419,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     }
     //End of File Uploads
     $userfolderid;
+    $uploadpath;
     if($imagedata!='' && $reportdate!='' && $EmployeeReport[0]!='' && $teamname!=''){
         $daterep=str_replace('-','',$reportdate);
         $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
@@ -1430,8 +1460,8 @@ elseif($_REQUEST['Option']=='UpdateForm')
             $imgfilename='';
         }
     }
-    elseif($imagedata=='' || $reportdate=='' || $EmployeeReport[0]=='' || $teamname==''){
-        $imgflag=0;
+    elseif($imagedata==''){
+        $imgflag=1;
         $imgfilename='';
     }
     if($weather!=''){
@@ -1461,7 +1491,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $finaltable='<html><body><table><tr><td style="text-align: center;"><div><img id=imglogo src="image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">'.$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr>';
 
 // FOR EXCEL
-    $sheettitle="LIH MING CONSTRUCTION PTE LTD\nTIME SHEET UPDATED REPORT FOR ".$empnames;
+    $sheettitle="TIME SHEET UPDATED REPORT FOR ".$empnames;
     $objPHPExcel->getActiveSheet()->setTitle('REPORT SUBMISSION UPDATE')->setCellValue('A1', $sheettitle)->setCellValue('A2', 'TEAM REPORT')
         ->setCellValue('A3', 'LOCATION')->setCellValue('B3',$teamlocation)->setCellValue('C3', 'CONTRACT NO')->setCellValue('D3', $contractno)->setCellValue('F3', 'TEAM')->setCellValue('G3', $teamname)
         ->setCellValue('A4', 'DATE') ->setCellValue('B4', $reportdate) ->setCellValue('C4','WEATHER')->setCellValue('D4',$weathertime)
@@ -1469,6 +1499,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $styleArray = array('borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN)));
     $objPHPExcel->getActiveSheet()->getStyle('A2')->applyFromArray($styleArray);
     $objPHPExcel->getActiveSheet()->getStyle('A3:G6')->applyFromArray($styleArray);
+    $objPHPExcel->getActiveSheet()->freezePane('A2');
     $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
     $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
@@ -1481,16 +1512,18 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D4:G4');
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D5:G5');
     $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B6:G6');
-    $objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(35);
+    $objPHPExcel->getActiveSheet()->getRowDimension('1')->setRowHeight(50);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setWrapText(true);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('A2')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('E3')->getFont()->setBold(true);
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->getFont()->setBold(true);
-    $objPHPExcel->getActiveSheet()->getStyle('A:E')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+//    $objPHPExcel->getActiveSheet()->getStyle('A:E')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('A1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('D1')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
+    $objPHPExcel->getActiveSheet()->getStyle('D1')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
     $objPHPExcel->getActiveSheet()->getStyle('D3')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
     $objPHPExcel->getActiveSheet()->getStyle('A2:A8')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
     $objPHPExcel->getActiveSheet()->getStyle('A3:A6')->getFont()->getColor()->setRGB('FFFAFA');
@@ -2032,7 +2065,14 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $update_exldata = ob_get_contents();
     ob_end_clean();
 
+    if($uploadpath!='')
+    {
     $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
+    }
+    else
+    {
+        $finaltable=$finaltable.'</table></body></html>';
+    }
 //final table end
     $teamremarks=$con->real_escape_string($teamremarks);
     $SV_remarks=$con->real_escape_string($SV_remarks);
@@ -2047,7 +2087,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     //update part
     if($imgflag==1){
     $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(2,'$teamname','$EmployeeReport[0]','$reportdate','$teamlocation',
-    $contractno,'$reachsite','$leavesite','$typeofjob','$weather','$weatherfrom','$weatherto','$pipetesting','$pressurestart',
+    '$contractno','$reachsite','$leavesite','$typeofjob','$weather','$weatherfrom','$weatherto','$pipetesting','$pressurestart',
     '$pressureend','$teamremarks','$imgfilename','$pipelaid','$size','$length',
         '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$Employeeremark',
         '$SV_ID','$SV_name','$SV_designation','$SV_start','$SV_end','$SV_remarks',
@@ -2079,7 +2119,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     }
     if($flag==1)
     {
-        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_ID=1");
+        $select_to=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE RC_ID=2");
         if($row=mysqli_fetch_array($select_to)){
             $toaddress=$row["ULD_EMAIL_ID"];
         }
@@ -2117,9 +2157,11 @@ elseif($_REQUEST['Option']=='UpdateForm')
         $mail->Username = $username;
         $mail->Password = $password;
         $mail->SMTPSecure = $smtpsecure;
-        $mail->From = $from;
+        $mail->Port=587;
+//        $mail->From = $from;
         $mail->FromName = 'LMC';
         $mail->addAddress($toaddress);
+        $mail->addCC($ccaddress);
         $mail->WordWrap = 50;
         $mail->isHTML(true);
         $mail->Subject =$sub;

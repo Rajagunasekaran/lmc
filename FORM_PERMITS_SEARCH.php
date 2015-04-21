@@ -101,28 +101,37 @@ $(document).ready(function(){
                 var equipmentusage_details=value_array[5];
                 var fittingusage_details=value_array[6];
                 var material_details=value_array[7];
-
                 var teamreport_details=value_array[8];
-                var jobdetails=value_array[9].split(',');
                 var teamjob=value_array[10];
                 employee_id=value_array[11];
+                if(value_array[12]!='')
+                {
                 var jobdone_pipilaid=((value_array[12]).toString()).split(',');
-                var jobdone_size=((value_array[13]).toString()).split(',');
-                var jobdone_length=((value_array[14]).toString()).split(',');
-                var imgdata=value_array[15];
+                }
+                if(value_array[13]!='')
+                {
+                    var jobdone_size=((value_array[13]).toString()).split(',');
+                }
+                if(value_array[14]!='')
+                {
+                    var jobdone_length=((value_array[14]).toString()).split(',');
+                }
+                var srchimgdata=value_array[15];
                 imagefolderid=value_array[17];
                 var meeting_details=value_array[18];
                     $('#SRCH_tr_txt_wftime').val('');
                     $('#SRCH_tr_txt_wttime').val('');
                     $('#SRCH_tr_txt_weather').val('');
-                    if(imgdata!='data:image/png;base64,')
+                    if(srchimgdata!=null)
                     {
-                        $('<div><img src="'+imgdata+'" width="500" height="400" alt="embedded folder icon"></div>').appendTo($("#appendimg"));
+                        $('<div><img src="'+srchimgdata+'" width="500" height="400" alt="embedded folder icon"></div>').appendTo($("#appendimg"));
                     }
                     else{
                         $('<div>No Image Available</div>').appendTo($("#appendimg"));
                     }
 
+            if((value_array[12]!='') && (value_array[13]!='') && (value_array[14]!=''))
+            {
                 if(jobdone_pipilaid[0]=='ROAD' || jobdone_pipilaid[1]=='ROAD' || jobdone_pipilaid[2]=='ROAD')
                 {
                     $('#SRCH_jd_chk_road').attr('checked', true);
@@ -172,22 +181,43 @@ $(document).ready(function(){
                     }
 
                 }
+            }
+                if((teamjob!='') || (teamjob!=null))
+                {
                 for(var t=0;t<teamjob.length;t++)
                 {
                     var id=teamjob[t][0];
                     id=id.replace(" ","");
                     $('#'+id).attr('checked', false);
                 }
+                }
+                if(value_array[9]!=null)
+                {
+                    var jobdetails=value_array[9].split(',');
                 for(var s=0;s<jobdetails.length;s++)
                 {
                     var id=jobdetails[s];
                     id=id.replace(" ","");
                     $('#'+id).attr('checked', true);
                 }
-                oldjobdetails=jobdetails;
+                }
                 //TEAM REPORT DETAILS
                 for(var a=0;a<teamreport_details.length;a++)
                 {
+
+                    if(teamreport_details[a][1]==null){teamreport_details[a][1]="";}
+                    if(teamreport_details[a][2]==null){teamreport_details[a][2]="";}
+                    if(teamreport_details[a][3]==null){teamreport_details[a][3]="";}
+                    if(teamreport_details[a][4]==null || teamreport_details[a][4]=='00:00'){teamreport_details[a][4]="";}
+                    if(teamreport_details[a][5]==null || teamreport_details[a][5]=='00:00'){teamreport_details[a][5]="";}
+                    if(teamreport_details[a][6]==null){teamreport_details[a][6]="";}
+                    if(teamreport_details[a][7]==null){teamreport_details[a][7]="";}
+                    if(teamreport_details[a][8]==null){teamreport_details[a][8]="";}
+                    if(teamreport_details[a][9]==null){teamreport_details[a][9]="";}
+                    if(teamreport_details[a][10]==null || teamreport_details[a][10]=='00:00'){teamreport_details[a][10]="";}
+                    if(teamreport_details[a][11]==null || teamreport_details[a][11]=='00:00'){teamreport_details[a][11]="";}
+                    if(teamreport_details[a][12]==null){teamreport_details[a][12]="";}
+
                     $('#SRCH_tr_txt_location').val(teamreport_details[a][1]);
                     $('#SRCH_tr_txt_date').val(teamreport_details[a][0]);
                     $('#SRCH_tr_txt_contractno').val(teamreport_details[a][2]);
@@ -201,7 +231,7 @@ $(document).ready(function(){
                     $('#SRCH_jd_txt_end').val(teamreport_details[a][11]);
                     $('#SRCH_jd_ta_remark').val(teamreport_details[a][12]);
                     $('#SRCH_tr_txt_weather').val(teamreport_details[a][13]);
- 			if(teamreport_details[a][13]=='')
+ 			           if(teamreport_details[a][13]=='')
                         {
                             $("#SRCH_tr_txt_wftime").val('');
                             $("#SRCH_tr_txt_wttime").val('');
@@ -218,10 +248,10 @@ $(document).ready(function(){
                     var emp_end="SRCH_Emp_endtime"+autoid;
                     var emp_ot="SRCH_Emp_ot"+autoid;
                     var emp_remark="SRCH_Emp_remark"+autoid;
-                    if(empname[i][5]==null){empname[i][5]=""};
-                    if(empname[i][4]==null){empname[i][4]=""};
-                    if(empname[i][3]==null){empname[i][3]=""};
-                    if(empname[i][2]==null){empname[i][2]=""};
+                    if(empname[i][5]==null){empname[i][5]="";}
+                    if(empname[i][4]==null){empname[i][4]="";}
+                    if(empname[i][3]==null || empname[i][3]=='00:00'){empname[i][3]="";}
+                    if(empname[i][2]==null || empname[i][2]=='00:00'){empname[i][2]="";}
 
                     if(employee_id==empname[i][0])
                     {
@@ -273,6 +303,10 @@ $(document).ready(function(){
                         var sv_deleterowid='SRCH_sv_deleterow/'+sv_tablerowcount;
                         var sv_row_id="SRCH_sv_tr_"+sv_tablerowcount;
                         var temp_textbox_id="SRCH_svtemp_id"+sv_tablerowcount;
+                        if(sitevisit[j][1]==null){sitevisit[j][1]="";}
+                        if(sitevisit[j][2]==null){sitevisit[j][2]="";}
+                        if(sitevisit[j][3]==null || sitevisit[j][3]=='00:00'){sitevisit[j][3]="";}
+                        if(sitevisit[j][4]==null || sitevisit[j][4]=='00:00'){sitevisit[j][4]="";}
                         var siteremarks;
                         if(sitevisit[j][5]==null)
                         {
@@ -297,6 +331,9 @@ $(document).ready(function(){
                         var mtransferdeleterowid='SRCH_mtransferdeleterow/'+mtransfertablerowcount;
                         var mtransfer_row_id="SRCH_mtranser_tr_"+mtransfertablerowcount;
                         var temp_textbox_id="SRCH_mtransfertemp_id"+mtransfertablerowcount;
+                        if(mech_equip_transfer[k][1]==null){mech_equip_transfer[k][1]="";}
+                        if(mech_equip_transfer[k][2]==null){mech_equip_transfer[k][2]="";}
+                        if(mech_equip_transfer[k][3]==null){mech_equip_transfer[k][3]="SELECT";}
                         var mech_equip_remarks;
                         if(mech_equip_transfer[k][4]==null)
                         {
@@ -321,6 +358,9 @@ $(document).ready(function(){
                         var machinerydeleterowid='SRCH_machinerydeleterow/'+machinerytablerowcount;
                         var machinery_row_id="SRCH_machinery_tr_"+machinerytablerowcount;
                         var temp_textbox_id="SRCH_machinerytemp_id"+machinerytablerowcount;
+                        if(machinery_details[l][1]==null){machinery_details[l][1]="SELECT";}
+                        if(machinery_details[l][2]==null || machinery_details[l][2]=='00:00'){machinery_details[l][2]="";}
+                        if(machinery_details[l][3]==null || machinery_details[l][3]=='00:00'){machinery_details[l][3]="";}
                         var machineryremarks;
                         if(machinery_details[l][4]==null)
                         {
@@ -345,6 +385,11 @@ $(document).ready(function(){
                         var rentaldeleterowid='SRCH_machinerydeleterow/'+rentaltablerowcount;
                         var rental_row_id="SRCH_rental_tr_"+rentaltablerowcount;
                         var temp_textbox_id="SRCH_rentaltemp_id"+rentaltablerowcount;
+                        if(rentalmachinery_details[m][1]==null){rentalmachinery_details[m][1]="";}
+                        if(rentalmachinery_details[m][2]==null){rentalmachinery_details[m][2]="";}
+                        if(rentalmachinery_details[m][3]==null){rentalmachinery_details[m][3]="";}
+                        if(rentalmachinery_details[m][4]==null || rentalmachinery_details[m][4]=='00:00'){rentalmachinery_details[m][4]="";}
+                        if(rentalmachinery_details[m][5]==null || rentalmachinery_details[m][5]=='00:00'){rentalmachinery_details[m][5]="";}
                         var rentalremarks;
                         if(rentalmachinery_details[m][6]==null)
                         {
@@ -369,6 +414,10 @@ $(document).ready(function(){
                         var equipmentdeleterowid='SRCH_equipementdeleterow/'+equipmenttablerowcount;
                         var equipment_row_id="SRCH_equipment_tr_"+equipmenttablerowcount;
                         var temp_textbox_id="SRCH_equipmenttemp_id"+equipmenttablerowcount;
+                        if(equipmentusage_details[n][1]==null){equipmentusage_details[n][1]="";}
+                        if(equipmentusage_details[n][2]==null){equipmentusage_details[n][2]="";}
+                        if(equipmentusage_details[n][3]==null || equipmentusage_details[n][3]=='00:00'){equipmentusage_details[n][3]="";}
+                        if(equipmentusage_details[n][4]==null || equipmentusage_details[n][4]=='00:00'){equipmentusage_details[n][4]="";}
                         var equipmentremarks;
                         if(equipmentusage_details[n][5]==null)
                         {
@@ -393,6 +442,9 @@ $(document).ready(function(){
                         var deleterowid='SRCH_fitting_deleterow/'+tablerowCount;
                         var row_id="SRCH_fitting_tr_"+tablerowCount;
                         var temp_textbox_id="SRCH_fittingtemp_id"+tablerowCount;
+                        if(fittingusage_details[o][1]==null){fittingusage_details[o][1]="SELECT";}
+                        if(fittingusage_details[o][2]==null){fittingusage_details[o][2]="";}
+                        if(fittingusage_details[o][3]==null){fittingusage_details[o][3]="";}
                         var fittingremarks;
                         if(fittingusage_details[o][4]==null)
                         {
@@ -418,6 +470,9 @@ $(document).ready(function(){
                         var deleterowid='SRCH_material_deleterow/'+tablerowCount;
                         var row_id="SRCH_material_tr_"+tablerowCount;
                         var temp_textbox_id="SRCH_materialtemp_id"+tablerowCount;
+                        if(material_details[p][1]==null){material_details[p][1]="SELECT";}
+                        if(material_details[p][2]==null){material_details[p][2]="";}
+                        if(material_details[p][3]==null){material_details[p][3]="";}
                         var appendrow='<tr class="active" id='+row_id+'><td style="max-width: 250px">'+material_details[p][1]+'</td><td style="max-width: 250px">'+material_details[p][2]+'</td><td style="max-width: 250px">'+material_details[p][3]+'</td></tr>';
                         $('#SRCH_material_table tr:last').after(appendrow);
                     }
@@ -1415,8 +1470,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-md-3 selectContainer">
                     <label id="tr_lbl_team">TEAM</label>
-                    <select class="form-control" id="SRCH_tr_lb_team" disabled name="SRCH_tr_lb_team">
-                    </select>
+                    <input type="text" class="form-control" id="SRCH_tr_lb_team" disabled name="SRCH_tr_lb_team" placeholder="Team" />
                 </div>
                 <div class="col-md-3">
                     <label id="tr_lbl_date">DATE<em>*</em></label>
@@ -1608,7 +1662,7 @@ $(document).ready(function(){
                 </div>
                 <div class="col-md-3">
                     <label for="SRCH_jd_ta_remark" id="SRCH_jd_lbl_remark">REMARKS</label>
-                    <textarea class="form-control" rows="1" id="SRCH_jd_ta_remark" name="SRCH_jd_ta_remark"></textarea>
+                    <textarea class="form-control" rows="1" id="SRCH_jd_ta_remark" name="SRCH_jd_ta_remark" placeholder="Remarks"></textarea>
                 </div>
             </div>
         </fieldset>
@@ -1853,7 +1907,7 @@ $(document).ready(function(){
 
                 <div class="col-md-4">
                     <label>REMARK</label>
-                    <textarea class="form-control SRCH_rentalform-validation" id="SRCH_rental_remarks" rows="1" name="SRCH_rental_remarks" placeholder="Remark"></textarea>
+                    <textarea class="form-control SRCH_rentalform-validation" id="SRCH_rental_remarks" rows="1" name="SRCH_rental_remarks" placeholder="Remarks"></textarea>
                     <input type="hidden" class="form-control" id="SRCH_rentalmechinery_id" name="SRCH_rentalmechinery_id">
                 </div>
             </div>
@@ -2064,7 +2118,7 @@ $(document).ready(function(){
         <li class="pull-right"><a href="#top">Back to top</a></li>
     </ul>
 </div>
-<script src="PAINT/JS/customShape.js"> </script>
+<script src="PAINT/JS/customShape1.js"> </script>
 </div>
 </div>
 </body>

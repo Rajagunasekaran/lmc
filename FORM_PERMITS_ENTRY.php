@@ -9,77 +9,31 @@ $(document).ready(function(){
     $('.hide').hide();
     $('#Final_submit').hide();
     //CODING FOR CUSTOM PAINT
-    var flag = 1, imageData, imageDataJson;
-    $(document).on('click', '#closeImage', function () {
-        $("#divImage").empty();
-        if (imageData != undefined)
-            $('<img src="' + imageData + '" style="border:1px solid #F5F5F5;align:center" class="img-responsive" width="600" height="400">').appendTo("#divImage");
-    });
-    $(document).on('click', '#saveImage', function () {
+    //drawing tool start
+    $(document).on('click', '.previous', function () {
         canvas.deactivateAllWithDispatch().renderAll();
         imageData = canvas.toDataURL();
         imageDataJson = JSON.stringify(canvas);
-        $('#myModal').modal('hide');
-        $("#divImage").empty();
-        $('<img src="' + imageData + '" style="border:1px solid #F5F5F5;align:center" class="img-responsive" width="600" height="400">').appendTo("#divImage");
     });
-    //END OF FINAL SUBMIT FUNCTION
-    $('.open-modal').click(function () {
-        $('#myModal').modal({backdrop: 'static', keyboard: false});
-//            $('#myModal').modal('show');
-    });
-    $('#myModal').on('shown.bs.modal', function () {
-        if (flag == 1) {
-            canvas = new fabric.Canvas('canvas');
-            canvas.setWidth("780");
-            canvas.setHeight("640");
-            canvas.on({
-                'object:selected': onObjectSelected
-            });
-            canvas.on('mouse:down', function (o) {
-                if (mode == 'line') {
-                    isDown = true;
-                    var pointer = canvas.getPointer(o.e);
-                    var points = [pointer.x, pointer.y, pointer.x, pointer.y];
-                    line = new fabric.Line(points, {
-                        strokeWidth: strokeWidth,
-                        stroke: color,
-                        originX: 'center',
-                        originY: 'center',
-                        hasControls: false,
-                        selectable: false
-                    });
-                    canvas.add(line);
-                }
-            });
-            canvas.on('mouse:move', function (o) {
-                if (mode == 'line') {
-                    if (!isDown)
-                        return;
-                    var pointer = canvas.getPointer(o.e);
-                    line.set({x2: pointer.x, y2: pointer.y});
-                    canvas.renderAll();
-                }
-            });
-            canvas.on('mouse:up', function (o) {
-                if (mode == 'line') {
-                    isDown = false;
-                }
-            });
+    var flag = 1, imageData, imageDataJson;
+
+    $(document).on('click', '.next', function () {
+        if(flag==1)
+        {
+            loadcanvas()
         }
-        flag = 0;
+        flag=0;
         canvas.clear();
         if (imageDataJson != undefined) {
             canvas.loadFromJSON(imageDataJson)
         }
+
+//        if (imageData != undefined && imageData!= null) {
+//            updateImage(imageData);
+//        }
     });
-    $("#myModal").on('hidden.bs.modal', function () {
-    });
-    $(document).on("click", '.a-img-btn', function () {
-        $('#divExample').focus();
-        $(".a-img-btn-active").removeClass("a-img-btn-active").addClass("a-img-btn");
-        $(this).addClass("a-img-btn-active").removeClass("a-img-btn");
-    });
+    //drawing tool end
+
 
     //ENDING OF CUSTOM CODE
 //    $('.preloader').show();
@@ -94,6 +48,7 @@ $(document).ready(function(){
     var errormessage=[];
     var employeeid;
     var topicname=[];
+    var mtransferitem=[];
     var xmlhttp=new XMLHttpRequest();
     xmlhttp.onreadystatechange=function(){
         if (xmlhttp.readyState==4 && xmlhttp.status==200) {
@@ -109,6 +64,7 @@ $(document).ready(function(){
             errormessage=value_array[5];
             topicname=value_array[7];
             var username=value_array[8];
+            mtransferitem=value_array[9];
             if(teamname==null)
             {
                 var msg=errormessage[9].replace('[UNAME]',username);
@@ -151,6 +107,13 @@ $(document).ready(function(){
                     typeofjob+='<label class="checkbox-inline no_indent"><input type="checkbox" id ="jobtype" name="jobtype[]" value="' + jobtype[i][1] + '">' + jobtype[i][0]+'</label>'
                 }
                 $('#type_of_job').append(typeofjob).show();
+                //MTRANSFER ITEM
+                var mtransfer_item='<option>SELECT</option>';
+                for (var i=0;i<mtransferitem.length;i++) {
+                    mtransfer_item += '<option value="' + mtransferitem[i] + '">' + mtransferitem[i] + '</option>';
+                }
+                $('#mtransfer_item').html(mtransfer_item);
+
             }
         }
     }
@@ -170,18 +133,18 @@ $(document).ready(function(){
 
 //CHANGE EVENT FOR REPORT DATE
     $('#tr_txt_date').change(function(){
+        $('.preloader').show();
         var reportdate=$('#tr_txt_date').val();
         var teamname=$('#tr_lb_team').val();
         if(reportdate!=""){
             var empname=[];
             var report_details=[];
             var currentemp=[];
-            $('.preloader').show();
             var xmlhttp=new XMLHttpRequest();
             xmlhttp.onreadystatechange=function(){
                 if (xmlhttp.readyState==4 && xmlhttp.status==200) {
-                    var value_array=JSON.parse(xmlhttp.responseText);
                     $('.preloader').hide();
+                    var value_array=JSON.parse(xmlhttp.responseText);
                     empname=value_array[0];
                     report_details=value_array[1];
                     currentemp=value_array[2];
@@ -338,7 +301,7 @@ $(document).ready(function(){
     $('#mt_btn_addrow').click(function(){
         var topic=$('#mt_lb_topic').val();
         var remark=$('#mt_ta_remark').val();
-        if((topic!='')&&(remark!=''))
+        if((topic!='SELECT'))
         {
             var mt_tablerowcount=$('#meeting_table tr').length;
             var mt_trrowid=mt_tablerowcount;
@@ -353,8 +316,17 @@ $(document).ready(function(){
             var appendrow='<tr class="active" id='+mt_row_id+'><td style="max-width: 150px"><div class="col-md-1"><span style="display:block;" class="glyphicon glyphicon-edit mt_editbutton" id='+mt_editid+'></span></div><div class="col-md-1"><span style="display:block;" class="glyphicon glyphicon-trash mt_removebutton" id='+mt_deleterowid+'></div></td><td style="max-width: 350px">'+topic+'</td><td style="max-width: 150px;">'+remark+'</td></tr>';
             $('#meeting_table tr:last').after(appendrow);
             mt_formclear();
-            $('#mt_btn_addrow').attr('disabled','disabled');
+//            $('#mt_btn_addrow').attr('disabled','disabled');
             $('#mt_btn_update').hide();
+        }
+        else if((topic=='SELECT')&&(remark!=''))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','MEETING TOPIC');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
         }
     });
 // FUNCTION FOR MEETING FORM CLEAR
@@ -367,7 +339,7 @@ $(document).ready(function(){
         $(this).closest('tr').remove();
         mt_formclear();
         $('#mt_btn_update').hide();
-        $('#mt_btn_addrow').attr('disabled','disabled').show();
+        $('#mt_btn_addrow').show();
         return false;
     });
 //CLICK EVENT FOR MEETING EDIT BUTTON
@@ -378,7 +350,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#mt_rowid').val(rowid);
         $('#mt_btn_addrow').hide();
-        $('#mt_btn_update').attr("disabled", "disabled").show();
+        $('#mt_btn_update').show();
         var $tds= $(this).closest('tr').children('td'),
             mt_topic = $tds.eq(1).text(),
             mt_remarks = $tds.eq(2).text();
@@ -390,28 +362,39 @@ $(document).ready(function(){
         var mt_topic=$('#mt_lb_topic').val();
         var mt_remarks=$('#mt_ta_remark').val();
         var mt_rowid=$('#mt_rowid').val();
+        if((mt_topic!='SELECT'))
+        {
         var objUser = {"mt_id":mt_rowid,"mt_topic":mt_topic,"mt_remarks":mt_remarks};
         var objKeys = ["","mt_topic","mt_remarks"];
         $('#mt_tr_' + objUser.mt_id + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
+        }
+        else if((mt_topic=='SELECT')&&(mt_remarks!=''))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','MEETING TOPIC');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+        }
+        else{
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+        }
         $('#mt_btn_addrow').show();
         $('#mt_btn_update').hide();
-        $('#mt_btn_update,#mt_btn_addrow').attr("disabled", "disabled");
+//        $('#mt_btn_update,#mt_btn_addrow').attr("disabled", "disabled");
         mt_formclear();
     });
 // FORM VALIDATION FOR BUTTONS
     $(document).on("change",'.meetingform-validation', function (){
         var mt_topic=$('#mt_lb_topic').val();
         var mt_remarks=$('#mt_ta_remark').val();
-        if((mt_topic!='SELECT') && (mt_remarks!=''))
-        {
-            $("#mt_btn_addrow,#mt_btn_update").removeAttr("disabled");
-        }
-        else
-        {
-            $("#mt_btn_addrow,#mt_btn_update").attr("disabled", "disabled");
-        }
+//        if((mt_topic!='SELECT') && (mt_remarks!=''))
+//        {
+//            $("#mt_btn_addrow,#mt_btn_update").removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $("#mt_btn_addrow,#mt_btn_update").attr("disabled", "disabled");
+//        }
     });
 
 // MEETING ADD,DELETE AND UPDATE FUNCTION
@@ -425,7 +408,7 @@ $(document).ready(function(){
         var start=$('#sv_txt_start').val();
         var end=$('#sv_txt_end').val();
         var remark=$('#sv_txt_remark').val();
-        if((desingnation!='') && (name!='') && (start!='') && (end!=''))
+        if((desingnation!='') || (name!='') || (start!='') || (end!='')||(remark!=''))
         {
             var sv_tablerowcount=$('#sv_tbl tr').length;
             var sv_trrowid=sv_tablerowcount;
@@ -440,8 +423,12 @@ $(document).ready(function(){
             var appendrow='<tr class="active" id='+sv_row_id+'><td style="max-width: 150px"><div class="col-md-1"><span style="display:block;" class="glyphicon glyphicon-edit sv_editbutton" id='+sv_editid+'></span></div><div class="col-md-1"><span style="display:block;" class="glyphicon glyphicon-trash sv_removebutton" id='+sv_deleterowid+'></div></td><td style="max-width: 250px">'+desingnation+'</td><td style="max-width: 250px">'+name+'</td><td style="max-width: 250px">'+start+'</td><td style="max-width: 250px">'+end+'</td><td style="max-width: 250px">'+remark+'</td></tr>';
             $('#sv_tbl tr:last').after(appendrow);
             sv_formclear()
-            $('#sv_btn_addrow').attr('disabled','disabled');
+//            $('#sv_btn_addrow').attr('disabled','disabled');
             $('#sv_btn_update').hide();
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
         }
     });
 // FUNCTION FOR SITEVISIT FORM CLEAR
@@ -457,7 +444,7 @@ $(document).ready(function(){
         $(this).closest('tr').remove();
         sv_formclear()
         $('#sv_btn_update').hide();
-        $('#sv_btn_addrow').attr('disabled','disabled').show();
+        $('#sv_btn_addrow').show();
         return false;
     });
 //CLICK EVENT FOR SITEVISIT EDIT BUTTON
@@ -468,7 +455,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#sv_rowid').val(rowid);
         $('#sv_btn_addrow').hide();
-        $('#sv_btn_update').attr("disabled", "disabled").show();
+        $('#sv_btn_update').show();
         var $tds = $(this).closest('tr').children('td'),
             sv_desgn = $tds.eq(1).text(),
             sv_name = $tds.eq(2).text(),
@@ -489,15 +476,27 @@ $(document).ready(function(){
         var sv_end=$('#sv_txt_end').val();
         var sv_remarks=$('#sv_txt_remark').val();
         var sv_rowid=$('#sv_rowid').val();
+        if((sv_desgn!='') || (sv_name!='') || (sv_start!='') || (sv_end!='') ||(sv_remarks!=''))
+        {
         var objUser = {"sv_id":sv_rowid,"sv_desgn":sv_desgn,"sv_name":sv_name,"sv_start":sv_start,"sv_end":sv_end,"sv_remark":sv_remarks};
         var objKeys = ["","sv_desgn","sv_name", "sv_start", "sv_end","sv_remark"];
         $('#sv_tr_' + objUser.sv_id + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
-        $('#sv_btn_addrow').show();
-        $('#sv_btn_update').hide();
-        $('#sv_btn_update,#sv_btn_addrow').attr("disabled", "disabled");
-        sv_formclear();
+            $('#sv_btn_addrow').show();
+            $('#sv_btn_update').hide();
+//        $('#sv_btn_update,#sv_btn_addrow').attr("disabled", "disabled");
+            sv_formclear();
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+            $('#sv_btn_addrow').hide();
+            $('#sv_btn_update').show();
+//        $('#sv_btn_update,#sv_btn_addrow').attr("disabled", "disabled");
+            sv_formclear();
+        }
+
     });
 // FORM VALIDATION FOR BUTTONS
     $(document).on("change blur",'.sitevisitform-validation', function (){
@@ -506,14 +505,15 @@ $(document).ready(function(){
         var sv_start=$('#sv_txt_start').val();
         var sv_end=$('#sv_txt_end').val();
         var sv_remarks=$('#sv_txt_remark').val();
-        if((sv_design!='') && (sv_name!='') && (sv_start!='') && (sv_end!='') )
-        {
-            $("#sv_btn_update,#sv_btn_addrow").removeAttr("disabled");
-        }
-        else
-        {
-            $("#sv_btn_update,#sv_btn_addrow").attr("disabled", "disabled");
-        }
+//        if((sv_design=='') && (sv_name=='') && (sv_start=='') && (sv_end=='') )
+//        {
+//            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+////            $("#sv_btn_update,#sv_btn_addrow").removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $("#sv_btn_update,#sv_btn_addrow").attr("disabled", "disabled");
+//        }
     });
 ////SITE VISIT ADD,DELETE AND UPDATE FUNCTION
 //MACHINERY/EQUIPMENT TRANSFER ADD,DELETE,UPDATE ROW FUNCTION
@@ -525,7 +525,7 @@ $(document).ready(function(){
         var mtransfer_item=$('#mtransfer_item').val();
         var mtransfer_to=$('#mtransfer_to').val();
         var mtransfer_remark=$('#mtransfer_remark').val();
-        if((mtranser_from!="") && (mtransfer_item!='') && (mtransfer_to!=''))
+        if(mtransfer_item!='SELECT')
         {
             var mtransfertablerowcount=$('#mtransfer_table tr').length;
             var mtrans_trrowid=mtransfertablerowcount;
@@ -540,14 +540,23 @@ $(document).ready(function(){
             var appendrow='<tr class="active" id='+mtransfer_row_id+'><td style="max-width: 150px"><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-edit mtransfereditbutton" id='+mtransfereditid+'></div><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-trash mtransferremovebutton"  id='+mtransferdeleterowid+'></div></td><td style="max-width: 250px">'+mtranser_from+'</td><td style="max-width: 250px">'+mtransfer_item+'</td><td style="max-width: 250px">'+mtransfer_to+'</td><td style="max-width: 250px">'+mtransfer_remark+'</td></tr>';
             $('#mtransfer_table tr:last').after(appendrow);
             mtransferformclear()
-            $('#mtransfer_addrow').attr('disabled','disabled');
+//            $('#mtransfer_addrow').attr('disabled','disabled');
             $('#mtransfer_update').hide();
+        }
+        else if((mtransfer_item=='SELECT') && ((mtranser_from!='') || (mtransfer_to!='') || (mtransfer_remark!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
         }
     });
 // FUNCTION FOR MACHINERY FORM CLEAR
     function mtransferformclear(){
         $('#mtranser_from').val('');
-        $('#mtransfer_item').val('');
+        $('#mtransfer_item').val('SELECT');
         $('#mtransfer_to').val('');
         $('#mtransfer_remark').val('').height('22');
     }
@@ -556,7 +565,7 @@ $(document).ready(function(){
         $(this).closest('tr').remove();
         mtransferformclear()
         $('#mtransfer_update').hide();
-        $('#mtransfer_addrow').attr("disabled", "disabled").show();
+        $('#mtransfer_addrow').show();
         return false;
     });
 //CLICK EVENT FOR MACHINERY EDIT BUTTON
@@ -567,7 +576,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#mtransfer_rowid').val(rowid);
         $('#mtransfer_addrow').hide();
-        $('#mtransfer_update').attr("disabled", "disabled").show();
+        $('#mtransfer_update').show();
         var $tds =$(this).closest('tr').children('td'),
             mtranser_from = $tds.eq(1).text(),
             mtransfer_item = $tds.eq(2).text(),
@@ -585,15 +594,36 @@ $(document).ready(function(){
         var mtransfer_to=$('#mtransfer_to').val();
         var mtransfer_remark=$('#mtransfer_remark').val();
         var mtransfer_rowid=$('#mtransfer_rowid').val();
+        if(mtransfer_item!='SELECT')
+        {
         var objUser = {"mtransferid":mtransfer_rowid,"mtranserfrom":mtranser_from,"mtransferitem":mtransfer_item,"mtransferto":mtransfer_to,"mtransferremark":mtransfer_remark};
         var objKeys = ["","mtranserfrom", "mtransferitem", "mtransferto","mtransferremark"];
         $('#mtranser_tr_' + objUser.mtransferid + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
-        $('#mtransfer_addrow').show();
-        $('#mtransfer_update').hide();
-        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
-        mtransferformclear();
+            $('#mtransfer_addrow').show();
+            $('#mtransfer_update').hide();
+//        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
+            mtransferformclear();
+        }
+        else if((mtransfer_item=='SELECT') && ((mtranser_from!='') || (mtransfer_to!='') || (mtransfer_remark!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+            $('#mtransfer_addrow').hide();
+            $('#mtransfer_update').show();
+//        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
+            mtransferformclear();
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+            $('#mtransfer_addrow').hide();
+            $('#mtransfer_update').show();
+//        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
+            mtransferformclear();
+        }
+
     });
 
 // FORM VALIDATION FOR BUTTONS
@@ -601,14 +631,14 @@ $(document).ready(function(){
         var mtranser_from=$('#mtranser_from').val();
         var mtransfer_item=$('#mtransfer_item').val();
         var mtransfer_to=$('#mtransfer_to').val();
-        if(mtranser_from!="" && mtransfer_item!="" && mtransfer_to!="")
-        {
-            $("#mtransfer_update,#mtransfer_addrow").removeAttr("disabled");
-        }
-        else
-        {
-            $("#mtransfer_update,#mtransfer_addrow").attr("disabled", "disabled");
-        }
+//        if(mtranser_from!="" && mtransfer_item!="" && mtransfer_to!="")
+//        {
+//            $("#mtransfer_update,#mtransfer_addrow").removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $("#mtransfer_update,#mtransfer_addrow").attr("disabled", "disabled");
+//        }
     });
 //END OF MACHINERY/EQUIPMENT TRANSFER ADD,DELETE,UPDATE ROW FUNCTION
 //RENTAL MACHINERY/EQUIPMENT TRANSFER ADD,DELETE,UPDATE FUNCTION//
@@ -620,7 +650,7 @@ $(document).ready(function(){
         var rental_start=$('#rental_start').val();
         var rental_end=$('#rental_end').val();
         var rental_remarks=$('#rental_remarks').val();
-        if((rental_lorryno!="") && (rental_throwearthstore!='') && (rental_throwearthoutside!='') && (rental_start!='') && (rental_end!=''))
+        if((rental_lorryno!="") || (rental_throwearthstore!='') || (rental_throwearthoutside!='') || (rental_start!='') || (rental_end!='') ||(rental_remarks!=''))
         {
             var rentaltablerowcount=$('#rental_table tr').length;
             var rental_trrowid=rentaltablerowcount;
@@ -634,16 +664,19 @@ $(document).ready(function(){
             var rental_row_id="rental_tr_"+rental_trrowid;
             var appendrow='<tr class="active" id='+rental_row_id+'><td style="max-width: 150px"><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-edit rentalmechinery_editbutton" id='+rentaleditid+'></div><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-trash rental_machineryremovebutton"  id='+rentaldeleterowid+'></div></td><td style="max-width: 250px">'+rental_lorryno+'</td><td style="max-width: 250px">'+rental_throwearthstore+'</td><td style="max-width: 250px">'+rental_throwearthoutside+'</td><td style="max-width: 250px">'+rental_start+'</td><td style="max-width: 250px">'+rental_end+'</td><td style="max-width: 250px">'+rental_remarks+'</td>';
             $('#rental_table tr:last').after(appendrow);
-            $('#rentalmechinery_addrow').attr("disabled", "disabled");
+//            $('#rentalmechinery_addrow').attr("disabled", "disabled");
             $('#rentalmechinery_updaterow').hide();
             Rentalmachineryclear()
+        }
+        else{
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
         }
     });
 // CLICK EVENT FOR RENTAL MACHINERY REMOVE BUTTON
     $(document).on("click",'.rental_machineryremovebutton', function (){
         $(this).closest('tr').remove();
         Rentalmachineryclear()
-        $('#rentalmechinery_addrow').attr("disabled", "disabled").show();
+        $('#rentalmechinery_addrow').show();
         $('#rentalmechinery_updaterow').hide();
         return false;
     });
@@ -655,7 +688,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#rentalmechinery_id').val(rowid);
         $('#rentalmechinery_addrow').hide();
-        $('#rentalmechinery_updaterow').attr("disabled", "disabled").show();
+        $('#rentalmechinery_updaterow').show();
         var $tds = $(this).closest('tr').children('td'),
             lorry_no = $tds.eq(1).text(),
             store = $tds.eq(2).text(),
@@ -679,15 +712,26 @@ $(document).ready(function(){
         var rental_end=$('#rental_end').val();
         var rental_remarks=$('#rental_remarks').val();
         var rental_rowid=$('#rentalmechinery_id').val();
+        if((rental_lorryno!="") || (rental_throwearthstore!='') || (rental_throwearthoutside!='') || (rental_start!='') || (rental_end!='') ||(rental_remarks!=''))
+        {
         var objUser = {"rentalrowid":rental_rowid,"lorryno":rental_lorryno,"throwstore":rental_throwearthstore,"throwoutside":rental_throwearthoutside,"start":rental_start,"end":rental_end,"remarks":rental_remarks};
         var objKeys = ["","lorryno", "throwstore", "throwoutside","start","end","remarks"];
         $('#rental_tr_' + objUser.rentalrowid + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
-        $('#rentalmechinery_addrow').show();
-        $('#rentalmechinery_updaterow').hide();
-        $('#rentalmechinery_updaterow,#rentalmechinery_addrow').attr("disabled", "disabled");
-        Rentalmachineryclear()
+            $('#rentalmechinery_addrow').show();
+            $('#rentalmechinery_updaterow').hide();
+//        $('#rentalmechinery_updaterow,#rentalmechinery_addrow').attr("disabled", "disabled");
+            Rentalmachineryclear()
+        }
+        else{
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+            $('#rentalmechinery_addrow').hide();
+            $('#rentalmechinery_updaterow').show();
+//        $('#rentalmechinery_updaterow,#rentalmechinery_addrow').attr("disabled", "disabled");
+            Rentalmachineryclear()
+        }
+
     });
     function Rentalmachineryclear()
     {
@@ -706,14 +750,14 @@ $(document).ready(function(){
         var rental_throwearthoutside=$('#rental_throwearthoutside').val();
         var rental_start=$('#rental_start').val();
         var rental_end=$('#rental_end').val();
-        if(rental_lorryno!="" && rental_throwearthstore!="" && rental_throwearthoutside!="" && rental_start!='' && rental_end!='')
-        {
-            $("#rentalmechinery_updaterow,#rentalmechinery_addrow").removeAttr("disabled");
-        }
-        else
-        {
-            $("#rentalmechinery_updaterow,#rentalmechinery_addrow").attr("disabled", "disabled");
-        }
+//        if(rental_lorryno!="" && rental_throwearthstore!="" && rental_throwearthoutside!="" && rental_start!='' && rental_end!='')
+//        {
+//            $("#rentalmechinery_updaterow,#rentalmechinery_addrow").removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $("#rentalmechinery_updaterow,#rentalmechinery_addrow").attr("disabled", "disabled");
+//        }
     });
 //RENTAL MACHINERY USAGE ADD,DELETE AND UPDATE FUNCTION
 //CLICK EVENT FOR MACHINERY ADD BUTTON
@@ -723,7 +767,7 @@ $(document).ready(function(){
         var machinery_start=$('#machinery_start').val();
         var machinery_end=$('#machinery_end').val();
         var machinery_remarks=$('#machinery_remarks').val();
-        if((machinerytype!="SELECT") && (machinery_start!='') && (machinery_end!=''))
+        if((machinerytype!="SELECT"))
         {
             var machinerytablerowcount=$('#machinery_table tr').length;
             var machinery_trrowid=machinerytablerowcount;
@@ -738,9 +782,19 @@ $(document).ready(function(){
             var appendrow='<tr class="active" id='+machinery_row_id+'><td style="max-width: 150px"><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-edit machineryeditbutton" id='+machineryeditid+'></div><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-trash machineryremovebutton"  id='+machinerydeleterowid+'><div></td><td style="max-width: 250px">'+machinerytype+'</td><td style="max-width: 250px">'+machinery_start+'</td><td style="max-width: 250px">'+machinery_end+'</td><td style="max-width: 250px">'+machinery_remarks+'</td></tr>';
             $('#machinery_table tr:last').after(appendrow);
             machineryformclear()
-            $('#machinery_addrow').attr('disabled','disabled');
+//            $('#machinery_addrow').attr('disabled','disabled');
             $('#machinery_update').hide();
         }
+        else if((machinerytype=='SELECT') && ((machinery_start!='') || (machinery_end!='') || (machinery_remarks!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','MACHINERY TYPE');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+        }
+
     });
 
     // FUNCTION FOR MACHINERY FORM CLEAR
@@ -754,7 +808,7 @@ $(document).ready(function(){
     $(document).on("click",'.machineryremovebutton', function (){
         $(this).closest('tr').remove();
         machineryformclear()
-        $('#machinery_addrow').attr('disabled','disabled').show();
+        $('#machinery_addrow').show();
         $('#machinery_update').hide();
         return false;
     });
@@ -766,7 +820,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#machinery_rowid').val(rowid);
         $('#machinery_addrow').hide();
-        $('#machinery_update').attr("disabled", "disabled").show();
+        $('#machinery_update').show();
         var $tds = $(this).closest('tr').children('td'),
             machinery_type = $tds.eq(1).text(),
             machinery_start = $tds.eq(2).text(),
@@ -784,15 +838,35 @@ $(document).ready(function(){
         var machinery_end=$('#machinery_end').val();
         var machinery_remarks=$('#machinery_remarks').val();
         var machinery_rowid=$('#machinery_rowid').val();
+        if((machinery_type!="SELECT"))
+        {
         var objUser = {"machineryid":machinery_rowid,"machinerytype":machinery_type,"machinerystart":machinery_start,"machineryend":machinery_end,"machineryremark":machinery_remarks};
         var objKeys = ["","machinerytype", "machinerystart", "machineryend","machineryremark"];
         $('#machinery_tr_' + objUser.machineryid + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
-        $('#machinery_addrow').show();
-        $('#machinery_update').hide();
-        $('#machinery_update,#machinery_addrow').attr("disabled", "disabled");
-        machineryformclear();
+            $('#machinery_addrow').show();
+            $('#machinery_update').hide();
+//        $('#machinery_update,#machinery_addrow').attr("disabled", "disabled");
+            machineryformclear();
+         }
+        else if((machinery_type=='SELECT')&&((machinery_start!='') || (machinery_end!='') || (machinery_remarks!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','MACHINERY TYPE');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+            $('#machinery_addrow').hide();
+            $('#machinery_update').show();
+//        $('#machinery_update,#machinery_addrow').attr("disabled", "disabled");
+            machineryformclear();
+        }
+        else
+         {
+        show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+             $('#machinery_addrow').hide();
+             $('#machinery_update').show();
+//        $('#machinery_update,#machinery_addrow').attr("disabled", "disabled");
+            machineryformclear();
+         }
     });
 
     // FORM VALIDATION FOR BUTTONS
@@ -800,14 +874,14 @@ $(document).ready(function(){
         var machinery_type=$('#machinery_type').val();
         var machinery_start=$('#machinery_start').val();
         var machinery_end=$('#machinery_end').val();
-        if(machinery_type!="SELECT" && machinery_start!="" && machinery_end!="")
-        {
-            $("#machinery_update,#machinery_addrow").removeAttr("disabled");
-        }
-        else
-        {
-            $("#machinery_update,#machinery_addrow").attr("disabled", "disabled");
-        }
+//        if(machinery_type!="SELECT" && machinery_start!="" && machinery_end!="")
+//        {
+//            $("#machinery_update,#machinery_addrow").removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $("#machinery_update,#machinery_addrow").attr("disabled", "disabled");
+//        }
     });
 //END OF MACHINERY USAGE ADD,DELETE AND UPDATE FUNCTION
 //EQUIPMENT USAGE ADD,DELETE AND UPDATE FUNCTION
@@ -819,7 +893,7 @@ $(document).ready(function(){
         var equipment_start=$('#equipment_start').val();
         var equipment_end=$('#equipment_end').val();
         var equipment_remark=$('#equipment_remark').val();
-        if((equipment_aircompressor!="") && (equipment_lorryno!='') && (equipment_start!='') && (equipment_end!=''))
+        if((equipment_aircompressor!="") || (equipment_lorryno!='') || (equipment_start!='') || (equipment_end!='') ||(equipment_remark!=''))
         {
             var equipmenttablerowcount=$('#equipment_table tr').length;
             var equipment_trrowid=equipmenttablerowcount;
@@ -834,8 +908,12 @@ $(document).ready(function(){
             var appendrow='<tr class="active" id='+equipment_row_id+'><td style="max-width: 150px"><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-edit equipmenteditbutton" id='+equipmenteditid+'></div><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-trash equipmentremovebutton" id='+equipmentdeleterowid+'></div></td><td style="max-width: 250px">'+equipment_aircompressor+'</td><td style="max-width: 250px">'+equipment_lorryno+'</td><td style="max-width: 250px">'+equipment_start+'</td><td style="max-width: 250px">'+equipment_end+'</td><td style="max-width: 250px">'+equipment_remark+'</td></tr>';
             $('#equipment_table tr:last').after(appendrow);
             equipmentformclear()
-            $('#equipment_addrow').attr('disabled','disabled');
+//            $('#equipment_addrow').attr('disabled','disabled');
             $('#equipment_update').hide();
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
         }
     });
 
@@ -852,7 +930,7 @@ $(document).ready(function(){
     $(document).on("click",'.equipmentremovebutton', function (){
         $(this).closest('tr').remove();
         equipmentformclear()
-        $('#equipment_addrow').attr('disabled','disabled').show();
+        $('#equipment_addrow').show();
         $('#equipment_update').hide();
         return false;
     });
@@ -864,7 +942,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#equipment_rowid').val(rowid);
         $('#equipment_addrow').hide();
-        $('#equipment_update').attr("disabled", "disabled").show();
+        $('#equipment_update').show();
         var $tds = $(this).closest('tr').children('td'),
             equipment_aircompressor = $tds.eq(1).text(),
             equipment_lorryno = $tds.eq(2).text(),
@@ -885,15 +963,27 @@ $(document).ready(function(){
         var equipment_end=$('#equipment_end').val();
         var equipment_remark=$('#equipment_remark').val();
         var equipment_rowid=$('#equipment_rowid').val();
+        if((equipment_aircompressor!="") || (equipment_lorryno!='') || (equipment_start!='') || (equipment_end!='') ||(equipment_remark!=''))
+        {
         var objUser = {"equipmentrowid":equipment_rowid,"equipmentaircompressor":equipment_aircompressor,"equipmentlorryno":equipment_lorryno,"equipmentstart":equipment_start,"equipmentend":equipment_end,"equipmentremark":equipment_remark};
         var objKeys = ["","equipmentaircompressor", "equipmentlorryno", "equipmentstart","equipmentend","equipmentremark"];
         $('#equipment_tr_' + objUser.equipmentrowid + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
-        $('#equipment_addrow').show();
-        $('#equipment_update').hide();
-        $('#equipment_update,#equipment_addrow').attr("disabled", "disabled");
-        equipmentformclear();
+            $('#equipment_addrow').show();
+            $('#equipment_update').hide();
+//        $('#equipment_update,#equipment_addrow').attr("disabled", "disabled");
+            equipmentformclear();
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+            $('#equipment_addrow').hide();
+            $('#equipment_update').show();
+//        $('#equipment_update,#equipment_addrow').attr("disabled", "disabled");
+            equipmentformclear();
+        }
+
     });
 
 // FORM VALIDATION FOR BUTTONS
@@ -902,14 +992,14 @@ $(document).ready(function(){
         var equipment_lorryno=$('#equipment_lorryno').val();
         var equipment_start=$('#equipment_start').val();
         var equipment_end=$('#equipment_end').val();
-        if(equipment_aircompressor!="" && equipment_lorryno!="" && equipment_start!="" && equipment_end!='')
-        {
-            $('#equipment_update,#equipment_addrow').removeAttr("disabled");
-        }
-        else
-        {
-            $('#equipment_update,#equipment_addrow').attr("disabled", "disabled");
-        }
+//        if(equipment_aircompressor!="" && equipment_lorryno!="" && equipment_start!="" && equipment_end!='')
+//        {
+//            $('#equipment_update,#equipment_addrow').removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $('#equipment_update,#equipment_addrow').attr("disabled", "disabled");
+//        }
     });
     //END OF EQUIPMENT USAGE ADD,DELETE AND UPDATE FUNCTION
 //FITTING  USAGE TABLE ADD FUNCTION//
@@ -920,7 +1010,7 @@ $(document).ready(function(){
         var size=$('#fitting_size').val();
         var qty=$('#fitting_quantity').val();
         var remarks=$('#fitting_remarks').val();
-        if((items!="SELECT") && (size!='') && (qty!=''))
+        if((items!="SELECT"))
         {
             var tablerowCount=$('#fitting_table tr').length;
             var fitting_trrowid=tablerowCount;
@@ -934,16 +1024,26 @@ $(document).ready(function(){
             var row_id="fitting_tr_"+fitting_trrowid;
             var appendrow='<tr  class="active" id='+row_id+'><td style="max-width: 150px"><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-edit fitting_editbutton" id='+editid+'></div><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-trash fitting_removebutton"  id='+deleterowid+'></div></td><td style="max-width: 250px">'+items+'</td><td style="max-width: 250px">'+size+'</td><td style="max-width: 250px">'+qty+'</td><td style="max-width: 250px">'+remarks+'</td></tr>';
             $('#fitting_table tr:last').after(appendrow);
-            $("#fitting_addrow").attr("disabled", "disabled");
+//            $("#fitting_addrow").attr("disabled", "disabled");
             $('#fitting_updaterow').hide();
             fittingformclear();
         }
+        else if((items=="SELECT") && ((size!='') || (qty!='') || (remarks!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','FITTINGS ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+        }
+
     });
     //**********DELETE ROW*************//
     $(document).on("click",'.fitting_removebutton', function (){
         $('#fitting_updaterow').hide();
         $(this).closest('tr').remove();
-        $("#fitting_addrow").attr("disabled", "disabled").show();
+        $("#fitting_addrow").show();
         fittingformclear();
         return false;
     });
@@ -955,7 +1055,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#fitting_id').val(rowid);
         $('#fitting_addrow').hide();
-        $("#fitting_updaterow").attr("disabled", "disabled").show();
+        $("#fitting_updaterow").show();
         var $tds = $(this).closest('tr').children('td'),
             items = $tds.eq(1).text(),
             size = $tds.eq(2).text(),
@@ -973,15 +1073,35 @@ $(document).ready(function(){
         var qty=$('#fitting_quantity').val();
         var remarks=$('#fitting_remarks').val();
         var rowid=$('#fitting_id').val();
+        if((items!="SELECT"))
+        {
         var objUser = {"id":rowid,"items":items,"size":size,"quantity":qty,"remark":remarks};
         var objKeys = ["","items", "size", "quantity","remark"];
         $('#fitting_tr_' + objUser.id + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
-        $('#fitting_addrow').show();
-        $('#fitting_updaterow').hide();
-        $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
-        fittingformclear();
+            $('#fitting_addrow').show();
+            $('#fitting_updaterow').hide();
+//        $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
+            fittingformclear();
+        }
+        else if((items=="SELECT") && ((size!='') || (qty!='') || (remarks!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','FITTINGS ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+            $('#fitting_addrow').hide();
+            $('#fitting_updaterow').show();
+//        $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
+            fittingformclear();
+        }
+        else{
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+            $('#fitting_addrow').hide();
+            $('#fitting_updaterow').show();
+//        $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
+            fittingformclear();
+        }
+
     });
     //*****FITTING FORM CLEAR**********//
     function fittingformclear()
@@ -996,14 +1116,14 @@ $(document).ready(function(){
         var items=$('#fitting_items').val();
         var size=$('#fitting_size').val();
         var qty=$('#fitting_quantity').val();
-        if(items!="SELECT" && size!="" && qty!="")
-        {
-            $('#fitting_addrow,#fitting_updaterow').removeAttr("disabled");
-        }
-        else
-        {
-            $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
-        }
+//        if(items!="SELECT" && size!="" && qty!="")
+//        {
+//            $('#fitting_addrow,#fitting_updaterow').removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
+//        }
     });
 //END OF FITTING  USAGE TABLE ADD FUNCTION//
 //MATERIAL USAGE ADD,DELETE AND UPDATE ROW FUNCTION//
@@ -1012,7 +1132,7 @@ $(document).ready(function(){
         var items=$('#material_items').val();
         var receipt=$('#material_receipt').val();
         var qty=$('#material_quantity').val();
-        if((items!="SELECT") && (receipt!='') && (qty!=''))
+        if((items!="SELECT"))
         {
             var tablerowCount=$('#material_table tr').length;
             var mat_trrowid=tablerowCount;
@@ -1026,16 +1146,25 @@ $(document).ready(function(){
             var row_id="material_tr_"+mat_trrowid;
             var appendrow='<tr class="active" id='+row_id+'><td style="max-width: 150px"><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-edit material_editbutton" id='+editid+'></div><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-trash material_removebutton"  id='+deleterowid+'></div></td><td style="max-width: 250px">'+items+'</td><td style="max-width: 250px">'+receipt+'</td><td style="max-width: 250px">'+qty+'</td></tr>';
             $('#material_table tr:last').after(appendrow);
-            $("#material_addrow").attr("disabled","disabled");
+//            $("#material_addrow").attr("disabled","disabled");
             $('#material_updaterow').hide();
             MATERIALformclear();
+        }
+        else if((items=="SELECT") && ((receipt!='') || (qty!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','MATERIAL ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
         }
     });
     //**********DELETE ROW*************//
     $(document).on("click",'.material_removebutton', function (){
         $('#material_updaterow').hide();
         $(this).closest('tr').remove();
-        $("#material_addrow").attr("disabled","disabled").show();
+        $("#material_addrow").show();
         MATERIALformclear();
         return false;
     });
@@ -1047,7 +1176,7 @@ $(document).ready(function(){
         var rowid=splitid[1];
         $('#material_id').val(rowid);
         $('#material_addrow').hide();
-        $('#material_updaterow').attr('disabled','disabled').show();
+        $('#material_updaterow').show();
         var $tds = $(this).closest('tr').children('td'),
             items = $tds.eq(1).text(),
             receipt = $tds.eq(2).text(),
@@ -1062,15 +1191,36 @@ $(document).ready(function(){
         var material_receipt=$('#material_receipt').val();
         var material_quantity=$('#material_quantity').val();
         var material_id=$('#material_id').val();
+        if((material_items!="SELECT"))
+        {
         var objUser = {"materialid":material_id,"materialitems":material_items,"materialreceipt":material_receipt,"materialquantity":material_quantity};
         var objKeys = ["","materialitems", "materialreceipt", "materialquantity"];
         $('#material_tr_' + objUser.materialid + ' td').each(function(i) {
             $(this).text(objUser[objKeys[i]]);
         });
-        $('#material_addrow').show();
-        $('#material_updaterow').hide();
-        $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
-        MATERIALformclear();
+            $('#material_addrow').show();
+            $('#material_updaterow').hide();
+//        $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
+            MATERIALformclear();
+        }
+        else if((material_items=="SELECT") && ((material_receipt!='') || (material_quantity!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','MATERIAL ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+            $('#material_addrow').hide();
+            $('#material_updaterow').show();
+//        $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
+            MATERIALformclear();
+        }
+        else
+        {
+            show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+            $('#material_addrow').hide();
+            $('#material_updaterow').show();
+//        $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
+            MATERIALformclear();
+        }
+
     });
     //*****MATERIAL FORM CLEAR**********//
     function MATERIALformclear()
@@ -1084,14 +1234,14 @@ $(document).ready(function(){
         var items=$('#material_items').val();
         var receipt=$('#material_receipt').val();
         var qty=$('#material_quantity').val();
-        if(items!="SELECT" && receipt!="" && qty!="")
-        {
-            $('#material_addrow,#material_updaterow').removeAttr("disabled");
-        }
-        else
-        {
-            $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
-        }
+//        if(items!="SELECT" && receipt!="" && qty!="")
+//        {
+//            $('#material_addrow,#material_updaterow').removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
+//        }
     });
 //END OF MATERIAL USAGE ADD,DELETE AND UPDATE ROW FUNCTION//
 
@@ -1148,6 +1298,7 @@ $(document).ready(function(){
         $('#nextbtn').attr("disabled","disabled").show();
         $('#prevbtn').hide();
         $('#Final_submit').hide();
+        ncount=1;
 
     }
 //ALREADY EXIST FORM CLEAR
@@ -1193,6 +1344,7 @@ $(document).ready(function(){
         canvas.clear();
         $('#myTab a:first').tab('show')
         $('#nextbtn').attr("disabled","disabled").show();
+        ncount=1;
     }
 
 //FINAL SUBMIT BUTTON VALIDATION
@@ -1201,64 +1353,64 @@ $(document).ready(function(){
 //        var contractno=$('#tr_txt_contractno').val();
 //        var teamname=$('#tr_lb_team').val();
         var reportdate=$('#tr_txt_date').val();
-//        var weather=$('#tr_txt_weather').val();
-//        var reachsite=$('#tr_txt_reachsite').val();
-//        var leavesite=$('#tr_txt_leavesite').val();
-//        var jobtype = $("input[id=jobtype]").is(":checked");
-//        var roadchk=$("input[id=jd_chk_road]").is(":checked");
-//        var concchk=$("input[id=jd_chk_contc]").is(":checked");
-//        var turfchk=$("input[id=jd_chk_truf]").is(":checked");
-//        var roadm=$('#jd_chk_roadm').val();
-//        var roadmm=$('#jd_chk_roadmm').val();
-//        var concm=$('#jd_chk_concm').val();
-//        var concmm=$('#jd_chk_concmm').val();
-//        var trufm=$('#jd_chk_trufm').val();
-//        var trufmm=$('#jd_chk_trufmm').val();
+        var weather=$('#tr_txt_weather').val();
+        var reachsite=$('#tr_txt_reachsite').val();
+        var leavesite=$('#tr_txt_leavesite').val();
+        var jobtype = $("input[id=jobtype]").is(":checked");
+        var roadchk=$("input[id=jd_chk_road]").is(":checked");
+        var concchk=$("input[id=jd_chk_contc]").is(":checked");
+        var turfchk=$("input[id=jd_chk_truf]").is(":checked");
+        var roadm=$('#jd_chk_roadm').val();
+        var roadmm=$('#jd_chk_roadmm').val();
+        var concm=$('#jd_chk_concm').val();
+        var concmm=$('#jd_chk_concmm').val();
+        var trufm=$('#jd_chk_trufm').val();
+        var trufmm=$('#jd_chk_trufmm').val();
 //        var pipetesting=$('#jd_txt_testing').val();
 //        var startpressure=$('#jd_txt_start').val();
 //        var endpressure=$('#jd_txt_end').val();
 ////        var employeetable=$('#Employee_table tr').length;
 //        // pipelaid validation
-//        if(roadchk==true){
-//            $('#jd_chk_roadm').removeAttr('disabled');
-//            $('#jd_chk_roadmm').removeAttr('disabled');
-//        }
-//        else{
-//            $("#jd_chk_roadm").attr("disabled", "disabled");
-//            $("#jd_chk_roadmm").attr("disabled", "disabled");
-//            $("#jd_chk_roadm").val('');
-//            $("#jd_chk_roadmm").val('');
-//        }
-//        if(concchk==true){
-//            $('#jd_chk_concm').removeAttr('disabled');
-//            $('#jd_chk_concmm').removeAttr('disabled');
-//        }
-//        else{
-//            $("#jd_chk_concm").attr("disabled", "disabled");
-//            $("#jd_chk_concmm").attr("disabled", "disabled");
-//            $("#jd_chk_concm").val('');
-//            $("#jd_chk_concmm").val('');
-//        }
-//        if(turfchk==true){
-//            $('#jd_chk_trufm').removeAttr('disabled');
-//            $('#jd_chk_trufmm').removeAttr('disabled');
-//        }
-//        else{
-//            $("#jd_chk_trufm").attr("disabled", "disabled");
-//            $("#jd_chk_trufmm").attr("disabled", "disabled");
-//            $("#jd_chk_trufm").val('');
-//            $("#jd_chk_trufmm").val('');
-//        }
-//        //weather time validation
-//        if(weather!=''){
-//            $('#tr_txt_wftime').removeAttr('disabled');
-//            $('#tr_txt_wttime').removeAttr('disabled');
-//        }
-//        else{
-//            $("#tr_txt_wftime").attr("disabled", "disabled");
-//            $("#tr_txt_wttime").attr("disabled", "disabled");
-//        }
-//
+        if(roadchk==true){
+            $('#jd_chk_roadm').removeAttr('disabled');
+            $('#jd_chk_roadmm').removeAttr('disabled');
+        }
+        else{
+            $("#jd_chk_roadm").attr("disabled", "disabled");
+            $("#jd_chk_roadmm").attr("disabled", "disabled");
+            $("#jd_chk_roadm").val('');
+            $("#jd_chk_roadmm").val('');
+        }
+        if(concchk==true){
+            $('#jd_chk_concm').removeAttr('disabled');
+            $('#jd_chk_concmm').removeAttr('disabled');
+        }
+        else{
+            $("#jd_chk_concm").attr("disabled", "disabled");
+            $("#jd_chk_concmm").attr("disabled", "disabled");
+            $("#jd_chk_concm").val('');
+            $("#jd_chk_concmm").val('');
+        }
+        if(turfchk==true){
+            $('#jd_chk_trufm').removeAttr('disabled');
+            $('#jd_chk_trufmm').removeAttr('disabled');
+        }
+        else{
+            $("#jd_chk_trufm").attr("disabled", "disabled");
+            $("#jd_chk_trufmm").attr("disabled", "disabled");
+            $("#jd_chk_trufm").val('');
+            $("#jd_chk_trufmm").val('');
+        }
+        //weather time validation
+        if(weather!=''){
+            $('#tr_txt_wftime').removeAttr('disabled');
+            $('#tr_txt_wttime').removeAttr('disabled');
+        }
+        else{
+            $("#tr_txt_wftime").attr("disabled", "disabled");
+            $("#tr_txt_wttime").attr("disabled", "disabled");
+        }
+
 //        if((location!=' ')&&(contractno!='') && (teamname!='SELECT') && (reportdate!='')  && (reachsite!='') && (leavesite!='') && (jobtype==true))
 //        {
 //            if((pipetesting!='') && (startpressure!='') && (endpressure!=''))
@@ -1369,6 +1521,23 @@ $(document).ready(function(){
             if(machinarytopic==machineryinnerarray){
                 show_msgbox("REPORT SUBMISSION ENTRY",errormsg,"error",false);
                 $('#machinery_type').val('SELECT').show();
+            }
+        }
+    });
+    //check mtransfer type
+    $(document).on("change",'#mtransfer_item', function (){
+        var mtransfertable = document.getElementById('mtransfer_table');
+        var mtransferitem=$('#mtransfer_item').val();
+        var errormsg=errormessage[8].toString().replace("[ITEM]",mtransferitem)
+        for ( var i = 1; row = mtransfertable.rows[i]; i++ )
+        {
+            row = mtransfertable.rows[i];
+            var mtransferinnerarray=[];
+            col = row.cells[2];
+            mtransferinnerarray.push(col.firstChild.nodeValue);
+            if(mtransferitem==mtransferinnerarray){
+                show_msgbox("REPORT SUBMISSION ENTRY",errormsg,"error",false);
+                $('#mtransfer_item').val('SELECT').show();
             }
         }
     });
@@ -1560,8 +1729,15 @@ $(document).ready(function(){
             }
         }
         var EmployeeDetails=[Employeeid,Start,End,OT,Remark,emp_name];
-
-        var dataURL = canvas.toDataURL();
+        var dataURL;
+        if(canvas.isEmpty())
+        {
+            dataURL='';
+        }
+        else
+        {
+         dataURL = canvas.toDataURL();
+        }
         var formelement =$('#entryform').serialize();
         var arraydata={"Option":"InputForm","MaterialDetails": materialusage_array,"FittingDetails":fittingusage_array,"EquipmentDetails":equipmentusage_array,"RentalDetails":rentalmechinery_array,"MechineryUsageDetails":mechineryusage_array,"MechEqptransfer":mech_eqp_array,"SiteVisit":SV_array,"MeetingDetails":meeting_array,"EmployeeDetails":EmployeeDetails,"imgData": dataURL};
         data=formelement + '&' + $.param(arraydata);
@@ -1893,8 +2069,8 @@ $(document).ready(function(){
             </div>
 
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="mt_btn_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="mt_btn_update" class="btn btn-info mt_btn_updaterow" disabled>UPDATE</button>
+                <button type="button" id="mt_btn_addrow" class="btn btn-info">ADD</button>
+                <button type="button" id="mt_btn_update" class="btn btn-info mt_btn_updaterow">UPDATE</button>
             </div>
         </fieldset>
         <div class="table-responsive">
@@ -2087,8 +2263,8 @@ $(document).ready(function(){
             </div>
 
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="sv_btn_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="sv_btn_update" class="btn btn-info sv_btn_updaterow" disabled>UPDATE</button>
+                <button type="button" id="sv_btn_addrow" class="btn btn-info" >ADD</button>
+                <button type="button" id="sv_btn_update" class="btn btn-info sv_btn_updaterow" >UPDATE</button>
             </div>
         </fieldset>
         <div class="table-responsive">
@@ -2120,21 +2296,23 @@ $(document).ready(function(){
         <!--        <form class="form-horizontal">-->
         <fieldset>
             <div class="row form-group">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label>FROM (LORRY NO)</label>
                     <input type="text" class="form-control mtransferform-validation quantity lorryno" id="mtranser_from" name="mtranser_from" placeholder="From (Lorry No)">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label>ITEMS</label>
-                    <input type="text" class="form-control alphanumeric mtransferform-validation txtlen" id="mtransfer_item" name="mtransfer_item" placeholder="Item">
+                    <select class="form-control alphanumeric mtransferform-validation" id="mtransfer_item" name="mtransfer_item">
+                    </select>
+<!--                    <input type="text" class="form-control alphanumeric mtransferform-validation txtlen" id="mtransfer_item" name="mtransfer_item" placeholder="Item">-->
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label>TO (LORRY NO)</label>
                     <input type="text" class="form-control mtransferform-validation quantity lorryno" id="mtransfer_to"  name="mtransfer_to" placeholder="To (Lorry No)">
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label>REMARKS</label>
                     <textarea class="form-control mtransferform-validation remarklen removecap textareaaccinjured" id="mtransfer_remark"  rows="1" name="mtransfer_remark" placeholder="Remarks"></textarea>
                 </div>
@@ -2147,8 +2325,8 @@ $(document).ready(function(){
                 </div>
             </div>
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="mtransfer_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="mtransfer_update" class="btn btn-info mtransfer_updaterow" disabled>UPDATE</button>
+                <button type="button" id="mtransfer_addrow" class="btn btn-info" >ADD</button>
+                <button type="button" id="mtransfer_update" class="btn btn-info mtransfer_updaterow" >UPDATE</button>
             </div>
         </fieldset>
         <div class="table-responsive">
@@ -2209,8 +2387,8 @@ $(document).ready(function(){
             </div>
 
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="machinery_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="machinery_update" class="btn btn-info machinery_updaterow" disabled>UPDATE</button>
+                <button type="button" id="machinery_addrow" class="btn btn-info" >ADD</button>
+                <button type="button" id="machinery_update" class="btn btn-info machinery_updaterow" >UPDATE</button>
 
             </div>
         </fieldset>
@@ -2275,8 +2453,8 @@ $(document).ready(function(){
             </div>
 
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="rentalmechinery_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="rentalmechinery_updaterow" class="btn btn-info rentalmechineryupdaterow" disabled>UPDATE</button>
+                <button type="button" id="rentalmechinery_addrow" class="btn btn-info" >ADD</button>
+                <button type="button" id="rentalmechinery_updaterow" class="btn btn-info rentalmechineryupdaterow" >UPDATE</button>
 
             </div>
         </fieldset>
@@ -2339,8 +2517,8 @@ $(document).ready(function(){
                 </div>
             </div>
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="equipment_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="equipment_update" class="btn btn-info equipment_updaterow" disabled>UPDATE</button>
+                <button type="button" id="equipment_addrow" class="btn btn-info">ADD</button>
+                <button type="button" id="equipment_update" class="btn btn-info equipment_updaterow">UPDATE</button>
             </div>
         </fieldset>
         <div class="table-responsive">
@@ -2399,8 +2577,8 @@ $(document).ready(function(){
             </div>
 
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="fitting_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="fitting_updaterow" class="btn btn-info  fittingupdaterow" disabled>UPDATE</button>
+                <button type="button" id="fitting_addrow" class="btn btn-info" >ADD</button>
+                <button type="button" id="fitting_updaterow" class="btn btn-info  fittingupdaterow" >UPDATE</button>
             </div>
         </fieldset>
         <div class="table-responsive">
@@ -2449,8 +2627,8 @@ $(document).ready(function(){
             </div>
 
             <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="material_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="material_updaterow" class="btn btn-info materialupdaterow" disabled>UPDATE</button>
+                <button type="button" id="material_addrow" class="btn btn-info" >ADD</button>
+                <button type="button" id="material_updaterow" class="btn btn-info materialupdaterow" >UPDATE</button>
             </div>
         </fieldset>
         <div class="table-responsive">
@@ -2471,83 +2649,64 @@ $(document).ready(function(){
     </div>
 </div>
 </div>
+
 <div class="tab-pane" id="tab2">
     <!-- DRAWING SURFACE--->
     <div class="panel panel-primary">
         <div class="panel-heading">
-            <h3 class="panel-title">DRAWING AREA</h3>
+            <h3 class="panel-title">DRAWING AREA<em>*</em></h3>
         </div>
         <div class="panel-body">
-        </div>
-        <div class="bs-example">
-            <!-- Modal HTML -->
-            <div id="myModal" class="modal fade">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">DRAWING SURFACE</h4>
-                            <input type="button" id="divExample" style="opacity:0" >
+            <div class="bs-example">
+                <div class="col-xs-9"><canvas id="canvas" style="border:1px solid #F5F5F5;" onclick="canvasonlick()"></canvas></div>
+                <div class="row">
+                    <div class="col-xs-3 canvasshapes"><div class="general" style="background-color:#F5F5F5;border:1px solid lavender;">
+                            <a onClick="setColor()"  class="btn primary a-img-btn" title='FILL WITH COLOR'><img src="PAINT/IMAGES/fill.jpg"  class="img-rounded"/></a>
+                            <a onClick="eclipse()"   class="btn primary a-img-btn" title='ECLIPSE'><img src="PAINT/IMAGES/eclipse.jpg"  class="img-rounded"/></a>
+                            <a onClick="triangle()"   class="btn primary a-img-btn" title='TRIANGLE'><img src="PAINT/IMAGES/triangle.jpg"  class="img-rounded"/></a>
+                            <a onClick="circle()"  class="btn primary a-img-btn-active" title='CIRCLE'><img src="PAINT/IMAGES/cir.png"  class="img-rounded"/></a>
+                            <a onClick="rectangle()" class="btn primary a-img-btn" title='RECTANGLE'><img src="PAINT/IMAGES/rectangle.png"  class="img-rounded"/></a>
+                            <a onClick="drawLine()"  class="btn primary a-img-btn" title='LINE' id="drawing-line"><img src="PAINT/IMAGES/line.jpg"  class="img-rounded"/></a>
+                            <a onClick="pencil()"  class="btn primary a-img-btn" title='PENCIL'><img src="PAINT/IMAGES/pencil.png"  class="img-rounded"/></a>
+                            <a onClick="eraser()"  class="btn primary a-img-btn" title='ERASER'><img src="PAINT/IMAGES/eraser.jpg"  class="img-rounded"/></a>
+                            <a onClick="textEditor1()"  class="btn primary a-img-btn" title='TEXTd'><img src="PAINT/IMAGES/text.jpg"  class="img-rounded"/></a>
+                            <a onClick="clearCanvas()" class="btn primary a-img-btn" title='CLEAR'><img src="PAINT/IMAGES/cancel.jpg"  class="img-rounded"/></a>
+                            <a onClick="selector()" class="btn primary a-img-btn" title='SELECTOR'><img src="PAINT/IMAGES/select.jpg"  class="img-rounded"/></a>
+                            <a onClick="cut()" class="btn primary a-img-btn" title='REMOVE'><img src="PAINT/IMAGES/cut.jpg"  class="img-rounded"/></a>
                         </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-xs-9"><canvas id="canvas" style="border:1px solid #F5F5F5;"></canvas></div>
-                                <div class="col-xs-3"><div class="general" style="background-color:#F5F5F5;border:1px solid lavender;">
-                                        <a onClick="setColor()"  class="btn primary a-img-btn" title='FILL WITH COLOR'><img src="PAINT/IMAGES/fill.jpg"  class="img-rounded"/></a>
-                                        <a onClick="eclipse()"   class="btn primary a-img-btn" title='ECLIPSE'><img src="PAINT/IMAGES/eclipse.jpg"  class="img-rounded"/></a>
-                                        <a onClick="triangle()"   class="btn primary a-img-btn" title='TRIANGLE'><img src="PAINT/IMAGES/triangle.jpg"  class="img-rounded"/></a>
-                                        <a onClick="circle()"  class="btn primary a-img-btn-active" title='CIRCLE'><img src="PAINT/IMAGES/cir.png"  class="img-rounded"/></a>
-                                        <a onClick="rectangle()" class="btn primary a-img-btn" title='RECTANGLE'><img src="PAINT/IMAGES/rectangle.png"  class="img-rounded"/></a>
-                                        <a onClick="drawLine()"  class="btn primary a-img-btn" title='LINE' id="drawing-line"><img src="PAINT/IMAGES/line.jpg"  class="img-rounded"/></a>
-                                        <a onClick="pencil()"  class="btn primary a-img-btn" title='PENCIL'><img src="PAINT/IMAGES/pencil.png"  class="img-rounded"/></a>
-                                        <a onClick="eraser()"  class="btn primary a-img-btn" title='ERASER'><img src="PAINT/IMAGES/eraser.jpg"  class="img-rounded"/></a>
-                                        <a onClick="textEditor1()"  class="btn primary a-img-btn" title='TEXTd'><img src="PAINT/IMAGES/text.jpg"  class="img-rounded"/></a>
-                                        <a onClick="clearCanvas()" class="btn primary a-img-btn" title='CLEAR'><img src="PAINT/IMAGES/cancel.jpg"  class="img-rounded"/></a>
-                                        <a onClick="selector()" class="btn primary a-img-btn" title='SELECTOR'><img src="PAINT/IMAGES/select.jpg"  class="img-rounded"/></a>
-                                        <a onClick="cut()" class="btn primary a-img-btn" title='REMOVE'><img src="PAINT/IMAGES/cut.jpg"  class="img-rounded"/></a>
-                                    </div>
-                                    <div class="font" style="background-color:#F5F5F5;"><br>
-                                        <label>Color:</label><input type="color" value="#36bac9" id="drawing-color" title="COLOR">&nbsp;&nbsp;&nbsp;&nbsp;
-                                        <label>Font Style:</label><select id="font-family" ><option value="Times New Roman">Times</option><option value="Agency FB">Agency FB</option><option value="Comic Sans">Comic Sans</option><option value="Courier">Courier</option><option value="Arial">Arial</option></select>
-                                        <input type="range" min="0" max="100" value="30" id="drawing-line-width" title="WIDTH">
-                                        <a onClick="bold()" class="btn primary a-img-btn-font-rem font" title='BOLD' id="fontbold"><img src="PAINT/IMAGES/bold.jpg"  class="img-rounded"/></a>
-                                        <a onClick="italic()" class="btn primary  a-img-btn-font-rem font" title='ITALIC' id="fontitalic"><img src="PAINT/IMAGES/italic.jpg"  class="img-rounded"/></a>
-                                        <a onClick="underline()" class="btn primary  a-img-btn-font-rem font" title='UNDERLINE' id="fontunderline"><img src="PAINT/IMAGES/underline.jpg"  class="img-rounded"/></a>
-                                    </div>
-                                    <div class="shapes" style="background-color:#F5F5F5;border:1px solid lavender;">
-                                        <a onClick="tappingTee1()"  class="btn primary a-img-btn" title='TAPPING TEE'><img src="PAINT/IMAGES/tappingtee.jpg"  class="img-rounded"/></a>
-                                        <a onClick="tJoint1()"  class="btn primary a-img-btn" title='T/JOINT'><img src="PAINT/IMAGES/tjoint.jpg"  class="img-rounded"/></a>
-                                        <a onClick="stubBlang1()"  class="btn primary a-img-btn" title='STUB FLANGE'><img src="PAINT/IMAGES/stubblang.jpg"  class="img-rounded"/></a>
-                                        <a onClick="reducer1()"  class="btn primary a-img-btn" title='REDUCER'><img src="PAINT/IMAGES/reducer.jpg"  class="img-rounded"/></a>
-                                        <a onClick="lastDegelbow1()"  class="btn primary a-img-btn" title='45/90 DEG ELBOW'><img src="PAINT/IMAGES/lastdegelbow.jpg"  class="img-rounded"/></a>
-                                        <a onClick="halfDegelbow1()"  class="btn primary a-img-btn" title='45 DEG ELBOW'><img src="PAINT/IMAGES/halfdegelbow.jpg"  class="img-rounded"/></a>
-                                        <a onClick="fullDegelbow1()"  class="btn primary a-img-btn" title='90 DEG ELBOW'><img src="PAINT/IMAGES/fulldegelbow.jpg"  class="img-rounded"/></a>
-                                        <a onClick="equalTee1()"  class="btn primary a-img-btn" title='EQUAL TEE'><img src="PAINT/IMAGES/equaltee.jpg"  class="img-rounded"/></a>
-                                        <a onClick="endCap1()"  class="btn primary a-img-btn" title='END CAP'><img src="PAINT/IMAGES/endcap.jpg"  class="img-rounded"/></a>
-                                        <a onClick="diTee1()"  class="btn primary a-img-btn" title='DI TEE'><img src="PAINT/IMAGES/ditee.jpg"  class="img-rounded"/></a>
-                                        <a onClick="diGatevalue1()"  class="btn primary a-img-btn" title='DI GATE VALVE'><img src="PAINT/IMAGES/digatevalue.jpg"  class="img-rounded"/></a>
-                                        <a onClick="diFlanging1()"  class="btn primary a-img-btn" title='DI FLANGE SPIGOT'><img src="PAINT/IMAGES/diflanging.jpg"  class="img-rounded"/></a>
-                                        <a onClick="diFlangesotcket1()" class="btn primary a-img-btn" title='DI FLANGE STOCKET'><img src="PAINT/IMAGES/diflangestocket.jpg"  class="img-rounded"/></a>
-                                        <a onClick="diColor1()"  class="btn primary a-img-btn" title='DI COLLAR'><img src="PAINT/IMAGES/dicolor.jpg"  class="img-rounded"/></a>
-                                        <a onClick="diCap1()"  class="btn primary a-img-btn" title='DI CAP'><img src="PAINT/IMAGES/dicap.jpg"  class="img-rounded"/></a>
-                                        <a onClick="coupler1()"  class="btn primary a-img-btn" title='COUPLER'><img src="PAINT/IMAGES/coupler.jpg"  class="img-rounded"/></a>
-                                        <a onClick="beEndCateValue1()"  class="btn primary a-img-btn" title='PE END GATE VALUE'><img src="PAINT/IMAGES/beendcatevalue.jpg"  class="img-rounded"/></a>
-                                        <a onClick="di90degElbow()"  class="btn primary a-img-btn" title='DI 90 DEG ELBOW'><img src="PAINT/IMAGES/90degElbow.jpg"  class="img-rounded"/></a>
-                                        <a onClick="di45DegElbow()"  class="btn primary a-img-btn" title='DI 45 DEG ELBOW'><img src="PAINT/IMAGES/di45DegElbow.jpg"  class="img-rounded"/></a>
-                                        <a onClick="diReducer()"  class="btn primary a-img-btn" title='DI REDUCER'><img src="PAINT/IMAGES/diReducer.jpg"  class="img-rounded"/></a>
-                                    </div></div>
-                            </div>
+                        <div class="font" style="background-color:#F5F5F5;"><br>
+                            <label>Color:</label><input type="color" value="#36bac9" id="drawing-color" title="COLOR">&nbsp;&nbsp;&nbsp;&nbsp;
+                            <label>Size:</label><input type="number"  value="10" id="drawing-line-width" title="SIZE" style="width:45" min="10" max="100" maxlength="2">
+                            <br>
+                            <a onClick="bold()" class="btn primary a-img-btn-font-rem font" title='BOLD' id="fontbold"><img src="PAINT/IMAGES/bold.jpg"  class="img-rounded"/></a>
+                            <a onClick="italic()" class="btn primary  a-img-btn-font-rem font" title='ITALIC' id="fontitalic"><img src="PAINT/IMAGES/italic.jpg"  class="img-rounded"/></a>
+                            <a onClick="underline()" class="btn primary  a-img-btn-font-rem font" title='UNDERLINE' id="fontunderline"><img src="PAINT/IMAGES/underline.jpg"  class="img-rounded"/></a>
                         </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" id="closeImage" data-dismiss="modal">CLOSE</button>
-                            <button type="button" class="btn btn-primary" id="saveImage">SAVE CHANGES</button>
-                        </div>
-                    </div>
+                        <div class="shapes" style="background-color:#F5F5F5;border:1px solid lavender;">
+                            <a onClick="tappingTee1()"  class="btn primary a-img-btn" title='TAPPING TEE'><img src="PAINT/IMAGES/tappingtee.jpg"  class="img-rounded"/></a>
+                            <a onClick="tJoint1()"  class="btn primary a-img-btn" title='T/JOINT'><img src="PAINT/IMAGES/tjoint.jpg"  class="img-rounded"/></a>
+                            <a onClick="stubBlang1()"  class="btn primary a-img-btn" title='STUB FLANGE'><img src="PAINT/IMAGES/stubblang.jpg"  class="img-rounded"/></a>
+                            <a onClick="reducer1()"  class="btn primary a-img-btn" title='REDUCER'><img src="PAINT/IMAGES/reducer.jpg"  class="img-rounded"/></a>
+                            <a onClick="lastDegelbow1()"  class="btn primary a-img-btn" title='45/90 DEG ELBOW'><img src="PAINT/IMAGES/lastdegelbow.jpg"  class="img-rounded"/></a>
+                            <a onClick="halfDegelbow1()"  class="btn primary a-img-btn" title='45 DEG ELBOW'><img src="PAINT/IMAGES/halfdegelbow.jpg"  class="img-rounded"/></a>
+                            <a onClick="fullDegelbow1()"  class="btn primary a-img-btn" title='90 DEG ELBOW'><img src="PAINT/IMAGES/fulldegelbow.jpg"  class="img-rounded"/></a>
+                            <a onClick="equalTee1()"  class="btn primary a-img-btn" title='EQUAL TEE'><img src="PAINT/IMAGES/equaltee.jpg"  class="img-rounded"/></a>
+                            <a onClick="endCap1()"  class="btn primary a-img-btn" title='END CAP'><img src="PAINT/IMAGES/endcap.jpg"  class="img-rounded"/></a>
+                            <a onClick="diTee1()"  class="btn primary a-img-btn" title='DI TEE'><img src="PAINT/IMAGES/ditee.jpg"  class="img-rounded"/></a>
+                            <a onClick="diGatevalue1()"  class="btn primary a-img-btn" title='DI GATE VALVE'><img src="PAINT/IMAGES/digatevalue.jpg"  class="img-rounded"/></a>
+                            <a onClick="diFlanging1()"  class="btn primary a-img-btn" title='DI FLANGE SPIGOT'><img src="PAINT/IMAGES/diflanging.jpg"  class="img-rounded" width="25px"/></a>
+                            <a onClick="diFlangesotcket1()" class="btn primary a-img-btn" title='DI FLANGE STOCKET'><img src="PAINT/IMAGES/diflangestocket.jpg"  class="img-rounded"  /></a>
+                            <a onClick="diColor1()"  class="btn primary a-img-btn" title='DI COLLAR'><img src="PAINT/IMAGES/dicolor.jpg"  class="img-rounded"/></a>
+                            <a onClick="diCap1()"  class="btn primary a-img-btn" title='DI CAP'><img src="PAINT/IMAGES/dicap.jpg"  class="img-rounded" width="25px"/></a>
+                            <a onClick="coupler1()"  class="btn primary a-img-btn" title='COUPLER'><img src="PAINT/IMAGES/dicolor.jpg"  class="img-rounded" width="25px"/></a>
+                            <a onClick="beEndCateValue1()"  class="btn primary a-img-btn" title='PE END GATE VALUE'><img src="PAINT/IMAGES/beendcatevalue.jpg"  class="img-rounded"/></a>
+                            <a onClick="di90degElbow()"  class="btn primary a-img-btn" title='DI 90 DEG ELBOW'><img src="PAINT/IMAGES/90degElbow.jpg"  class="img-rounded"/></a>
+                            <a onClick="di45DegElbow()"  class="btn primary a-img-btn" title='DI 45 DEG ELBOW'><img src="PAINT/IMAGES/di45DegElbow.jpg"  class="img-rounded"/></a>
+                            <a onClick="diReducer()"  class="btn primary a-img-btn" title='DI REDUCER'><img src="PAINT/IMAGES/diReducer.jpg"  class="img-rounded"/></a>
+                        </div></div>
                 </div>
+
             </div>
-            <!-- Button HTML (to Trigger Modal) -->
-            <input type="button" class="btn btn-lg btn-primary open-modal" value="SHOW DRAW TOOL">
         </div>
         <div id="divImage"></div>
     </div><!-- ENDING DRAWING SURFACE--->

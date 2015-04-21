@@ -42,6 +42,7 @@ if(isset($_REQUEST)){
     {
         $flag=$_REQUEST['CONFIG_ENTRY_lb_module'];
         $CONFIG_ENTRY_data=$_REQUEST['CONFIG_ENTRY_tb_data'];
+        $CONFIG_ENTRY_data=$con->real_escape_string($CONFIG_ENTRY_data);
         $CONFIG_ENTRY_type=$_REQUEST['CONFIG_ENTRY_lb_type'];
         $CONFIG_ENTRY_arr_config=array(3=>array("LMC_USER_RIGHTS_CONFIGURATION","URC_DATA"));
         $sql1= "SELECT ".$CONFIG_ENTRY_arr_config[$flag][1]." FROM ".$CONFIG_ENTRY_arr_config[$flag][0]." CCN WHERE CCN.CGN_ID=(SELECT C.CGN_ID FROM LMC_CONFIGURATION C WHERE C.CGN_ID='$CONFIG_ENTRY_type') AND ".$CONFIG_ENTRY_arr_config[$flag][1]."='$CONFIG_ENTRY_data'";
@@ -50,6 +51,7 @@ if(isset($_REQUEST)){
         if($row=mysqli_fetch_array($CONFIG_ENTRY_type1)){
             $CONFIG_ENTRY_save= 2;
         }
+
         $con->autocommit(false);
         $CONFIG_ENTRY_arr=array(3=>array("LMC_USER_RIGHTS_CONFIGURATION","URC_DATA,URC_USERSTAMP","(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP')"));
         if($flag==3)
@@ -63,10 +65,21 @@ if(isset($_REQUEST)){
         else if($CONFIG_ENTRY_type==16){
             $sql="INSERT INTO LMC_REPORT_DOCUMENT_CATEGORY(RDC_CATEGORY,ULD_ID)VALUES('$CONFIG_ENTRY_data',(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP'))";
         }
-    else
+        else if($CONFIG_ENTRY_type==17){
+            $sql="INSERT INTO LMC_MACHINERY_ITEM(MI_ITEM,ULD_ID)VALUES('$CONFIG_ENTRY_data',(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP'))";
+        }
+        else if($CONFIG_ENTRY_type==18){
+            $sql="INSERT INTO LMC_MACHINERY_USAGE(MCU_MACHINERY_TYPE,ULD_ID)VALUES('$CONFIG_ENTRY_data',(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP'))";
+        }
+        else if($CONFIG_ENTRY_type==19){
+            $sql="INSERT INTO LMC_FITTING_USAGE(FU_ITEMS,ULD_ID)VALUES('$CONFIG_ENTRY_data',(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP'))";
+        }
+        else if($CONFIG_ENTRY_type==20){
+            $sql="INSERT INTO LMC_MATERIAL_USAGE(MU_ITEMS,ULD_ID)VALUES('$CONFIG_ENTRY_data',(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP'))";
+        }
+        else
             $sql="INSERT INTO ".$CONFIG_ENTRY_arr[$flag][0]." (CGN_ID, ".$CONFIG_ENTRY_arr[$flag][1].") VALUES ('$CONFIG_ENTRY_type', '$CONFIG_ENTRY_data', (SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$USERSTAMP'))";
         if($CONFIG_ENTRY_save!=2){
-
             if (!mysqli_query($con,$sql)) {
                 die('Error: ' . mysqli_error($con));
                 $CONFIG_ENTRY_save=4;
@@ -83,7 +96,7 @@ if(isset($_REQUEST)){
     {
         $CONFIG_ENTRY_arr_config=array(3=>array("LMC_USER_RIGHTS_CONFIGURATION","URC_DATA"));
         $flag=$_REQUEST['CONFIG_ENTRY_lb_module'];
-        $CONFIG_ENTRY_arr_type=array(14=>array("LMC_MEETING_TOPIC","MT_TOPIC"),16=>array("LMC_REPORT_DOCUMENT_CATEGORY","RDC_CATEGORY"),13=>array("LMC_TEAM_CREATION","TEAM_NAME"));
+        $CONFIG_ENTRY_arr_type=array(14=>array("LMC_MEETING_TOPIC","MT_TOPIC"),16=>array("LMC_REPORT_DOCUMENT_CATEGORY","RDC_CATEGORY"),13=>array("LMC_TEAM_CREATION","TEAM_NAME"),17=>array("LMC_MACHINERY_ITEM","MI_ITEM"),18=>array("LMC_MACHINERY_USAGE","MCU_MACHINERY_TYPE"),19=>array("LMC_FITTING_USAGE","FU_ITEMS"),20=>array("LMC_MATERIAL_USAGE","MU_ITEMS"));
         $CONFIG_ENTRY_type=$_REQUEST['CONFIG_ENTRY_lb_type'];
         $CONFIG_ENTRY_data=$_REQUEST['CONFIG_ENTRY_tb_data'];
         if($flag==3){

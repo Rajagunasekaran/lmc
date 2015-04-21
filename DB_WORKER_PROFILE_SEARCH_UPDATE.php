@@ -75,25 +75,24 @@ INNER JOIN LMC_ROLE_CREATION B ON A.RC_ID=B.RC_ID GROUP BY A.ULD_WORKER_NAME ORD
     echo JSON_ENCODE($finalvalue);
 }
 if($_REQUEST['option']=='emailcheck'){
-    $empname=$_REQUEST['empname'];
-    $selectempname=mysqli_query($con,"SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_WORKER_NAME='$empname'");
-    if($row=mysqli_fetch_array($selectempname)){
-        $selectemp=$row["ULD_ID"];
-    }
+    $empname=$_REQUEST['empid'];
     $emilid=$_REQUEST['emailid'];
-    $existmailquery=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_EMAIL_ID='$emilid' AND ULD_ID!=$selectemp");
+    $existmailquery=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_EMAIL_ID='$emilid' AND ULD_ID!=$empname");
     $row=mysqli_num_rows($existmailquery);
     echo $row;
 }
 if($_REQUEST['option']=='worknocheck'){
-    $empname=$_REQUEST['empname'];
-    $selectempname=mysqli_query($con,"SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_WORKER_NAME='$empname'");
-    if($row=mysqli_fetch_array($selectempname)){
-        $selectemp=$row["ULD_ID"];
-    }
+    $empname=$_REQUEST['empid'];
     $workerno=$_REQUEST['workerno'];
-    $existmailquery=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_WORKER_NO='$workerno' AND ULD_ID!=$selectemp");
+    $existmailquery=mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_WORKER_NO='$workerno' AND ULD_ID!=$empname");
     $row=mysqli_num_rows($existmailquery);
+    echo $row;
+}
+if($_REQUEST['option']=="logincheck"){
+    $empname=$_REQUEST['empid'];
+    $username=$_REQUEST['loginname'];
+    $sql_result= mysqli_query($con,"SELECT * FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$username' AND ULD_ID!=$empname");
+    $row=mysqli_num_rows($sql_result);
     echo $row;
 }
 if($_REQUEST['option']=='UPDATE'){
@@ -137,7 +136,6 @@ if($_REQUEST['option']=='UPDATE'){
     $currentdate=str_replace('-','',$currentdate);
     $attch_file_folder=$parent_attach_folder_name.DIRECTORY_SEPARATOR.$empfolderid.DIRECTORY_SEPARATOR;
     $uploadcount=$_REQUEST['upload_count'];
-
     for($x=1;$x<=$uploadcount;$x++)
     {
         if($_FILES['upload_filename'.$x]['name']!=''){
@@ -146,6 +144,8 @@ if($_REQUEST['option']=='UPDATE'){
             $upload_file_array[]=$attach_file_name;//$_FILES['upload_filename'.$x]['name'];
         }
     }
+//    print_r($upload_file_array);
+//    exit;
     $upload_filename='';
     for($y=0;$y<count($upload_file_array);$y++){
         if($upload_file_array[$y]!=''){
@@ -158,21 +158,33 @@ if($_REQUEST['option']=='UPDATE'){
         }
     }
 
-    if($oldfilename!='' && $upload_filename!='' ){
+    if($oldfilename!='' && $upload_filename!=''){
         $upload_filename=$oldfilename.'/'.$upload_filename;
+        $fileflag=1;
     }
-    elseif($upload_filename==''){
+    elseif($upload_filename=='' && $oldfilename!=''){
         $upload_filename=$oldfilename;
+        $fileflag=1;
     }
-    elseif($oldfilename==''){
+    elseif($oldfilename=='' && $upload_filename!=''){
         $upload_filename=$upload_filename;
+        $fileflag=1;
+    }
+    elseif($oldfilename=='' && $upload_filename==''){
+        $upload_filename='null';
+        $fileflag=0;
     }
     $uploadfile=$con->real_escape_string($upload_filename);
     $con->autocommit(false);
-    $update_query="UPDATE LMC_USER_LOGIN_DETAILS SET ULD_USERNAME='$logid',ULD_PASSWORD='$pasword',RC_ID='$role',ULD_WORKER_NAME='$empname',ULD_WORKER_NO='$empnum',ULD_DOC_FILE_NAME='$uploadfile',ULD_EMAIL_ID='$emailid',ULD_ADDRESS='$address',ULD_NRIC_NO='$nricno',ULD_MOBILE_NUMBER='$contactno',ULD_USERSTAMP='$activeemp' WHERE ULD_ID='$emprowid'";
+    if($fileflag==1){
+        $update_query="UPDATE LMC_USER_LOGIN_DETAILS SET ULD_USERNAME='$logid',ULD_PASSWORD='$pasword',RC_ID='$role',ULD_WORKER_NAME='$empname',ULD_WORKER_NO='$empnum',ULD_DOC_FILE_NAME='$uploadfile',ULD_EMAIL_ID='$emailid',ULD_ADDRESS='$address',ULD_NRIC_NO='$nricno',ULD_MOBILE_NUMBER='$contactno',ULD_USERSTAMP='$activeemp' WHERE ULD_ID='$emprowid'";
+    }
+    elseif($fileflag==0){
+        $update_query="UPDATE LMC_USER_LOGIN_DETAILS SET ULD_USERNAME='$logid',ULD_PASSWORD='$pasword',RC_ID='$role',ULD_WORKER_NAME='$empname',ULD_WORKER_NO='$empnum',ULD_DOC_FILE_NAME=$uploadfile,ULD_EMAIL_ID='$emailid',ULD_ADDRESS='$address',ULD_NRIC_NO='$nricno',ULD_MOBILE_NUMBER='$contactno',ULD_USERSTAMP='$activeemp' WHERE ULD_ID='$emprowid'";
+    }
     if (!mysqli_query($con,$update_query)) {
-        die('Error: ' . mysqli_error($con));
         $flag=0;
+        die('Error: ' . mysqli_error($con));
     }
     else{
         $flag=1;

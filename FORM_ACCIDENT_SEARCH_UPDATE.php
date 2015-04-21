@@ -194,6 +194,12 @@ $(document).ready(function(){
     $(document).on("click",'#SRC_searchbtn', function (){
         datatable()
     });
+
+    //FUNCTION FOR FORMTABLEDATEFORMAT
+    function FormTableDateFormat(inputdate){
+        var string = inputdate.split("-");
+        return string[2]+'-'+ string[1]+'-'+string[0];
+    }
     //FUNCTION FOR DATA TABLE
     function datatable(){
         $('.preloader').show();
@@ -210,7 +216,7 @@ $(document).ready(function(){
                 $('.preloader').hide();
                 if(values_array!=null){
                     $('#REV_nodata_startenddate').hide();
-                    var SRC_UPD_table_header='<table id="SRC_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead  bgcolor="#6495ed" style="color:white"><tr><th></th><th>DATE</th><th>NAME</th><th>PLACE</th><th>TYPE OF INJURY</th><th>NATURE OF INJURY</th><th>LOCATION</th><th>USERSTAMP</th><th>TIMESTAMP</th><th align="center">VIEW</th></tr></thead><tbody>'
+                    var SRC_UPD_table_header='<table id="SRC_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead  bgcolor="#6495ed" style="color:white"><tr><th></th><th class="uk-date-column">DATE</th><th>NAME</th><th>PLACE</th><th>TYPE OF INJURY</th><th>NATURE OF INJURY</th><th>LOCATION</th><th>USERSTAMP</th><th class="uk-timestp-column">TIMESTAMP</th><th align="center">VIEW</th></tr></thead><tbody>'
                     for(var j=0;j<values_array.length;j++){
                         empdi=values_array[j][0];
                         reportdate=values_array[j][1];
@@ -249,7 +255,9 @@ $(document).ready(function(){
                     $('#SRC_tbl_htmltable').DataTable( {
                         "aaSorting": [],
                         "pageLength": 10,
-                        "sPaginationType":"full_numbers"
+                        "sPaginationType":"full_numbers",
+                        "aoColumnDefs" : [
+                            { "aTargets" : ["uk-date-column"] , "sType" : "uk_date"}, { "aTargets" : ["uk-timestp-column"] , "sType" : "uk_timestp"} ]
                     });
                     $('#SRC_searchbtn').attr('disabled','disabled');
                 }
@@ -272,6 +280,30 @@ $(document).ready(function(){
         var option="FETCH_DATA";
         xmlhttp.open("GET","DB_ACCIDENT_SEARCH_UPDATE.php?option="+option+"&emp="+selectedemp+"&fromdate="+fromdate+"&todate="+todate);
         xmlhttp.send();
+        sorting()
+    }
+    //FUNCTION FOR SORTING
+    function sorting(){
+        jQuery.fn.dataTableExt.oSort['uk_date-asc']  = function(a,b) {
+            var x = new Date( Date.parse(FormTableDateFormat(a)));
+            var y = new Date( Date.parse(FormTableDateFormat(b)) );
+            return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+        };
+        jQuery.fn.dataTableExt.oSort['uk_date-desc'] = function(a,b) {
+            var x = new Date( Date.parse(FormTableDateFormat(a)));
+            var y = new Date( Date.parse(FormTableDateFormat(b)) );
+            return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
+        };
+        jQuery.fn.dataTableExt.oSort['uk_timestp-asc']  = function(a,b) {
+            var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
+            var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
+            return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+        };
+        jQuery.fn.dataTableExt.oSort['uk_timestp-desc'] = function(a,b) {
+            var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
+            var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
+            return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
+        };
     }
     // CLICK EVENT FR RADIO BUTTON
     $(document).on('click','.USRC_UPD_class_radio',function(){

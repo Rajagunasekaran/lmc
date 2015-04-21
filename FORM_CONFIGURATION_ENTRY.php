@@ -39,7 +39,7 @@ include "NEW_MENU.php"
                             for (var i=0;i<CONFIG_ENTRY_values.length;i++) {
                                 CONFIG_ENTRY_typ_opt += '<option value="' + CONFIG_ENTRY_values[i][0] + '">' + CONFIG_ENTRY_values[i][1] + '</option>';
                             }
-                            $('#CONFIG_ENTRY_tr_type').append('<label class="col-sm-2 control-label">SELECT SETTINGS<em>*</em></label> <div class="col-sm-3"><select id="CONFIG_ENTRY_lb_type" name="CONFIG_ENTRY_lb_type" class="form-control"></select></div>');
+                            $('#CONFIG_ENTRY_tr_type').append('<label class="col-sm-2 control-label">SELECT SETTINGS<em>*</em></label> <div class="col-sm-10"><select style="width: 305px;" id="CONFIG_ENTRY_lb_type" name="CONFIG_ENTRY_lb_type" class="form-control"></select></div>');
                             $('#CONFIG_ENTRY_lb_type').html(CONFIG_ENTRY_typ_opt);
                         }
                     }
@@ -58,13 +58,13 @@ include "NEW_MENU.php"
             $('#CONFIG_ENTRY_tr_data,#CONFIG_ENTRY_tr_btn').empty();
             if($('#CONFIG_ENTRY_lb_type').val()!='SELECT')
             {
-                if(($('#CONFIG_ENTRY_lb_type').val()=='16') || ($('#CONFIG_ENTRY_lb_type').val()=='14'))
+                if(($('#CONFIG_ENTRY_lb_type').val()=='16') || ($('#CONFIG_ENTRY_lb_type').val()=='14') || ($('#CONFIG_ENTRY_lb_type').val()=='17') || ($('#CONFIG_ENTRY_lb_type').val()=='18') || ($('#CONFIG_ENTRY_lb_type').val()=='19') || ($('#CONFIG_ENTRY_lb_type').val()=='20'))
                 {
-                    $('#CONFIG_ENTRY_tr_data').append('<label class="control-label col-sm-2" id="datalabel">PLEASE KEY IN THE NEW ENTRY<em>*</em> </label> <div class="col-sm-3"><input type="text" id="CONFIG_ENTRY_tb_data" class="reports form-control" name="CONFIG_ENTRY_tb_data" maxlength="50" placeholder="Data"></div><div id="CONFIG_ENTRY_div_errmsg" hidden class="errormsg">');
+                    $('#CONFIG_ENTRY_tr_data').append('<label class="control-label col-sm-2" id="datalabel">PLEASE KEY IN THE NEW ENTRY<em>*</em> </label> <div class="col-sm-10"><input type="text" id="CONFIG_ENTRY_tb_data" class="reports form-control" style="width: 305px;"  name="CONFIG_ENTRY_tb_data" maxlength="50" placeholder="Data"></div>');
                 }
                 else
                 {
-                    $('#CONFIG_ENTRY_tr_data').append('<label class="control-label col-sm-2" id="datalabel">PLEASE KEY IN THE NEW ENTRY<em>*</em> </label> <div class="col-sm-3"><input type="text" id="CONFIG_ENTRY_tb_data" name="CONFIG_ENTRY_tb_data" class="form-control upper" title="Enter Data According to Type"  maxlength="25" placeholder="Data"></div><div id="CONFIG_ENTRY_div_errmsg" hidden class="errormsg">');
+                    $('#CONFIG_ENTRY_tr_data').append('<label class="control-label col-sm-2" id="datalabel">PLEASE KEY IN THE NEW ENTRY<em>*</em> </label> <div class="col-sm-10"><input type="text" id="CONFIG_ENTRY_tb_data" name="CONFIG_ENTRY_tb_data"  style="width: 305px;"class="form-control upper" title="Enter Data According to Type"  maxlength="25" placeholder="Data">');
                 }
                 $('#CONFIG_ENTRY_tr_btn').append('<div class="col-sm-3 col-lg-offset-10" id="datalabel"><input type="button" id="CONFIG_ENTRY_btn_save" class="btn  btn-info" value="SAVE" disabled>&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" id="CONFIG_ENTRY_btn_reset" class="btn btn-info" value="RESET"></div>');
 //                $("#CONFIG_ENTRY_tb_data").doValidation({rule:'alphanumeric',prop:{whitespace:true,uppercase:true,autosize:true}});
@@ -84,6 +84,26 @@ include "NEW_MENU.php"
             {
                 $('#CONFIG_ENTRY_tb_data').attr('title', 'MEETING TOPIC');
                 $('#CONFIG_ENTRY_tb_data').attr('placeholder', '[MEETING TOPIC]');
+            }
+            else if($('#CONFIG_ENTRY_lb_type').val()=='17')
+            {
+                $('#CONFIG_ENTRY_tb_data').attr('title', 'MACHINERY/EQUIPEMENT TRANSFER');
+                $('#CONFIG_ENTRY_tb_data').attr('placeholder', '[MACHINERY/EQUIPEMENT TRANSFER]');
+            }
+            else if($('#CONFIG_ENTRY_lb_type').val()=='18')
+            {
+                $('#CONFIG_ENTRY_tb_data').attr('title', 'MACHINERY USAGE');
+                $('#CONFIG_ENTRY_tb_data').attr('placeholder', '[MACHINERY USAGE]');
+            }
+            else if($('#CONFIG_ENTRY_lb_type').val()=='19')
+            {
+                $('#CONFIG_ENTRY_tb_data').attr('title', 'FITTINGS USAGE');
+                $('#CONFIG_ENTRY_tb_data').attr('placeholder', '[FITTINGS USAGE]');
+            }
+            else if($('#CONFIG_ENTRY_lb_type').val()=='20')
+            {
+                $('#CONFIG_ENTRY_tb_data').attr('title', 'MATERIAL USAGE');
+                $('#CONFIG_ENTRY_tb_data').attr('placeholder', '[MATERIAL USAGE]');
             }
             else
             {
@@ -110,15 +130,16 @@ include "NEW_MENU.php"
                     if(CONFIG_ENTRY_msg_alert==1)
                     {
                         var errmsg=CONFIG_ENTRY_errmsg[2].replace('[MODULE NAME]',$("#CONFIG_ENTRY_lb_type option:selected").text());
-                        show_msgbox("CONFIGURATION ENTRY",errmsg,"success",false)
+                        show_msgbox("SETTINGS ENTRY",errmsg,"success",false)
                     }
                     else if(CONFIG_ENTRY_msg_alert==0)
                     {
-                        show_msgbox("CONFIGURATION ENTRY",CONFIG_ENTRY_errmsg[0],"error",false)
+                        show_msgbox("SETTINGS ENTRY",CONFIG_ENTRY_errmsg[0],"error",false)
                     }
                     if(CONFIG_ENTRY_msg_alert==2){
                         $("#CONFIG_ENTRY_btn_save").attr("disabled","disabled");
-                        $("#CONFIG_ENTRY_div_errmsg").text(CONFIG_ENTRY_errmsg[3].replace('[TYPE]',$("#CONFIG_ENTRY_lb_type option:selected").text())).show();
+                        var existerrmsg=CONFIG_ENTRY_errmsg[3].replace('[TYPE]',$("#CONFIG_ENTRY_lb_type option:selected").text());
+                        show_msgbox("SETTINGS ENTRY",existerrmsg,"error",false)
                     }
                     else{
                         $('#CONFIG_ENTRY_tr_data,#CONFIG_ENTRY_tr_btn').empty();
@@ -140,15 +161,16 @@ include "NEW_MENU.php"
                 xmlhttp.onreadystatechange=function() {
                     if (xmlhttp.readyState==4 && xmlhttp.status==200) {
                         $('.preloader').hide();
-                        if(xmlhttp.responseText==1){
-                            $("#CONFIG_ENTRY_div_errmsg").show();
-                            $("#CONFIG_ENTRY_div_errmsg").text(CONFIG_ENTRY_errmsg[3].replace('[TYPE]',$("#CONFIG_ENTRY_lb_type option:selected").text()));}
-                        else
-                            $("#CONFIG_ENTRY_div_errmsg").text('');
-                        if(xmlhttp.responseText==0)
-                            $("#CONFIG_ENTRY_btn_save").removeAttr("disabled","disabled");
-                        else
+                        if(xmlhttp.responseText==1)
+                        {
+                            var existerrmsg=CONFIG_ENTRY_errmsg[3].replace('[TYPE]',$("#CONFIG_ENTRY_lb_type option:selected").text());
+                            show_msgbox("SETTINGS ENTRY",existerrmsg,"error",false);
                             $("#CONFIG_ENTRY_btn_save").attr("disabled","disabled");
+                            }
+                        else
+                        {
+                            $("#CONFIG_ENTRY_btn_save").removeAttr("disabled","disabled");
+                        }
 
                     }}
                 var OPTION="CONFIG_ENTRY_check_data";
