@@ -23,9 +23,10 @@ $(document).ready(function(){
             loadcanvas()
         }
         flag=0;
-        canvas.clear();
+//        canvas.clear();
         if (imageDataJson != undefined) {
-            canvas.loadFromJSON(imageDataJson)
+//            canvas.loadFromJSON(imageDataJson)
+            updateImage(imageDataJson);
         }
 
 //        if (imageData != undefined && imageData!= null) {
@@ -121,16 +122,6 @@ $(document).ready(function(){
     xmlhttp.open("GET","DB_PERMITS_ENTRY.php?option="+option);
     xmlhttp.send();
 
-    function meeting_topiclist_create(){
-        $('#mt_lb_topic').replaceWith('<select class="form-control meetingform-validation" id="mt_lb_topic" name="mt_lb_topic"></select>')
-        var topic='<option value="SELECT">SELECT</option>';
-        for(var k=0;k<topicname.length;k++){
-            topic += '<option value="' + topicname[k] + '">' + topicname[k] + '</option>';
-        }
-        $('#mt_lb_topic').html(topic);
-        $('#mt_btn_add').val('ADD');
-    }
-
 //CHANGE EVENT FOR REPORT DATE
     $('#tr_txt_date').change(function(){
         $('.preloader').show();
@@ -212,10 +203,9 @@ $(document).ready(function(){
                     }
                     else
                     {
-                        var errormsg=errormessage[1].toString().replace("[DATE]",reportdate)
+                        var errormsg=errormessage[1].toString().replace("[DATE]",reportdate);
                         show_msgbox("REPORT SUBMISSION ENTRY",errormsg,"error",false);
-                        existsform_clear();
-
+//                        existsform_clear();
                     }
                 }
             }
@@ -1249,14 +1239,12 @@ $(document).ready(function(){
     function form_clear(){
         $('#tr_txt_location').val('');
         $('#tr_txt_contractno').val('');
-        $('#tr_lb_team').val();
         $('#tr_txt_date').val('');
         $('#tr_txt_weather').val('');
         $('#tr_txt_wftime').val('');
         $('#tr_txt_wttime').val('');
         $('#tr_txt_reachsite').val('');
         $('#tr_txt_leavesite').val('');
-
         $('input:checkbox').removeAttr('checked');
 
         $('#jd_chk_roadm').val('');
@@ -1271,8 +1259,12 @@ $(document).ready(function(){
         $('#jd_ta_remark').val('');
         $('#mt_lb_topic').val('SELECT').show();
         $('#mt_ta_remark').val('');
-
-
+        $("#jd_chk_roadm").attr("disabled", "disabled");
+        $("#jd_chk_roadmm").attr("disabled", "disabled");
+        $("#jd_chk_concm").attr("disabled", "disabled");
+        $("#jd_chk_concmm").attr("disabled", "disabled");
+        $("#jd_chk_trufm").attr("disabled", "disabled");
+        $("#jd_chk_trufmm").attr("disabled", "disabled");
         $('textarea').height('22');
         sv_formclear();
         mtransferformclear();
@@ -1294,12 +1286,11 @@ $(document).ready(function(){
         $('#meeting_table tr:not(:first)').remove();
         canvas.clear();
         $("#divImage").empty();
-        $('#myTab a:first').tab('show')
+        $('#myTab a:first').tab('show');
         $('#nextbtn').attr("disabled","disabled").show();
         $('#prevbtn').hide();
         $('#Final_submit').hide();
         ncount=1;
-
     }
 //ALREADY EXIST FORM CLEAR
     function existsform_clear(){
@@ -1309,7 +1300,6 @@ $(document).ready(function(){
         $('#tr_txt_wttime').val('');
         $('#tr_txt_reachsite').val('');
         $('#tr_txt_leavesite').val('');
-
         $('input:checkbox').removeAttr('checked');
 
         $('#jd_chk_roadm').val('');
@@ -1322,7 +1312,13 @@ $(document).ready(function(){
         $('#jd_txt_start').val('');
         $('#jd_txt_end').val('');
         $('#jd_ta_remark').val('');
-
+        $("#jd_chk_roadm").attr("disabled", "disabled");
+        $("#jd_chk_roadmm").attr("disabled", "disabled");
+        $("#jd_chk_concm").attr("disabled", "disabled");
+        $("#jd_chk_concmm").attr("disabled", "disabled");
+        $("#jd_chk_trufm").attr("disabled", "disabled");
+        $("#jd_chk_trufmm").attr("disabled", "disabled");
+        $('textarea').height('22');
         sv_formclear();
         mtransferformclear();
         Rentalmachineryclear();
@@ -1342,7 +1338,7 @@ $(document).ready(function(){
         $('#material_table tr:not(:first)').remove();
         $('#meeting_table tr:not(:first)').remove();
         canvas.clear();
-        $('#myTab a:first').tab('show')
+        $('#myTab a:first').tab('show');
         $('#nextbtn').attr("disabled","disabled").show();
         ncount=1;
     }
@@ -1576,31 +1572,18 @@ $(document).ready(function(){
         }
     });
 
-    $('#mt_btn_add').click(function(){
-
-        var mt_btn_value=$(this).val();
-        if(mt_btn_value=='ADD'){
-            $('#mt_lb_topic').replaceWith('<input type="text"  name="mt_lb_topic" id="mt_lb_topic" class="form-control upper check_topic " />');
-            $(this).val('CLEAR');
-        }
-        else{
-            meeting_topiclist_create();
-        }
-    });
 //FINAL SUBMIT FUNCTION
     $(document).on("click",'#Final_submit', function (){
         $('.preloader').show();
-        //MATERIAL DETAILS TABLE RECORDS
-        var metrialrefTab = document.getElementById("material_table");
+        //MATERIAL DETAILS TABLE RECORDSvar fittingusage_array=[];
         var materialusage_array=[];
-        for ( var i = 1; row = metrialrefTab.rows[i]; i++ )
-        {
-            row = metrialrefTab.rows[i];
+        var metrialrefTab = document.getElementById('material_table');
+        for (var r = 1, n = metrialrefTab.rows.length; r < n; r++) {
             var materialinnerarray=[];
-            for ( var j = 1; col = row.cells[j]; j++ ) {
-                materialinnerarray.push(col.firstChild.nodeValue);
+            for (var c = 1, m = metrialrefTab.rows[r].cells.length; c < m; c++) {
+                materialinnerarray.push(metrialrefTab.rows[r].cells[c].innerHTML);
             }
-            materialusage_array.push(materialinnerarray) ;
+            materialusage_array.push(materialinnerarray)
         }
         if(materialusage_array.length==0)
         {
@@ -1620,7 +1603,6 @@ $(document).ready(function(){
         {
             fittingusage_array='null';
         }
-
         //EQUIPMENT DETAILS TABLE RECORDS
         var equipmentusage_array=[];
         var equipmenttable = document.getElementById('equipment_table');
@@ -1663,7 +1645,6 @@ $(document).ready(function(){
         {
             mechineryusage_array='null';
         }
-
         //MACHINERY / EQUIPMENT TRANSFER TABLE RECORDS
         var mech_eqp_array=[];
         var mtransfertable = document.getElementById('mtransfer_table');
@@ -1693,18 +1674,15 @@ $(document).ready(function(){
         {
             SV_array='null';
         }
-
-// MEETING DETAILS TABLE RECORDS
-        var meetingrefTab = document.getElementById("meeting_table");
+        // MEETING DETAILS TABLE RECORDS
         var meeting_array=[];
-        for ( var i = 1; row = meetingrefTab.rows[i]; i++ )
-        {
-            row = meetingrefTab.rows[i];
+        var meetingrefTab = document.getElementById('meeting_table');
+        for (var r = 1, n = meetingrefTab.rows.length; r < n; r++) {
             var meetinginnerarray=[];
-            for ( var j = 1; col = row.cells[j]; j++ ) {
-                meetinginnerarray.push(col.firstChild.nodeValue);
+            for (var c = 1, m = meetingrefTab.rows[r].cells.length; c < m; c++) {
+                meetinginnerarray.push(meetingrefTab.rows[r].cells[c].innerHTML);
             }
-            meeting_array.push(meetinginnerarray) ;
+            meeting_array.push(meetinginnerarray)
         }
         if(meeting_array.length==0)
         {
@@ -1736,7 +1714,7 @@ $(document).ready(function(){
         }
         else
         {
-         dataURL = canvas.toDataURL();
+         dataURL = JSON.stringify(canvas)+"DrawToolImageurl:"+canvas.toDataURL();
         }
         var formelement =$('#entryform').serialize();
         var arraydata={"Option":"InputForm","MaterialDetails": materialusage_array,"FittingDetails":fittingusage_array,"EquipmentDetails":equipmentusage_array,"RentalDetails":rentalmechinery_array,"MechineryUsageDetails":mechineryusage_array,"MechEqptransfer":mech_eqp_array,"SiteVisit":SV_array,"MeetingDetails":meeting_array,"EmployeeDetails":EmployeeDetails,"imgData": dataURL};
@@ -1747,30 +1725,31 @@ $(document).ready(function(){
             url: "DB_PERMITS_ENTRY.php",
             data: data,
             success: function(msg){
+                alert("success"+msg)
                 $('.preloader').hide();
                 var msg_alert=JSON.parse(msg);
                 var spflag=msg_alert[0];
                 var dirflag=msg_alert[1];
                 var writeable=msg_alert[2];
                 if(spflag==1){
-                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[0],"success",false)
+                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[0],"success",false);
                     form_clear();
                 }
                 else if(spflag==0)
                 {
-                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[2],"error",false)
+                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[2],"error",false);
                 }
                 else if(dirflag==0)
                 {
-                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[6],"error",false)
+                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[6],"error",false);
                 }
                 else if(writeable==0)
                 {
-                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[10],"error",false)
+                    show_msgbox("REPORT SUBMISSION ENTRY",errormessage[10],"error",false);
                 }
                 else
                 {
-                    show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false)
+                    show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
                 }
             }
         });
@@ -2654,7 +2633,7 @@ $(document).ready(function(){
     <!-- DRAWING SURFACE--->
     <div class="panel panel-primary">
         <div class="panel-heading">
-            <h3 class="panel-title">DRAWING AREA<em>*</em></h3>
+            <h3 class="panel-title">DRAWING AREA</h3>
         </div>
         <div class="panel-body">
             <div class="bs-example">

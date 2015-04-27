@@ -175,7 +175,8 @@ elseif($_REQUEST['Option']=='InputForm')
     $uploadpath;
     if($imagedata!='' && $reportdate!='' && $EmployeeReport[0] && $teamname!=''){
         $daterep=str_replace('-','',$reportdate);
-        $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
+//        $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
+        $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.txt';
         $userfolderid=get_emp_folderid($EmployeeReport[0]);
         chmod($userfolderid,0777);
         $path=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
@@ -198,10 +199,10 @@ elseif($_REQUEST['Option']=='InputForm')
         if($dirflag==1 && $writable==1){
             $uploadpath=$path.$imgfilename;
             try{
-                $data=str_replace('data:image/png;base64,','',$imagedata);
-                $data = str_replace(' ','+',$data);
-                $data = base64_decode($data);
-                $success = file_put_contents($uploadpath, $data);
+//                $data=str_replace('data:image/png;base64,','',$imagedata);
+//                $data = str_replace(' ','+',$data);
+//                $data = base64_decode($data);
+                $success = file_put_contents($uploadpath, $imagedata);
                 $imgflag=1;
             }
             catch(Exception $e){
@@ -760,10 +761,11 @@ elseif($_REQUEST['Option']=='InputForm')
     $objWriter->save('php://output');
     $entry_exldata = ob_get_contents();
     ob_end_clean();
-
-    if($uploadpath!='')
+    $fileimagecontent=file_get_contents($uploadpath);
+    $fileimgeurl=explode("DrawToolImageurl:",$fileimagecontent);
+    if($fileimgeurl[1]!=''&&$fileimgeurl[1]!=undefined&&$fileimgeurl[1]!=null)
     {
-    $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
+    $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$fileimgeurl[1].'"/></td></tr></table></body></html>';
     }
     else
     {
@@ -795,6 +797,7 @@ elseif($_REQUEST['Option']=='InputForm')
        ' ','$rental_lorryno','$rental_store', '$rental_outside','$rental_start','$rental_end','$rental_remark',
        ' ','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark',
        ' ','$MS_topic','$MS_remarks','$UserStamp',@SUCCESS_MESSAGE)";
+//        echo $callquery;exit;
         $result = $con->query($callquery);
         if(!$result){
             unlink($uploadpath);
@@ -929,9 +932,11 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
         if($filname!=null || $filname!=''){
             $upload_dir = $dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
             $path = $upload_dir.$filname;
-            $type = pathinfo($path, PATHINFO_EXTENSION);
-            $data = file_get_contents($path);
-            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            $fileimagecontent=file_get_contents($path);
+            $fileimgeurl=explode("DrawToolImageurl:",$fileimagecontent);
+//            $type = pathinfo($path, PATHINFO_EXTENSION);
+//            $data = file_get_contents($path);
+            $base64 = $fileimgeurl[1];//'data:image/' . $type . ';base64,' . base64_encode($data);
         }
         $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
     }
@@ -1006,7 +1011,7 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
         $activeemp_name[]=array($row["ULD_ID"]);
     }
     //JOB DONE
-    $jobdonedetails=mysqli_query($con,"SELECT GROUP_CONCAT(TJ_PIPE_LAID) as PIPELAID,GROUP_CONCAT(TJ_SIZE) AS SIZE,GROUP_CONCAT(TJ_LENGTH) AS LENGTH FROM LMC_TEAM_JOB WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
+    $jobdonedetails=mysqli_query($con,"SELECT GROUP_CONCAT(IF(TJ_PIPE_LAID IS NULL,'',TJ_PIPE_LAID)) as PIPELAID,GROUP_CONCAT(IF (TJ_SIZE IS NULL,'',TJ_SIZE)) AS SIZE,GROUP_CONCAT(IF(TJ_LENGTH IS NULL,'',TJ_LENGTH)) AS LENGTH FROM LMC_TEAM_JOB WHERE TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($jobdonedetails)){
         $jobdone_pipelaid[]=array($row["PIPELAID"]);
         $jobdone_size[]=array($row['SIZE']);
@@ -1054,10 +1059,13 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         if($filname!=null || $filname!=''){
             $upload_dir = $dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
             $path = $upload_dir.$filname;
-            $type = pathinfo($path, PATHINFO_EXTENSION);
-            $data = file_get_contents($path);
-            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            $fileimagecontent=file_get_contents($path);
+            $fileimgeurl=explode("DrawToolImageurl:",$fileimagecontent);
+//            $type = pathinfo($path, PATHINFO_EXTENSION);
+//            $data = file_get_contents($path);
+            $base64 = $fileimgeurl;//[1];//'data:image/' . $type . ';base64,' . base64_encode($data);
         }
+//        echo $base64;
         $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
         $team_report_details1=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
     }
@@ -1132,7 +1140,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $activeemp_name[]=array($row["ULD_ID"]);
     }
     //JOB DONE
-    $jobdonedetails=mysqli_query($con,"SELECT GROUP_CONCAT(TJ_PIPE_LAID) as PIPELAID,GROUP_CONCAT(TJ_SIZE) AS SIZE,GROUP_CONCAT(TJ_LENGTH) AS LENGTH FROM LMC_TEAM_JOB WHERE TRD_ID='$trdid'");
+    $jobdonedetails=mysqli_query($con,"SELECT GROUP_CONCAT(IF(TJ_PIPE_LAID IS NULL,'',TJ_PIPE_LAID)) as PIPELAID,GROUP_CONCAT(IF (TJ_SIZE IS NULL,'',TJ_SIZE)) AS SIZE,GROUP_CONCAT(IF(TJ_LENGTH IS NULL,'',TJ_LENGTH)) AS LENGTH FROM LMC_TEAM_JOB WHERE TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($jobdonedetails)){
         $jobdone_pipelaid[]=$row["PIPELAID"];
         $jobdone_size[]=$row['SIZE'];
@@ -1269,9 +1277,9 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $finaltable=$finaltable.'<br><br><tr><td>'.$materialusagetable.'</td></tr>';
         }
 //image
-        if($path!='')
+        if($base64[1]!=''&&$base64[1]!=undefined&&$base64[1]!=null)
         {
-            $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$path.'"/></td></tr></table></body></html>';
+            $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$base64[1].'"/></td></tr></table></body></html>';
         }
         else{
             $finaltable=$finaltable.'</table></body></html>';
@@ -1411,8 +1419,8 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $meeting=$_POST["SRC_MeetingDetails"];
     $EmployeeReport=$_POST["SRC_EmployeeDetails"];
     $imagedata=$_POST['imgData'];
-
-    $oldimgfileid=mysqli_query($con,"SELECT TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$reportdate' AND EMP_ID='$activeemp'");
+//    echo "SELECT TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$reportdate' AND EMP_ID='$activeemp'";
+    $oldimgfileid=mysqli_query($con,"SELECT TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS WHERE TRD_DATE='$reportdate' AND ULD_ID='$activeemp'");
     if($row=mysqli_fetch_array($oldimgfileid))
     {
         $old_imgfileid=$row['TRD_IMG_FILE_NAME'];
@@ -1422,7 +1430,9 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $uploadpath;
     if($imagedata!='' && $reportdate!='' && $EmployeeReport[0]!='' && $teamname!=''){
         $daterep=str_replace('-','',$reportdate);
-        $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
+//        $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.png';
+        $imgfilename=$EmployeeReport[0].'_'.$daterep.'_'.date('His').'.txt';
+
         $userfolderid=get_emp_folderid($EmployeeReport[0]);
         chmod($userfolderid,0777);
         $path=$dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
@@ -1443,10 +1453,11 @@ elseif($_REQUEST['Option']=='UpdateForm')
         if($dirflag==1 && $writable==1){
             $uploadpath=$path.$imgfilename;
             try{
-                $data=str_replace('data:image/png;base64,','',$imagedata);
-                $data = str_replace(' ','+',$data);
-                $data = base64_decode($data);
-                $success = file_put_contents($uploadpath, $data);
+//                $data=str_replace('data:image/png;base64,','',$imagedata);
+//                $data = str_replace(' ','+',$data);
+//                $data = base64_decode($data);
+                $success = file_put_contents($uploadpath, $imagedata);//file_put_contents($uploadpath, $data);
+
                 $imgflag=1;
             }
             catch(Exception $e){
@@ -2064,10 +2075,11 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $objWriter->save('php://output');
     $update_exldata = ob_get_contents();
     ob_end_clean();
-
-    if($uploadpath!='')
+    $fileimagecontent=file_get_contents($uploadpath);
+    $fileimgeurl=explode("DrawToolImageurl:",$fileimagecontent);
+    if($fileimgeurl[1]!=''&&$fileimgeurl[1]!=undefined&&$fileimgeurl[1]!=null)
     {
-    $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$uploadpath.'"/></td></tr></table></body></html>';
+    $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$fileimgeurl[1].'"/></td></tr></table></body></html>';
     }
     else
     {
@@ -2111,10 +2123,10 @@ elseif($_REQUEST['Option']=='UpdateForm')
             unlink($uploadpath);
         }
     }
-
-    if($flag==1 && ($old_imgfileid!='' || $old_imgfileid!=null))
+    if($flag==1 && ($old_imgfileid!='' && $old_imgfileid!=null&&$old_imgfileid!=""))
     {
         $deltpath = $dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR.$old_imgfileid;
+        $dir.$parentfolder.DIRECTORY_SEPARATOR.$userfolderid.DIRECTORY_SEPARATOR;
         unlink($deltpath);
     }
     if($flag==1)

@@ -4,46 +4,53 @@ include "NEW_MENU.php";
 <link rel="stylesheet" href="PAINT/CSS/icon.css">
 <script>
 var SRC_upload_count=0;
+var finalimagedata="",imagecheckflag=0;;
 $(document).ready(function(){
 //    $('.preloader').show();
     //CODING FOR CUSTOM PAINT
-    var flag = 1, imageData, imageDataJson;
+    var imgflag = 1, imageData, imageDataJson;
     $(document).on('click', '#closeImage', function () {
         $("#divImage").empty();
-        if (imageData != undefined)
+//        if(!canvas.isEmpty()){
+        if (imageData != undefined&&imageData != null&&imageData != "")
             $('<img src="' + imageData + '" style="border:1px solid #F5F5F5;align:center" class="img-responsive" width="600" height="400">').appendTo("#divImage");
-    });
+//        }
+        });
     $(document).on('click', '#saveImage', function () {
         canvas.deactivateAllWithDispatch().renderAll();
-        imageData = canvas.toDataURL();
-        imageDataJson = JSON.stringify(canvas);
+
         $('#myModal').modal('hide');
         $("#divImage").empty();
+        if(!canvas.isEmpty()){
+            imageData = canvas.toDataURL();
+            imageDataJson = JSON.stringify(canvas);
+        if (imageData != undefined&&imageData != null&&imageData != "")
         $('<img src="' + imageData + '" style="border:1px solid #F5F5F5;align:center" class="img-responsive" width="600" height="400">').appendTo("#divImage");
-    });
+        }
+        else{
+            imageDataJson="";
+            imageData="";
+        }
+        canvas.deactivateAllWithDispatch().renderAll();
+        });
     //END OF FINAL SUBMIT FUNCTION
     $('.open-modal').click(function () {
         $('#myModal').modal({backdrop: 'static', keyboard: false});
     });
+
     $('#myModal').on('shown.bs.modal', function () {
-        if(flag==1)
+
+        if(imgflag==1)
         {
             loadcanvas()
+            finalimagedata="";
+            imagecheckflag=1;
         }
-        flag = 0;
-        canvas.clear();
-//        if (imageDataJson != undefined && imageDataJson!= null) {
-//            updateImage(imageDataJson);
-//        }
-//        else
-        if (imageData != undefined && imageData!= null) {
-            updateImage(imageData);
+        imgflag = 0;
+        canvas.clear()
+        if (imageDataJson != undefined && imageDataJson!= null&&imageDataJson != "") {
+            canvas.loadFromJSON(imageDataJson,canvas.renderAll.bind(canvas));
         }
-//        imageDataJson = JSON.stringify(canvas);
-//        alert(imageDataJson)
-//        if (imageDataJson != undefined && imageDataJson!= null) {
-//            updateImage(imageDataJson);
-//        }
     });
     $("#myModal").on('hidden.bs.modal', function () {
     });
@@ -137,12 +144,14 @@ $(document).ready(function(){
             empname=value_array[6];
             topicname=value_array[7];
             machineryequip=value_array[9];
-            //topic
+
+            //meetig topic
             var topic='<option>SELECT</option>';
             for (var i=0;i<topicname.length;i++) {
                 topic += '<option value="' + topicname[i] + '">' + topicname[i] + '</option>';
             }
             $('#SRC_mt_lb_topic').html(topic);
+
             //TEAM
             $('#SRC_tr_lb_team').val(teamname);
 
@@ -199,11 +208,7 @@ $(document).ready(function(){
     $(document).on("click",'#SRC_searchbtn', function (){
         datatable();
     });
-//FUNCTION FOR FORMTABLEDATEFORMAT
-    function FormTableDateFormat(inputdate){
-        var string = inputdate.split("-");
-        return string[2]+'-'+ string[1]+'-'+string[0];
-    }
+
     function datatable(){
         $('.preloader').show();
         var selectedemp=$('#SRC_team_lb_empname').val();
@@ -218,7 +223,7 @@ $(document).ready(function(){
                 error_message=searchvalues[1];
                 $('.preloader').hide();
                 if(values_array!=null){
-                    var SRC_UPD_table_header='<table id="SRC_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead  bgcolor="#6495ed" style="color:white;text-align:center;"><tr><th></th><th style="text-align:center;" class="uk-date-column">DATE</th><th style="text-align:center;">START</th><th style="text-align:center;">END</th><th style="text-align:center;">OT</th><th width="350px" style="text-align:center;">REMARKS</th><th style="text-align:center;">USERSTAMP</th><th style="text-align:center;" class="uk-timestp-column">TIMESTAMP</th><th style="text-align:center;">VIEW</th></tr></thead><tbody>'
+                    var SRC_UPD_table_header='<table id="SRC_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead  bgcolor="#6495ed" style="color:white;text-align:center;"><tr><th></th><th style="text-align:center;">DATE</th><th style="text-align:center;">START</th><th style="text-align:center;">END</th><th style="text-align:center;">OT</th><th width="350px" style="text-align:center;">REMARKS</th><th style="text-align:center;">USERSTAMP</th><th style="text-align:center;">TIMESTAMP</th><th style="text-align:center;">VIEW</th></tr></thead><tbody>'
                     for(var j=0;j<values_array.length;j++){
                         var empdi=values_array[j][0];
                         var reportdate=values_array[j][1];
@@ -268,9 +273,7 @@ $(document).ready(function(){
                     $('#SRC_tbl_htmltable').DataTable( {
                         "aaSorting": [],
                         "pageLength": 10,
-                        "sPaginationType":"full_numbers",
-                        "aoColumnDefs" : [
-                            { "aTargets" : ["uk-date-column"] , "sType" : "uk_date"}, { "aTargets" : ["uk-timestp-column"] , "sType" : "uk_timestp"} ]
+                        "sPaginationType":"full_numbers"
                     });
                     $('#SRC_searchbtn').attr('disabled','disabled');
                 }
@@ -286,30 +289,6 @@ $(document).ready(function(){
         var option="UPDATE_SEARCH_DATA";
         xmlhttp.open("GET","DB_PERMITS_ENTRY.php?option="+option+"&emp="+selectedemp+"&fromdate="+fromdate+"&todate="+todate);
         xmlhttp.send();
-        sorting();
-    }
-    //FUNCTION FOR SORTING
-    function sorting(){
-        jQuery.fn.dataTableExt.oSort['uk_date-asc']  = function(a,b) {
-            var x = new Date( Date.parse(FormTableDateFormat(a)));
-            var y = new Date( Date.parse(FormTableDateFormat(b)) );
-            return ((x < y) ? -1 : ((x > y) ?  1 : 0));
-        };
-        jQuery.fn.dataTableExt.oSort['uk_date-desc'] = function(a,b) {
-            var x = new Date( Date.parse(FormTableDateFormat(a)));
-            var y = new Date( Date.parse(FormTableDateFormat(b)) );
-            return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
-        };
-        jQuery.fn.dataTableExt.oSort['uk_timestp-asc']  = function(a,b) {
-            var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
-            var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
-            return ((x < y) ? -1 : ((x > y) ?  1 : 0));
-        };
-        jQuery.fn.dataTableExt.oSort['uk_timestp-desc'] = function(a,b) {
-            var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
-            var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
-            return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
-        };
     }
     $(document).on('click','.pdf-open-model',function () {
         $('#pdf_show').empty();
@@ -329,15 +308,6 @@ $(document).ready(function(){
         xmlhttp.send();
     });
 
-    function meeting_topiclist_create(){
-        $('#SRC_mt_lb_topic').replaceWith('<select class="form-control meetingform-validation" id="SRC_mt_lb_topic" name="SRC_mt_lb_topic"></select>')
-        var topic='<option value="SELECT">SELECT</option>';
-        for(var k=0;k<topicname.length;k++){
-            topic += '<option value="' + topicname[k] + '">' + topicname[k] + '</option>';
-        }
-        $('#SRC_mt_lb_topic').html(topic);
-        $('#SRC_mt_btn_add').val('ADD');
-    }
     $(document).on('change','#SRC_from_date',function(){
         var USRC_UPD_startdate = $('#SRC_from_date').datepicker('getDate');
         var date = new Date( Date.parse( USRC_UPD_startdate ));
@@ -361,12 +331,24 @@ $(document).ready(function(){
     $(document).on('click','#SRC_radiosearchbtn',function(){
         $('.preloader').show();
         $('#divImage').empty();
+        $('#SRC_jd_chk_road').attr('checked', false);
+        $('#SRC_jd_chk_roadm').val('');
+        $('#SRC_jd_chk_roadmm').val('');
+        $('#SRC_jd_chk_contc').attr('checked', false);
+        $('#SRC_jd_chk_concm').val('');
+        $('#SRC_jd_chk_concmm').val('');
+        $('#SRC_jd_chk_truf').attr('checked', false);
+        $('#SRC_jd_chk_trufm').val('');
+        $('#SRC_jd_chk_trufmm').val('');
         var selectedemp=$('#SRC_team_lb_empname').val();
         var SRC_UPD_idradiovalue=$('input:radio[name=SRC_UPD_rd_flxtbl]:checked').attr('id');
         xmlhttp.onreadystatechange=function(){
             if (xmlhttp.readyState==4 && xmlhttp.status==200){
                 var value_array=JSON.parse(xmlhttp.responseText);
                 $('#SRC_radiosearchbtn').attr('disabled','disabled');
+                $('#SRC_Final_Update').attr('disabled','disabled').hide();
+                imageDataJson="";
+                imageData="";
                 $('.preloader').hide();
                 $('#backtotop').show();
                 if(value_array[8]!=null)
@@ -384,17 +366,29 @@ $(document).ready(function(){
                     var teamreport_details=value_array[8];
                     var teamjob=value_array[10];
                     employee_id=value_array[11];
+                    var jobdone_pipilaid='';
+                    var jobdone_size='';
+                    var jobdone_length='';
                     if(value_array[12]!='')
                     {
-                    var jobdone_pipilaid=((value_array[12]).toString()).split(',');
+                        jobdone_pipilaid=((value_array[12]).toString()).split(',');
+                    }
+                    else{
+                        jobdone_pipilaid='';
                     }
                     if(value_array[13]!='')
                     {
-                    var jobdone_size=((value_array[13]).toString()).split(',');
+                        jobdone_size=((value_array[13]).toString()).split(',');
+                    }
+                    else{
+                        jobdone_size='';
                     }
                     if(value_array[14]!='')
                     {
-                    var jobdone_length=((value_array[14]).toString()).split(',');
+                        jobdone_length=((value_array[14]).toString()).split(',');
+                    }
+                    else{
+                        jobdone_length='';
                     }
                     imageData=value_array[15];
                     error_message=value_array[16];
@@ -402,117 +396,156 @@ $(document).ready(function(){
                     $('#SRC_tr_txt_wftime').val('');
                     $('#SRC_tr_txt_wttime').val('');
                     $('#SRC_tr_txt_weather').val('');
-                    if(imageData!=null)
+                    if(imageData!=null&&imageData!="")
                     {
-                        $('<img src="' + imageData + '" style="border:1px solid #F5F5F5;align:center" class="img-responsive" width="600" height="400">').appendTo("#divImage");
+                        finalimagedata=imageData;
+                        imageDataJson=imageData[0];
+                        imageData=imageData[1];
+                        $('<img src="' +imageData+ '" style="border:1px solid #F5F5F5;align:center" class="img-responsive" width="600" height="400">').appendTo("#divImage");
                     }
 
-                    if((value_array[12]!='') && (value_array[13]!='') && (value_array[14]!=''))
+                    if((value_array[12]!='') || (value_array[13]!='') || (value_array[14]!=''))
                     {
-                    if(jobdone_pipilaid[0]=='ROAD' || jobdone_pipilaid[1]=='ROAD' || jobdone_pipilaid[2]=='ROAD')
-                    {
-                        $('#SRC_jd_chk_road').attr('checked', true);
-                        $('#SRC_jd_chk_roadm').val(jobdone_size[0]);
-                        $('#SRC_jd_chk_roadmm').val(jobdone_length[0]);
-                        $('#SRC_jd_chk_roadm').removeAttr('disabled');
-                        $('#SRC_jd_chk_roadmm').removeAttr('disabled');
+                        if(jobdone_pipilaid[0]=='ROAD' || jobdone_pipilaid[1]=='ROAD' || jobdone_pipilaid[2]=='ROAD')
+                        {
+                            $('#SRC_jd_chk_road').attr('checked', true);
+                            if(jobdone_size[0]!=''){
+                                $('#SRC_jd_chk_roadm').val(jobdone_size[0]);
+                            }
+                            if(jobdone_length[0]!=''){
+                                $('#SRC_jd_chk_roadmm').val(jobdone_length[0]);
+                            }
+                            $('#SRC_jd_chk_roadm').removeAttr('disabled');
+                            $('#SRC_jd_chk_roadmm').removeAttr('disabled');
+                        }
+                        else{
+                            $('#SRC_jd_chk_road').attr('checked', false);
+                            $("#SRC_jd_chk_roadm").attr("disabled", "disabled");
+                            $("#SRC_jd_chk_roadmm").attr("disabled", "disabled");
+                            $("#SRC_jd_chk_roadm").val('');
+                            $("#SRC_jd_chk_roadmm").val('');
+                        }
+                        if(jobdone_pipilaid[0]=='CONC' || jobdone_pipilaid[1]=='CONC' || jobdone_pipilaid[2]=='CONC')
+                        {
+                            if(jobdone_pipilaid[0]=='CONC')
+                            {
+                                $('#SRC_jd_chk_contc').attr('checked', true);
+                                if(jobdone_size[0]!=''){
+                                    $('#SRC_jd_chk_concm').val(jobdone_size[0]);
+                                }
+                                if(jobdone_length[0]!=''){
+                                    $('#SRC_jd_chk_concmm').val(jobdone_length[0]);
+                                }
+                                $('#SRC_jd_chk_concm').removeAttr('disabled');
+                                $('#SRC_jd_chk_concmm').removeAttr('disabled');
+                            }
+                            else if(jobdone_pipilaid[1]=='CONC')
+                            {
+                                $('#SRC_jd_chk_contc').attr('checked', true);
+                                if(jobdone_size[1]!=''){
+                                    $('#SRC_jd_chk_concm').val(jobdone_size[1]);
+                                }
+                                if(jobdone_length[1]!=''){
+                                    $('#SRC_jd_chk_concmm').val(jobdone_length[1]);
+                                }
+                                $('#SRC_jd_chk_concm').removeAttr('disabled');
+                                $('#SRC_jd_chk_concmm').removeAttr('disabled');
+
+                            }
+                            else if(jobdone_pipilaid[2]=='CONC')
+                            {
+                                $('#SRC_jd_chk_contc').attr('checked', true);
+                                if(jobdone_size[2]!=''){
+                                    $('#SRC_jd_chk_concm').val(jobdone_size[2]);
+                                }
+                                if(jobdone_length[2]!=''){
+                                    $('#SRC_jd_chk_concmm').val(jobdone_length[2]);
+                                }
+                                $('#SRC_jd_chk_concm').removeAttr('disabled');
+                                $('#SRC_jd_chk_concmm').removeAttr('disabled');
+                            }
+                        }
+                        else{
+                            $('#SRC_jd_chk_contc').attr('checked', false);
+                            $("#SRC_jd_chk_concm").attr("disabled", "disabled");
+                            $("#SRC_jd_chk_concmm").attr("disabled", "disabled");
+                            $("#SRC_jd_chk_concm").val('');
+                            $("#SRC_jd_chk_concmm").val('');
+                        }
+                        if(jobdone_pipilaid[0]=='TURF' || jobdone_pipilaid[1]=='TURF' || jobdone_pipilaid[2]=='TURF')
+                        {
+                            if(jobdone_pipilaid[0]=='TURF')
+                            {
+                                $('#SRC_jd_chk_truf').attr('checked', true);
+                                if(jobdone_size[0]!=''){
+                                    $('#SRC_jd_chk_trufm').val(jobdone_size[0]);
+                                }
+                                if(jobdone_length[0]!=''){
+                                    $('#SRC_jd_chk_trufmm').val(jobdone_length[0]);
+                                }
+                                $('#SRC_jd_chk_trufm').removeAttr('disabled');
+                                $('#SRC_jd_chk_trufmm').removeAttr('disabled');
+                            }
+                            else if(jobdone_pipilaid[1]=='TURF')
+                            {
+                                $('#SRC_jd_chk_truf').attr('checked', true);
+                                if(jobdone_size[1]!=''){
+                                    $('#SRC_jd_chk_trufm').val(jobdone_size[1]);
+                                }
+                                if(jobdone_length[1]!=''){
+                                    $('#SRC_jd_chk_trufmm').val(jobdone_length[1]);
+                                }
+                                $('#SRC_jd_chk_trufm').removeAttr('disabled');
+                                $('#SRC_jd_chk_trufmm').removeAttr('disabled');
+                            }
+                            else if(jobdone_pipilaid[2]=='TURF')
+                            {
+                                $('#SRC_jd_chk_truf').attr('checked', true);
+                                if(jobdone_size[2]!=''){
+                                    $('#SRC_jd_chk_trufm').val(jobdone_size[2]);
+                                }
+                                if(jobdone_length[2]!=''){
+                                    $('#SRC_jd_chk_trufmm').val(jobdone_length[2]);
+                                }
+                                $('#SRC_jd_chk_trufm').removeAttr('disabled');
+                                $('#SRC_jd_chk_trufmm').removeAttr('disabled');
+                            }
+                        }
+                        else{
+                            $('#SRC_jd_chk_truf').attr('checked', false);
+                            $("#SRC_jd_chk_trufm").attr("disabled", "disabled");
+                            $("#SRC_jd_chk_trufmm").attr("disabled", "disabled");
+                            $("#SRC_jd_chk_trufm").val('');
+                            $("#SRC_jd_chk_trufmm").val('');
+                        }
                     }
                     else{
-                        $('#SRC_jd_chk_road').attr('checked', false);
                         $("#SRC_jd_chk_roadm").attr("disabled", "disabled");
                         $("#SRC_jd_chk_roadmm").attr("disabled", "disabled");
-                        $("#SRC_jd_chk_roadm").val('');
-                        $("#SRC_jd_chk_roadmm").val('');
-                    }
-                    if(jobdone_pipilaid[0]=='CONC' || jobdone_pipilaid[1]=='CONC' || jobdone_pipilaid[2]=='CONC')
-                    {
-                        if(jobdone_pipilaid[0]=='CONC')
-                        {
-                            $('#SRC_jd_chk_contc').attr('checked', true);
-                            $('#SRC_jd_chk_concm').val(jobdone_size[0]);
-                            $('#SRC_jd_chk_concmm').val(jobdone_length[0]);
-                            $('#SRC_jd_chk_concm').removeAttr('disabled');
-                            $('#SRC_jd_chk_concmm').removeAttr('disabled');
-                        }
-                        else if(jobdone_pipilaid[1]=='CONC')
-                        {
-                            $('#SRC_jd_chk_contc').attr('checked', true);
-                            $('#SRC_jd_chk_concm').val(jobdone_size[1]);
-                            $('#SRC_jd_chk_concmm').val(jobdone_length[1]);
-                            $('#SRC_jd_chk_concm').removeAttr('disabled');
-                            $('#SRC_jd_chk_concmm').removeAttr('disabled');
-
-                        }
-                        else if(jobdone_pipilaid[2]=='CONC')
-                        {
-                            $('#SRC_jd_chk_contc').attr('checked', true);
-                            $('#SRC_jd_chk_concm').val(jobdone_size[2]);
-                            $('#SRC_jd_chk_concmm').val(jobdone_length[2]);
-                            $('#SRC_jd_chk_concm').removeAttr('disabled');
-                            $('#SRC_jd_chk_concmm').removeAttr('disabled');
-                        }
-                    }
-                    else{
-                        $('#SRC_jd_chk_contc').attr('checked', false);
                         $("#SRC_jd_chk_concm").attr("disabled", "disabled");
                         $("#SRC_jd_chk_concmm").attr("disabled", "disabled");
-                        $("#SRC_jd_chk_concm").val('');
-                        $("#SRC_jd_chk_concmm").val('');
-                    }
-                    if(jobdone_pipilaid[0]=='TURF' || jobdone_pipilaid[1]=='TURF' || jobdone_pipilaid[2]=='TURF')
-                    {
-                        if(jobdone_pipilaid[0]=='TURF')
-                        {
-                            $('#SRC_jd_chk_truf').attr('checked', true);
-                            $('#SRC_jd_chk_trufm').val(jobdone_size[0]);
-                            $('#SRC_jd_chk_trufmm').val(jobdone_length[0]);
-                            $('#SRC_jd_chk_trufm').removeAttr('disabled');
-                            $('#SRC_jd_chk_trufmm').removeAttr('disabled');
-                        }
-                        else if(jobdone_pipilaid[1]=='TURF')
-                        {
-                            $('#SRC_jd_chk_truf').attr('checked', true);
-                            $('#SRC_jd_chk_trufm').val(jobdone_size[1]);
-                            $('#SRC_jd_chk_trufmm').val(jobdone_length[1]);
-                            $('#SRC_jd_chk_trufm').removeAttr('disabled');
-                            $('#SRC_jd_chk_trufmm').removeAttr('disabled');
-                        }
-                        else if(jobdone_pipilaid[2]=='TURF')
-                        {
-                            $('#SRC_jd_chk_truf').attr('checked', true);
-                            $('#SRC_jd_chk_trufm').val(jobdone_size[2]);
-                            $('#SRC_jd_chk_trufmm').val(jobdone_length[2]);
-                            $('#SRC_jd_chk_trufm').removeAttr('disabled');
-                            $('#SRC_jd_chk_trufmm').removeAttr('disabled');
-                        }
-                    }
-                    else{
-                        $('#SRC_jd_chk_truf').attr('checked', false);
                         $("#SRC_jd_chk_trufm").attr("disabled", "disabled");
                         $("#SRC_jd_chk_trufmm").attr("disabled", "disabled");
-                        $("#SRC_jd_chk_trufm").val('');
-                        $("#SRC_jd_chk_trufmm").val('');
-                    }
                     }
                     if((teamjob!='') || (teamjob!=null))
                     {
-                    for(var t=0;t<teamjob.length;t++)
-                    {
-                        var id=teamjob[t][0];
-                        id=id.replace(" ","");
-                        $('#'+id).attr('checked', false);
-                    }
+                        for(var t=0;t<teamjob.length;t++)
+                        {
+                            var id=teamjob[t][0];
+                            id=id.replace(" ","");
+                            $('#'+id).attr('checked', false);
+                        }
                     }
                     if(value_array[9]!=null)
                     {
                         var jobdetails=value_array[9].split(',');
 
-                    for(var s=0;s<jobdetails.length;s++)
-                    {
-                        var id=jobdetails[s];
-                        id=id.replace(" ","");
-                        $('#'+id).attr('checked', true);
-                    }
+                        for(var s=0;s<jobdetails.length;s++)
+                        {
+                            var id=jobdetails[s];
+                            id=id.replace(" ","");
+                            $('#'+id).attr('checked', true);
+                        }
                     }
                     //TEAM REPORT DETAILS
                     for(var a=0;a<teamreport_details.length;a++)
@@ -2054,18 +2087,6 @@ $(document).ready(function(){
             }
         }
     });
-
-    $('#SRC_mt_btn_add').click(function(){
-
-        var mt_btn_value=$(this).val();
-        if(mt_btn_value=='ADD'){
-            $('#SRC_mt_lb_topic').replaceWith('<input type="text"  name="SRC_mt_lb_topic" id="SRC_mt_lb_topic" class="form-control upper check_topic" />');
-            $(this).val('CLEAR');
-        }
-        else{
-            meeting_topiclist_create();
-        }
-    });
     //FINAL SUBMIT FUNCTION
     $(document).on("click",'#SRC_Final_Update', function (){
         $('.preloader').show();
@@ -2298,13 +2319,38 @@ $(document).ready(function(){
 
         var formelement =$('#SRC_entryform').serialize();
 //            var dataURL = canvas.toDataURL();
-        var arraydata={"Option":"UpdateForm","SRC_MaterialDetails": materialusage_array,"SRC_FittingDetails":fittingusage_array,"SRC_EquipmentDetails":equipmentusage_array,"SRC_RentalDetails":rentalmechinery_array,"SRC_MechineryUsageDetails":mechineryusage_array,"SRC_MechEqptransfer":mech_eqp_array,"SRC_SiteVisit":SV_array,"SRC_MeetingDetails":meeting_array,"SRC_EmployeeDetails":EmployeeDetails,"imgData": imageData};
+        var dataURL;
+        if(imagecheckflag==0)
+        {
+        if(finalimagedata!=""&&finalimagedata!=null&&finalimagedata!=undefined)
+        {
+            dataURL = imageDataJson+"DrawToolImageurl:"+imageData;//finalimagedata;//JSON.stringify(canvas)+"DrawToolImageurl:"+canvas.toDataURL();
+        }
+        else if(finalimagedata==""||finalimagedata==null||finalimagedata==undefined)
+        {
+        dataURL='';
+        }
+        }
+        else
+        {
+        if(canvas.isEmpty())
+        {
+            dataURL='';
+        }
+        else
+        {
+            dataURL = JSON.stringify(canvas)+"DrawToolImageurl:"+canvas.toDataURL();
+        }
+        }
+
+        var arraydata={"Option":"UpdateForm","SRC_MaterialDetails": materialusage_array,"SRC_FittingDetails":fittingusage_array,"SRC_EquipmentDetails":equipmentusage_array,"SRC_RentalDetails":rentalmechinery_array,"SRC_MechineryUsageDetails":mechineryusage_array,"SRC_MechEqptransfer":mech_eqp_array,"SRC_SiteVisit":SV_array,"SRC_MeetingDetails":meeting_array,"SRC_EmployeeDetails":EmployeeDetails,"imgData": dataURL};
         data=formelement + '&' + $.param(arraydata);
         $.ajax({
             type: "POST",
             url: "DB_PERMITS_ENTRY.php",
             data:data,
             success: function(msg){
+//                alert(msg+"success")
                 $('.preloader').hide();
                 var msg_alert=JSON.parse(msg);
                 var spflag=msg_alert[0];
@@ -2315,7 +2361,7 @@ $(document).ready(function(){
                     show_msgbox("REPORT SUBMISSION UPDATE",error_message[0],"success",false);
                     $('#SRC_entryform').hide();
                     datatable();
-                    $('#SRC_Final_Update').hide();
+                    $('#SRC_Final_Update').attr('disabled','disabled').hide();
                 }
                 else if(spflag==0)
                 {

@@ -32,7 +32,7 @@ function loadcanvas()
             line = new fabric.Line(points, {
                 strokeWidth: $('#drawing-line-width').val(),
                 stroke: color,
-                originX: 'center',
+                originX: 'centzer',
                 originY: 'center',
                 hasControls: false,
                 selectable: false
@@ -217,8 +217,9 @@ function redrawimages()
         {
             rectangle();
         }
-
+        canvas.setActiveObject(canvas.getActiveObject())
     }
+
 //    if(imagetype=='path'){
 //        pencil();
 //    }
@@ -438,6 +439,7 @@ function triangle() {
         fill: 'transparent',
         stroke: color,
         strokeWidth: strokeWidth
+
     });
     canvas.add(shape);
     selector()
@@ -458,7 +460,8 @@ function eclipse() {
         stroke: color,
         strokeWidth: strokeWidth
     });
-    canvas.add(myEllipse);
+        canvas.setActiveObject(myEllipse)
+        canvas.add(myEllipse);
     selector()
 }
 drawingColorEl.onchange = function () {
@@ -495,9 +498,13 @@ function rectangle() {
         fill: 'transparent',
         strokeWidth: strokeWidth,
         selectable:true,
-        hasControls: true
+        hasControls: true,
+        active:true
     });
+//    canvas.setActiveObject(rect)
+//    canvas.setActiveObject(canvas.item(0));
     canvas.add(rect);
+
     selector()
 }
 function setColor() {
@@ -538,6 +545,7 @@ function tappingTee1() {
 //                    strokeWidth: strokeWidth
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector();
 //    setdefaultsize()
@@ -569,6 +577,7 @@ function tJoint1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector();
 }
@@ -589,6 +598,7 @@ function stubBlang1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 
@@ -609,6 +619,7 @@ function reducer1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 
@@ -629,6 +640,7 @@ function lastDegelbow1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -648,6 +660,7 @@ function halfDegelbow1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -666,6 +679,7 @@ function fullDegelbow1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -684,6 +698,7 @@ function equalTee1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -704,6 +719,7 @@ function endCap1() {
                 strokeWidth: strokeWidth
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -722,6 +738,7 @@ function diTee1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -740,6 +757,7 @@ function diGatevalue1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -758,6 +776,7 @@ function diFlanging1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -776,6 +795,7 @@ function diFlangesotcket1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -794,6 +814,7 @@ function diColor1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -812,6 +833,7 @@ function diCap1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 
@@ -832,6 +854,7 @@ function coupler1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 }
@@ -850,6 +873,7 @@ function beEndCateValue1() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 
@@ -870,6 +894,7 @@ function di90degElbow() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 
@@ -890,6 +915,7 @@ function di45DegElbow() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 
@@ -910,6 +936,7 @@ function diReducer() {
                 top: obj_top
             });
             canvas.add(oImg);
+            canvas.setActiveObject(oImg);
         });
     selector()
 
