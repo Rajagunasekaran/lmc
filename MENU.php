@@ -4,9 +4,9 @@
 //VER 0.01-INITIAL VERSION, SD:21/01/2015 ED:21/01/2015
 //*********************************************************************************************************//-->
 <?php
-include "GET_USERSTAMP.php";
-include "HEADER.php";
-include('SESSION.php');
+include("LMC_LIB/GET_USERSTAMP.php");
+include ("HEADER.php");
+include('LMC_LIB/SESSION.php');
 $Userstamp=json_encode($UserStamp);
 ?>
 <html>
@@ -47,8 +47,7 @@ function updateClock ( )
     $("#clock").html(currentTime);
 }
 $(document).ready(function(){
-
-    
+    $('.preloaderimg').attr('src','CSS/images/preloader.gif');
     $('#checkin').attr("disabled","disabled");
 
     <?php echo  "var Userstamp = ". $Userstamp.PHP_EOL;?>
@@ -133,6 +132,7 @@ $(document).ready(function(){
         var filelist=all_menu_array[4];
         var sub_submenuItem="";
         var script_flag=all_menu_array[3];
+        var rolelogin=all_menu_array[5];
 //        var dashbord='<ul class="nav navbar-nav  "><li ><a href="MENU.php">DASH BOARD</a></li></ul>';
 //        $("#menu").append(dashbord);
 //        $(".preloader").hide();
@@ -141,14 +141,24 @@ $(document).ready(function(){
             var main='mainmenu'+i
             var submen='submenu'+i;
             var filename=filelist[count]+'.php';
-            if(ARCMENU_first_submenu[i].length==1)
-            {
-                mainmenuItem='<li><a class="btnclass" page="'+filename+'" href="#"  id="'+ACRMENU_mainmenu[i]+'" >'+ACRMENU_mainmenu[i]+'</a></li>'
+            if(ACRMENU_mainmenu[i]=='DOCUMENTATION'||ACRMENU_mainmenu[i]=='WORKER PROFILE') {
+                if (ARCMENU_first_submenu[i].length == 1) {
+                    mainmenuItem = '<li><a class="btnclass" page="' + filename + '" href="#"  id="' + ACRMENU_mainmenu[i] + '" >' + ACRMENU_mainmenu[i] + '</a></li>'
 
+                }
+                else {
+                    mainmenuItem = '<li class="dropdown"><a tabindex="0" href="#" data-toggle="dropdown">' + ACRMENU_mainmenu[i] + '<b class="caret"></b></a><ul class="dropdown-menu fa-ul ' + submen + '">'
+                }
             }
             else
             {
-                mainmenuItem='<li class="dropdown"><a tabindex="0" href="#" data-toggle="dropdown">'+ACRMENU_mainmenu[i]+'<b class="caret"></b></a><ul class="dropdown-menu fa-ul '+submen+'">'
+                if (ARCMENU_first_submenu[i].length == 0) {
+                    mainmenuItem = '<li><a class="btnclass" page="' + filename + '" href="#"  id="' + ACRMENU_mainmenu[i] + '" >' + ACRMENU_mainmenu[i] + '</a></li>'
+
+                }
+                else {
+                    mainmenuItem = '<li class="dropdown"><a tabindex="0" href="#" data-toggle="dropdown">' + ACRMENU_mainmenu[i] + '<b class="caret"></b></a><ul class="dropdown-menu fa-ul ' + submen + '">'
+                }
             }
             $("#ACRMENU_ulclass_mainmenu").append(mainmenuItem);
             for(var j=0;j<ARCMENU_first_submenu.length;j++)
@@ -208,7 +218,7 @@ $(document).ready(function(){
 </script>
 <title>LIH MING CONSTRUCTION PTE LTD</title>
 <meta charset="utf-8">
-<link rel="shortcut icon" type="image/ico" href="image/LMCico.png">
+<link rel="shortcut icon" type="image/ico" href="../image/LMCico.png">
 <meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
 </head>
 <body >
@@ -226,7 +236,7 @@ $(document).ready(function(){
 
         <table>
             <tr>
-                <td style="width:1000px";><b><h4><span  style="font-family:Helvetica Neue" id="clock" ></span></h4></b></td><td style="width:100px" style="font-family:Helvetica Neue;"><b><i class="glyphicon glyphicon-user " ></i>  <?php echo $UserStamp ?></b></td><td><b><a href="logout.php">Logout <i class="glyphicon glyphicon-log-out"></i></b></a></td>
+                <td style="width:1000px";><b><h4><span  style="font-family:Helvetica Neue" id="clock" ></span></h4></b></td><td style="width:100px" style="font-family:Helvetica Neue;"><b><i class="glyphicon glyphicon-user " ></i>  <?php echo $UserStamp ?></b></td><td><b><a href="LOGIN/logout.php">Logout <i class="glyphicon glyphicon-log-out"></i></b></a></td>
             </tr>
             <tr>
                 <td><b><label id="clockmsg" name="clockmsg" ></label></b> </td>

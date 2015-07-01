@@ -48,13 +48,13 @@
     <link rel="stylesheet" href="menu/bootstrap-submenu.min.css">
     <link rel="stylesheet" href="menu/docs.min.css">
     <script src="menu/bootstrap-submenu.min.js" defer></script>
-    <script src="jquery/SetCase%20.js"></script>
+    <script src="jquery/SetCase .js"></script>
     <script src="menu/docs.js" defer></script>
     <style>
         <?php include 'CSS/StyleSheet.css'; ?>
     </style>
     <meta charset="utf-8">
-    <link rel="shortcut icon" type="image/ico" href="image/create_thumb.png">
+    <link rel="shortcut icon"  href="image/favicon.ico" type="image/x-icon">
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
     <style>
         .dropdown-menu{

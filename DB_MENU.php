@@ -1,9 +1,9 @@
 <?php
 //error_reporting(0);
-include "GET_USERSTAMP.php";
-include "CONNECTION.php";
-include "COMMON.php";
-$USERSTAMP=$UserStamp;;
+include "LMC_LIB/GET_USERSTAMP.php";
+include "LMC_LIB/CONNECTION.php";
+include "LMC_LIB/COMMON.php";
+$USERSTAMP=$UserStamp;
 if($_REQUEST['option']=="MENU")
 {
     mysqli_report(MYSQLI_REPORT_STRICT);
@@ -75,7 +75,7 @@ if($_REQUEST['option']=="MENU")
         }
 
         if(count($URSC_Main_menu_array)!=0){
-            $final_values=array($URSC_Main_menu_array, $URSC_sub_menu_array,$URSC_sub_sub_menu_data_array,$URSC_script_flag,$URSRC_filename);    // $final = array($URSC_sub_menu_array,$URSC_sub_sub_menu_array,$URSC_sub_sub_menu_data_array);
+            $final_values=array($URSC_Main_menu_array, $URSC_sub_menu_array,$URSC_sub_sub_menu_data_array,$URSC_script_flag,$URSRC_filename,$login_id_role);    // $final = array($URSC_sub_menu_array,$URSC_sub_sub_menu_array,$URSC_sub_sub_menu_data_array);
         }
         else{
 

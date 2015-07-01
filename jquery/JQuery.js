@@ -561,3 +561,31 @@ function replaceSpclcharAngularBrack(str)
     finalstr = finalstr.replace(/>/g, "&gt;");
     return finalstr;
 }
+//FUNCTION FOR SORTING
+function sorting(){
+    jQuery.fn.dataTableExt.oSort['uk_date-asc']  = function(a,b) {
+        var x = new Date( Date.parse(FormTableDateFormat(a)));
+        var y = new Date( Date.parse(FormTableDateFormat(b)) );
+        return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+    };
+    jQuery.fn.dataTableExt.oSort['uk_date-desc'] = function(a,b) {
+        var x = new Date( Date.parse(FormTableDateFormat(a)));
+        var y = new Date( Date.parse(FormTableDateFormat(b)) );
+        return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
+    };
+    jQuery.fn.dataTableExt.oSort['uk_timestp-asc']  = function(a,b) {
+        var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
+        var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
+        return ((x < y) ? -1 : ((x > y) ?  1 : 0));
+    };
+    jQuery.fn.dataTableExt.oSort['uk_timestp-desc'] = function(a,b) {
+        var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
+        var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
+        return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
+    };
+}
+//FUNCTION TO CONVERT DATE FORMAT//
+function FormTableDateFormat(inputdate){
+    var string = inputdate.split("-");
+    return string[2]+'-'+ string[1]+'-'+string[0];
+}
