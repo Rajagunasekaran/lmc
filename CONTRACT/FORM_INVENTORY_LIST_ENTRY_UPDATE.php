@@ -15,11 +15,11 @@ include "../FOLDERMENU.php";
         $(".percentage").doValidation({rule:'numbersonly',prop:{realpart:2}});
         $(".inetger").doValidation({rule:'numbersonly',prop:{realpart:6}});
         $(document).on("keyup",'.alphanumeric',function() {
-            if (this.value.match(/[^a-zA-Z0-9\_\-\ \.\,\/]/g)) {
-                this.value = this.value.replace(/[^a-zA-Z0-9\_\-\ \.\,\/]/g, '');
+            if (this.value.match(/[^a-zA-Z0-9\_\-\ \.\,\/\(\)]/g)) {
+                this.value = this.value.replace(/[^a-zA-Z0-9\_\-\ \.\,\/\(\)]/g, '');
             }
         });
-        $("textarea").autogrow({vertical: true, horizontal: true});
+        $(".autosizealph").doValidation({prop:{whitespace:true,autosize:true}});
         $('.preloader').show();
         var errormessage=[];
         var option="get_item_details";
@@ -110,26 +110,24 @@ include "../FOLDERMENU.php";
         }
         function clearform(){
             $('#ILEU_btn_additem').show();
-            $('#inv_entryform').hide();
+            $('#inv_entrydiv').hide();
             $('#ILEU_btn').hide();
             $('#ILEU_btn_save').val('SAVE');
-            $("#inv_entryform").find('input:text,textarea').val('');
-            $("#inv_entryform").find('select').val('SELECT');
-            $("#inv_entryform").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
+            $("#inv_entrydiv").find('input:text,textarea').val('');
+            $("#inv_entrydiv").find('select').val('SELECT');
+            $("#inv_entrydiv").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
             rowid='';
-            $('#ILEU_itemdesc').height(20);
         }
         $(document).on('click','#ILEU_btn_additem',function(){
             $('#ILEU_btn_additem').hide();
-            $('#inv_entryform').show();
+            $('#inv_entrydiv').show();
             $('#ILEU_btn').show();
             $('#ILEU_btn_save').val('SAVE');
-            $('#ILEU_itemdesc').height(20);
         });
         $(document).on('click','#ILEU_btn_cancel',function(){
             clearform();
         });
-        $(document).on('change blur','#reportaccident',function(){
+        $(document).on('change blur','#invlistentryform',function(){
             if($('#ILEU_itemno').val()!='' && $('#ILEU_itemdesc').val()!='' && $('#ILEU_contractno').val()!='SELECT' && $('#ILEU_uom').val()!='SELECT'){
                 $('#ILEU_btn_save').removeAttr('disabled');
             }
@@ -142,7 +140,7 @@ include "../FOLDERMENU.php";
             $('#ILEU_btn').show();
             $('.preloader').show();
             var btnval=$('#ILEU_btn_save').val();
-            var formelement=$('#reportaccident').serialize();
+            var formelement=$('#invlistentryform').serialize();
             $.ajax({
                 type: "POST",
                 url: "DB_INVENTORY_LIST_ENTRY_UPDATE.php",
@@ -190,7 +188,7 @@ include "../FOLDERMENU.php";
         });
         $(document).on('click','.edit',function(){
             $('.preloader').show();
-            $('#inv_entryform').hide();
+            $('#inv_entrydiv').hide();
             $('#ILEU_btn_additem').hide();
             $('#ILEU_btn_save').val('UPDATE');
             $('#ILEU_btn').show();
@@ -208,14 +206,13 @@ include "../FOLDERMENU.php";
             $('#ILEU_quantity').val(tds[9]);
             $('#ILEU_infoupdate').val(tds[10]);
             $('.preloader').hide();
-            $('#inv_entryform').show();
+            $('#inv_entrydiv').show();
         });
-
     });
 </script>
 </head>
 <body>
-<form id="reportaccident" class="form-horizontal">
+<form id="invlistentryform" class="form-horizontal">
     <div class="preloader"><span class="Centerer"></span><img class="preloaderimg"/> </div>
     <div class="container">
         <div class="panel panel-info">
@@ -224,14 +221,14 @@ include "../FOLDERMENU.php";
             </div>
             <div class="panel-body">
                 <fieldset>
-                    <div id="inv_entryform" hidden>
+                    <div id="inv_entrydiv" hidden>
                         <div class="form-group">
                             <label class="col-md-3">ITEM NO <em>*</em></label>
                             <div class="col-lg-2"><input type="text" class="form-control alphanumeric" id="ILEU_itemno" maxlength="10" name="ILEU_itemno" placeholder="Item No"></div>
                         </div>
                         <div class="form-group">
                             <label class="col-md-3">ITEM DESCRIPTION <em>*</em></label>
-                            <div class="col-lg-4"><textarea class="form-control" id="ILEU_itemdesc" name="ILEU_itemdesc" rows="1" maxlength="100" placeholder="Description"></textarea></div>
+                            <div class="col-lg-4"><input type="text" class="form-control alphanumeric autosizealph" id="ILEU_itemdesc" name="ILEU_itemdesc" maxlength="60" placeholder="Description"/></div>
                         </div>
                         <div class="form-group">
                             <label class="col-md-3">CONTRACT NO <em>*</em></label>
@@ -274,7 +271,7 @@ include "../FOLDERMENU.php";
                         </div>
                     </div>
                 </fieldset>
-                <div class="table-responsive" id="ILEU_htmltable" >
+                <div class="table-responsive" id="ILEU_htmltable">
                     <section>
                     </section>
                 </div>

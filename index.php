@@ -6,7 +6,6 @@ include "HEADER.php";
 <html>
 <head>
     <title>LIH MING CONSTRUCTION PTE LTD</title>
-    <!--<link href="../CSS/StyleSheet.css" rel="stylesheet" type="text/css">-->
     <style>
         h2 {
             background-color:#498af3;
@@ -72,6 +71,19 @@ include "HEADER.php";
             else
                 $("#errPassword").text('Enter Valid Username');
         });
+        $(document).on('change blur','#lg-form',function(){
+            if($('#username').val()!='' && $('#password').val()!=''){
+                $('#login_create').removeAttr('disabled');
+            }
+            else if($('#username').val()!=''){
+                $('#login_create').attr('disabled','disabled');
+                $('#reset_btn').removeAttr('disabled');
+            }
+            else {
+                $('#login_create').attr('disabled','disabled');
+                $('#reset_btn').attr('disabled','disabled');
+            }
+        });
     });
     </script>
 </head>
@@ -92,8 +104,8 @@ include "HEADER.php";
             </div>
             <div class="errormsg" id='errPassword'><?php echo $error ?></div>
             <div class="form-group">
-                <input name="submit" type="submit" value="LOGIN" class="btn btn-info" id="login_create">
-                <input name="reset" type="button" value="RESET PASSWORD" class="btn btn-info" id="reset_btn">
+                <input name="submit" type="submit" value="LOGIN" class="btn btn-info" id="login_create" disabled>
+                <input name="reset" type="button" value="RESET PASSWORD" class="btn btn-info" id="reset_btn" disabled>
             </div>
         </form>
     </div>

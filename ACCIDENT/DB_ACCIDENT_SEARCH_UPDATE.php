@@ -204,7 +204,7 @@ elseif($_REQUEST['option']=='VIEW_PDF_FETCH')
         <tr><td width="250">'.$URE_reasontxt.'</td></tr></table>';
 
     // final table start
-    if(($employeedetails[0][12]!='')&&($employeedetails[0][13]!='')&&($employeedetails[0][14]!='')){
+    if(($employeedetails[0][12]!='')||($employeedetails[0][13]!='')||($employeedetails[0][14]!='')){
         $reportheadername='INCIDENT INVESTIGATION REPORT FOR '.$employeedetails[0][0];
         $finaltable= '<html><body><table><tr><td style="text-align: center;"><div><img id=imglogo src="../image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">' .$reportheadername.'</div></h2></td></tr><br><br><br><tr><td>'.$accidentreporttable.'</td></tr><br><br><tr><td>'.$machineryreporttable.'</td></tr><br><br><tr><td>'.$injuredreporttable.'</td></tr><br><br><tr><td>'.$descriptionreporttable.'</td></tr></table></body></html>';
     }
@@ -332,7 +332,7 @@ elseif($_REQUEST['option']=='SAVE'){
         <tr><td width="250">'.$URE_reasontxt.'</td></tr></table>';
 
 // FINAL TABLE
-    if(($typeofmachinery!='')&&($lmno!='')&&($nameofoperator!='')){
+    if(($typeofmachinery!='')||($lmno!='')||($nameofoperator!='')){
         $reportheadername='INCIDENT INVESTIGATION REPORT FOR '.$name;
         $finaltable= '<html><body><table><tr><td style="text-align: center;"><div><img id=imglogo src="../image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">' .$reportheadername.'</div></h2></td></tr><br><br><br><tr><td>'.$accidentreporttable.'</td></tr><br><br><tr><td>'.$machineryreporttable.'</td></tr><br><br><tr><td>'.$injuredreporttable.'</td></tr><br><br><tr><td>'.$descriptionreporttable.'</td></tr></table></body></html>';
     }
