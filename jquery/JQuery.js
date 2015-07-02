@@ -516,6 +516,10 @@ function show_msgbox(title,msg,status,confirmation)
     {
         $('body').append('<div class="jconfirm white msgbox" hidden="" ><div class="jconfirm-bg"></div><div class="container"><div class="row"><div class="col-md-6 col-md-offset-3 span6 offset3"><div class="jconfirm-box" style="-webkit-transition-duration: 0.4s; transition-duration: 0.4s; margin-top: 157.5px;"><div class="closeIcon"><span class="fa fa-remove"></span></div><div class="msgboxtitle" style="" ></div><span class="divider"></span><div class="msgboxcontent"></div><div class="buttons pull-right"><button class="maxbtn menuconfirm">OK</button><button class="maxbtn msgcancel">CANCEL</button></div><div class="jquery-clear"></div></div></div></div></div></div>');
     }
+    else if(confirmation=="delete")
+    {
+        $('body').append('<div class="jconfirm white msgbox" hidden="" ><div class="jconfirm-bg"></div><div class="container"><div class="row"><div class="col-md-6 col-md-offset-3 span6 offset3"><div class="jconfirm-box" style="-webkit-transition-duration: 0.4s; transition-duration: 0.4s; margin-top: 157.5px;"><div class="closeIcon"><span class="fa fa-remove"></span></div><div class="msgboxtitle" style="" ></div><span class="divider"></span><div class="msgboxcontent"></div><div class="buttons pull-right"><button class="maxbtn deleteconfirm">OK</button><button class="maxbtn msgcancel">CANCEL</button></div><div class="jquery-clear"></div></div></div></div></div></div>');
+    }
     else
     {
         $('body').append('<div class="jconfirm white msgbox" hidden="" ><div class="jconfirm-bg"></div><div class="container"><div class="row"><div class="col-md-6 col-md-offset-3 span6 offset3"><div class="jconfirm-box" style="-webkit-transition-duration: 0.4s; transition-duration: 0.4s; margin-top: 157.5px;"><div class="closeIcon"><span class="fa fa-remove"></span></div><div class="msgboxtitle" style="" ></div><span class="divider"></span><div class="msgboxcontent"></div><div class="buttons pull-right"><button class="maxbtn msgconfirm">OK</button></div><div class="jquery-clear"></div></div></div></div></div></div>');
@@ -532,7 +536,7 @@ function show_msgbox(title,msg,status,confirmation)
     $('.msgconfirm').focus();
     $('.menuconfirm').focus();
 }
-$(document).on("click",'.msgcancel,.msgconfirm,.menuconfirm', function (){
+$(document).on("click",'.msgcancel,.msgconfirm,.menuconfirm,.deleteconfirm', function (){
     $(".msgbox").hide();
 });
 function resetPreloader(pos){
@@ -545,7 +549,7 @@ function adjustPosition(oldPosition,top,left){
 }
 
 $(function() {
-    $('.preloaderimg').attr('src','CSS/images/preloader.gif');
+    $('.preloaderimg').attr('src','../CSS/images/preloader.gif');
     $(document).on('click','.messageclose',function(){
         $('#focustext').focus();
     });
@@ -560,32 +564,4 @@ function replaceSpclcharAngularBrack(str)
     var finalstr = str.replace(/</g, "&lt;");
     finalstr = finalstr.replace(/>/g, "&gt;");
     return finalstr;
-}
-//FUNCTION FOR SORTING
-function sorting(){
-    jQuery.fn.dataTableExt.oSort['uk_date-asc']  = function(a,b) {
-        var x = new Date( Date.parse(FormTableDateFormat(a)));
-        var y = new Date( Date.parse(FormTableDateFormat(b)) );
-        return ((x < y) ? -1 : ((x > y) ?  1 : 0));
-    };
-    jQuery.fn.dataTableExt.oSort['uk_date-desc'] = function(a,b) {
-        var x = new Date( Date.parse(FormTableDateFormat(a)));
-        var y = new Date( Date.parse(FormTableDateFormat(b)) );
-        return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
-    };
-    jQuery.fn.dataTableExt.oSort['uk_timestp-asc']  = function(a,b) {
-        var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
-        var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
-        return ((x < y) ? -1 : ((x > y) ?  1 : 0));
-    };
-    jQuery.fn.dataTableExt.oSort['uk_timestp-desc'] = function(a,b) {
-        var x = new Date( Date.parse(FormTableDateFormat(a.split(' ')[0]))).setHours(a.split(' ')[1].split(':')[0],a.split(' ')[1].split(':')[1],a.split(' ')[1].split(':')[2]);
-        var y = new Date( Date.parse(FormTableDateFormat(b.split(' ')[0]))).setHours(b.split(' ')[1].split(':')[0],b.split(' ')[1].split(':')[1],b.split(' ')[1].split(':')[2]);
-        return ((x < y) ? 1 : ((x > y) ?  -1 : 0));
-    };
-}
-//FUNCTION TO CONVERT DATE FORMAT//
-function FormTableDateFormat(inputdate){
-    var string = inputdate.split("-");
-    return string[2]+'-'+ string[1]+'-'+string[0];
 }

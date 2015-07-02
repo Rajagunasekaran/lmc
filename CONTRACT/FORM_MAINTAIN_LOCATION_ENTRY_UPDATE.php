@@ -73,6 +73,7 @@ include "../FOLDERMENU.php";
                         var ML_UPD_table_header = '<table id="ML_tbl_htmltable" border="1"  width="1300" cellspacing="0" class="srcresult"><thead  bgcolor="#6495ed" style="color:white;text-align:center;"><tr><th>EDIT</th><th style="text-align:center;">REF NO</th><th width="350px" style="text-align:center;">LOCATION</th><th style="text-align:center;">RECIPIENT</th><th style="text-align:center;">CONTRACT</th><th style="text-align:center;">DATE ENTERED</th><th style="text-align:center;">DATE COMPLETED</th><th style="text-align:center;">DATE DRAFTBILL CREATED</th><th style="text-align:center;">JOB STATUS</th><th style="text-align:center;">DRAFTBILL STATUS</th><th style="text-align:center;">REMARK</th><th style="text-align:center;">USESTAMP</th><th>TIMESTAMP</th></tr></thead><tbody>';
                         for (var i = 0; i < resultarray.length; i++) {
                             var refno = resultarray[i].refno;
+                            refno="LM/"+refno;
                             var location = resultarray[i].location;
                             var recipient = resultarray[i].receipant;
                             var contract = resultarray[i].contractno;
@@ -121,6 +122,7 @@ include "../FOLDERMENU.php";
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     $('.preloader').hide();
                     var result = xmlhttp.responseText;
+                    alert(result)
                     if (buttonvalue == 'SAVE') {
                         if(result==1)
                         {
@@ -173,6 +175,7 @@ include "../FOLDERMENU.php";
             for(var j=0;j<resultarray.length;j++) {
                 if (tblerowid == resultarray[j].rowid) {
                     var refno = resultarray[j].refno;
+                    refno="LM/"+refno;
                     var location = resultarray[j].location;
                     var workorderno=resultarray[j].workorderno;
                     var recipient = resultarray[j].receipant;

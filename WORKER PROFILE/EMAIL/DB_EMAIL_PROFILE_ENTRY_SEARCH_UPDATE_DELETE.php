@@ -70,7 +70,65 @@ if(isset($_REQUEST)) {
     $EP_SRC_UPD_DEL_email_arrayresult=array("EP_SRC_UPD_DEL_profilelistdataid"=>$EP_SRC_UPD_DEL_email_array,"EP_SRC_UPD_DEL_errormsg"=>$EP_SRC_UPD_DEL_errorMsg_array);
     echo json_encode($EP_SRC_UPD_DEL_email_arrayresult);
     }
-
+    if($_REQUEST['option']=='EP_SRC_UPD_DEL_srch')
+    {
+        $EP_SRC_UPD_DEL_email_list=[];
+        $EP_SRC_UPD_DEL_emailstmt_array=[];
+        $EP_SRC_UPD_DEL_email_list=[];
+        $EP_SRC_UPD_DEL_id=$_REQUEST['EP_SRC_UPD_DEL_id'];
+        $EP_SRC_UPD_DEL_query="SELECT DATE_FORMAT(EL_TIMESTAMP,'%d-%m-%Y %T') AS TIMESTAMP,EL_ID,EL_EMAIL_ID,ULD.ULD_USERNAME,EP_NON_IP_FLAG FROM LMC_EMAIL_LIST EL,LMC_EMAIL_PROFILE EP ,LMC_USER_LOGIN_DETAILS ULD WHERE EL.EP_ID='$EP_SRC_UPD_DEL_id' AND EL.EP_ID=EP.EP_ID AND EL.ULD_ID=ULD.ULD_ID ORDER BY EL.EL_EMAIL_ID";
+        $EP_SRC_UPD_DEL_rs=mysqli_query($con,$EP_SRC_UPD_DEL_query);
+        while($row=mysqli_fetch_array($EP_SRC_UPD_DEL_rs))
+        {
+            $EP_SRC_UPD_DEL_emailid=$row["EL_EMAIL_ID"];
+            $EP_SRC_UPD_DEL_userstamp=$row["ULD_USERNAME"];
+            $EP_SRC_UPD_DEL_timestamp=$row["TIMESTAMP"];
+            $EP_SRC_UPD_DEL_el_id=$row["EL_ID"];
+            $EP_SRC_UPD_DEL_flag=$row["EP_NON_IP_FLAG"];
+            $EP_SRC_UPD_DEL_emaillist=(object)['emailno'=>$EP_SRC_UPD_DEL_el_id,'emailid'=>$EP_SRC_UPD_DEL_emailid,'userstamp'=>$EP_SRC_UPD_DEL_userstamp,'timestamp'=>$EP_SRC_UPD_DEL_timestamp,'EP_SRC_UPD_DEL_flag'=>$EP_SRC_UPD_DEL_flag];
+            $EP_SRC_UPD_DEL_email_list[]=$EP_SRC_UPD_DEL_emaillist;
+        }
+        echo json_encode($EP_SRC_UPD_DEL_email_list);
+    }
+    if($_REQUEST['option']=="EP_SRC_UPD_DEL_already")
+    {
+        $profilename=$_REQUEST['EP_SRC_UPD_DEL_profilename'];
+        $EP_ENTRY_email=$_REQUEST['EP_SRC_UPD_DEL_emailid'];
+        $EP_ENTRY_alreadyemailid=mysqli_query($con,"SELECT * FROM LMC_EMAIL_LIST WHERE EL_EMAIL_ID='$EP_ENTRY_email' AND EP_ID=(SELECT  EP_ID FROM LMC_EMAIL_PROFILE WHERE EP_EMAIL_DOMAIN='$profilename')");
+        $row=mysqli_num_rows($EP_ENTRY_alreadyemailid);
+        if($row>0)
+        {
+            $EP_ENTRY_chkmail_flag=1;
+        }
+        else{
+            $EP_ENTRY_chkmail_flag=0;
+        }
+        echo $EP_ENTRY_chkmail_flag;
+    }
+    if($_REQUEST['option']=='EP_Update')
+    {
+        $EP_UPD_email=$_REQUEST['EP_UPD_email'];
+        $rowid=$_REQUEST['rowid'];
+        $EP_SRC_UPD_DEL_update="UPDATE LMC_EMAIL_LIST SET EL_EMAIL_ID='$EP_UPD_email',ULD_ID=(SELECT ULD_ID FROM LMC_USER_LOGIN_DETAILS WHERE ULD_USERNAME='$UserStamp') WHERE EL_ID='$rowid'";
+        if(!mysqli_query($con,$EP_SRC_UPD_DEL_update)){
+            $updateflag=0;
+        }
+        else{
+            $updateflag=1;
+        }
+        echo  $updateflag;
+    }
+    if($_REQUEST['option']=='EP_SRC_UPD_DEL_delete'){
+        $deleteid=$_REQUEST['deleteid'];
+        $deltequery="DELETE FROM LMC_EMAIL_LIST WHERE EL_ID='$deleteid'";
+        if(!mysqli_query($con,$deltequery)){
+            $deleteflag=0;
+        }
+        else{
+            $deleteflag=1;
+        }
+        echo $deleteflag;
+    }
 }
 //FUNCTION TO CHECK WHETHER THE DATA INSERTED OR NOT
 function EP_ENTRY_getmaxprimaryid()

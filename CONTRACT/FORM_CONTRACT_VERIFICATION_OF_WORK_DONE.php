@@ -8,7 +8,7 @@ include "../FOLDERMENU.php";
 </style>
 <script>
     $(document).ready(function() {
-//        $("#additem :input").attr("disabled", "disabled");
+        $("#additem :input").attr("disabled", "disabled");
         $( "textarea" ).autogrow( { vertical : true, horizontal : true } );
         $(".amountonly").doValidation({rule:'numbersonly',prop:{realpart:5,imaginary:2}});
         $(".numonly").doValidation({rule:'numbersonly',prop:{realpart:5}});
@@ -16,6 +16,106 @@ include "../FOLDERMENU.php";
             dateFormat: "dd-mm-yy",
             changeYear: true,
             changeMonth: true
+        });
+        $('.preloader').show();
+        $.ajax({
+            type: "POST",
+            url: "DB_CONTRACT_VERIFCATION_OF_WORK_DONE.php",
+            data: {"option": "INITIAL_DATA"},
+            success: function (res) {
+                $('.preloader').hide();
+                var response = JSON.parse(res);
+                var referenceno = response[0];
+                var ref_no = '<option>SELECT</option>';
+                for (var i = 0; i < referenceno.length; i++) {
+                    ref_no += '<option value="' + referenceno[i] + '">' + "LM/"+referenceno[i] + '</option>';
+                }
+                $('#VWD_lb_referenceno').html(ref_no);
+            },
+            error: function (data) {
+                alert('error in getting' + JSON.stringify(data));
+            }
+        });
+        $('#VWD_lb_referenceno').change(function(){
+            var refno=$(this).val();
+            if(refno!='SELECT') {
+                $('.preloader').show();
+                $.ajax({
+                    type: "POST",
+                    url: "DB_CONTRACT_VERIFCATION_OF_WORK_DONE.php",
+                    data: {"option": "Referencenosearch", "refno": refno},
+                    success: function (res) {
+                        $('.preloader').hide();
+                       var response = JSON.parse(res);
+                        $('#VWD_location').val(response.location)
+                        $('#VWD_referenceno').val("LM/"+refno)
+                        $('#VWD_contractno').val(response.contractno)
+                        $('#VWD_workorderno').val(response.workorderno)
+                        $('#VWD_officerincharge').val(response.oic)
+                        $('#VWD_datecreated').val(response.dateentered)
+                        $('#VWD_wrkcompleted').val(response.datecompleted)
+                        $('#VWD_dateverification').val(response.dateverification)
+
+                    },
+                    error: function (data) {
+                        alert('error in getting' + JSON.stringify(data));
+                    }
+                });
+            }
+            else
+            {
+                $('#VWD_location').val('')
+                $('#VWD_referenceno').val('')
+                $('#VWD_contractno').val('')
+                $('#VWD_workorderno').val('')
+                $('#VWD_officerincharge').val('')
+                $('#VWD_datecreated').val('')
+                $('#VWD_wrkcompleted').val('')
+                $('#VWD_dateverification').val('')
+            }
+        });
+        $(document).on("change blur",'#initialdiv', function (){
+            if($('#VWD_location').val()!='' && $('#VWD_referenceno').val()!='' && $('#VWD_contractno').val()!='' && $('#VWD_workorderno').val()!='' && $('#VWD_officerincharge').val()!='' && $('#VWD_datecreated').val()!='' && $('#VWD_wrkcompleted').val()!='' && $('#VWD_dateverification').val()!=''){
+               $('#VWD_add').removeAttr('disabled');
+            }
+            else
+            {
+                $('#VWD_add').att('disabled','disabled');
+            }
+        });
+
+        $('#VWD_add').click(function(){
+            $("#additem :input").removeAttr("disabled");
+            $('#CC_search').attr('disabled','disabled');
+            $('#CC_enter').attr('disabled','disabled');
+        });
+        var itemno;
+        $('#CC_itemno').blur(function(){
+            itemno=$(this).val();
+            if(itemno!='')
+            {
+                $('#CC_search').removeAttr('disabled');
+            }
+            else{
+                $('#CC_search').attr('disabled','disabled');
+            }
+        });
+        $('#CC_search').click(function(){
+                $('.preloader').show();
+                $.ajax({
+                    type: "POST",
+                    url: "DB_CONTRACT_VERIFCATION_OF_WORK_DONE.php",
+                    data: {"option": "itemnosearch", "itemno": itemno},
+                    success: function (res) {
+                        alert(res)
+                        $('.preloader').hide();
+                        var response = JSON.parse(res);
+                    },
+                    error: function (data) {
+                        alert('error in getting' + JSON.stringify(data));
+                    }
+            });
+
         });
         //CLICK EVENT FOR ENTER BTN IN ITEM SEARCH
         $('#CC_enter').click(function(){
@@ -56,37 +156,38 @@ include "../FOLDERMENU.php";
                 <h2 class="panel-title">VERIFICATION OF WORK DONE</h2>
             </div>
             <div class="panel-body">
+                <div id="initialdiv">
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="VWD_location">LOCATION</label>
-                    <div class="col-sm-4"><select  id="VWD_location" name="VWD_location" class="form-control"></select></div>
+                    <div class="col-sm-4"><input type="text"  id="VWD_location" name="VWD_location" class="form-control" placeholder="Location" readonly/></div>
                     <label class="col-sm-3 control-label" for="VWD_datecreated">DATE CREATED ORDER</label>
                     <div class="col-sm-2">
                         <div class="input-group">
-                            <input type="text" id="VWD_datecreated" name="VWD_datecreated" placeholder="Date created order" class="form-control date-picker datemandtry"/>
-                            <label for="VWD_datecreated" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span></label>
+                            <input type="text" id="VWD_datecreated" name="VWD_datecreated" placeholder="Date created order" class="form-control date-picker datemandtry" readonly/>
+                            <label for="VWD_datecreated" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar" ></span></label>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="VWD_referenceno">REFERENCE NO</label>
                     <div class="col-sm-2"><select id="VWD_lb_referenceno" name="VWD_lb_referenceno" class="form-control" ></select></div>
-                    <div class="col-sm-2"><input type="text"  id="VWD_referenceno" name="VWD_referenceno" placeholder="Reference No" class="form-control date-picker datemandtry" /></div>
+                    <div class="col-sm-2"><input type="text"  id="VWD_referenceno" name="VWD_referenceno" placeholder="Reference No" class="form-control" readonly /></div>
                     <label class="col-sm-3 control-label" for="VWD_wrkcompleted">DATE WORK COMPLETED</label>
                     <div class="col-sm-2">
                         <div class="input-group">
-                            <input type="text" id="VWD_wrkcompleted" name="VWD_wrkcompleted" placeholder="Date Work completed" class="form-control date-picker"/>
+                            <input type="text" id="VWD_wrkcompleted" name="VWD_wrkcompleted" placeholder="Date Work completed" class="form-control date-picker" readonly/>
                             <label for="VWD_wrkcompleted" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span></label>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="VWD_contractno">CONTRACT NO/WORK ORDER NO</label>
-                    <div class="col-sm-2"><input type="text"  id="VWD_contractno" name="VWD_contractno" placeholder="Contract No" class="form-control"/></div>
-                    <div class="col-sm-2"><input type="text"  id="VWD_workorderno" name="VWD_workorderno" placeholder="Work Order No" class="form-control"/></div>
+                    <div class="col-sm-2"><input type="text"  id="VWD_contractno" name="VWD_contractno" placeholder="Contract No" class="form-control" readonly/></div>
+                    <div class="col-sm-2"><input type="text"  id="VWD_workorderno" name="VWD_workorderno" placeholder="Work Order No" class="form-control" readonly/></div>
                     <label class="col-sm-3 control-label" for="VWD_dateverification">DATE VERIFICATION</label>
                     <div class="col-sm-2">
                         <div class="input-group">
-                            <input type="text" id="VWD_dateverification" name="VWD_dateverification" placeholder="Date Verification" class="form-control date-picker datemandtry"/>
+                            <input type="text" id="VWD_dateverification" name="VWD_dateverification" placeholder="Date Verification" class="form-control date-picker datemandtry" readonly/>
                             <label for="VWD_dateverification" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span></label>
                         </div>
                     </div>
@@ -95,9 +196,10 @@ include "../FOLDERMENU.php";
                     <label class="col-sm-3 control-label" for="VWD_officerincharge">PGAS OFFICER-IN-CHARGER(OIC)</label>
                     <div class="col-sm-4"><input type="text"  id="VWD_officerincharge" name="VWD_officerincharge" placeholder="OIC" class="form-control"/></div>
                     <div class="col-lg-offset-10" style="padding-left:20px;">
-                        <input type="button" id="CC_search" name="CC_search" class="btn btn-info" value="ADD"/>
-                        <input type="button" id="CC_search" name="CC_search" class="btn btn-info" value="DEL"/>
+                        <input type="button" id="VWD_add" name="CC_search" class="btn btn-info" value="ADD" disabled/>
+                        <input type="button" id="VWD_delte" name="CC_search" class="btn btn-info" value="DEL"/>
                     </div>
+                </div>
                 </div>
                 <div id="additem" style="border-style: solid; border-width:thin; border-color:#d3d3d3; padding:10px;">
                     <div class="form-group">
