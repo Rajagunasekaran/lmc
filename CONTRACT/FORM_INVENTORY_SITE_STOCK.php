@@ -112,9 +112,9 @@ include "../FOLDERMENU.php";
                 $("#inv_searchoptdiv").show();
                 $('#ISS_btn').hide();
                 $('#inv_sitestockdiv').hide();
-                $("#inv_sitestockdiv").find('input:text,textarea').val('');
-                $("#inv_sitestockdiv").find('select').val('SELECT');
-                $("#inv_sitestockdiv").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
+                $("#inv_sitestockdiv,#inv_searchbydiv,#inv_searchoptdiv").find('input:text,textarea').val('');
+                $("#inv_sitestockdiv,#inv_searchbydiv,#inv_searchoptdiv").find('select').val('SELECT');
+                $("#inv_sitestockdiv,#inv_searchbydiv,#inv_searchoptdiv").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
             }
             $(document).on('change blur','#invsitestockform',function(){
                 if($('#ISS_db_date').val()!='' && $('#ISS_lb_itemno').val()!='SELECT' && $('#ISS_tb_itemname').val()!='' &&
@@ -176,19 +176,23 @@ include "../FOLDERMENU.php";
                             var site_stock=[];
                             site_stock=JSON.parse(sitestock);
                             if (site_stock.length > 0) {
-                                data_table(site_stock);
+                                stockdata_table(site_stock);
                                 $('.preloader').hide();
                             }
                             else {
                                 $('.preloader').hide();
                                 show_msgbox("INVENTORY SITE STOCK", errormessage[2], "error", false);
+                                $('#ISS_lb_itemnosrch').val('SELECT');
+                                $('#ISS_lb_itemnamesrch').val('SELECT');
+                                $('#ISS_db_datesrchfrom').val('');
+                                $('#ISS_db_datesrchto').val('');
                             }
                         }
                     });
                 }
             });
             var table;
-            function data_table(sitestock){
+            function stockdata_table(sitestock){
                 if(sitestock.length>0) {
                     var ISS_table_header = '<table style="width:1300px" id="ISS_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead bgcolor="#6495ed" style="color:white"><tr><th style="width:90px;text-align: center" nowrap class="uk-date-column">DATE</th><th style="width:90px;text-align: center" nowrap>ITEM NO</th><th style="width:300px;text-align: center" nowrap>ITEM NAME</th><th style="width:100px;text-align: center" nowrap>WEEKLY OPENING BALANCE</th><th style="width:80px;text-align: center" nowrap>ADD NEW STOCK</th><th style="width:70px;text-align: center" nowrap>DRAWN</th><th style="width:80px;text-align: center" nowrap>RETURNED</th><th style="width:80px;text-align: center" nowrap>SITE USED</th><th style="width:90px;text-align: center" nowrap>SITE STOCK</th><th style="width:50px;text-align: center" nowrap>SOLD</th><th style="width:80px;text-align: center">BALANCE STOCK</th></tr></thead><tbody>';
                     for (var i = 0; i < sitestock.length; i++) {
@@ -344,7 +348,6 @@ include "../FOLDERMENU.php";
                 </fieldset>
                 <div class="table-responsive" id="ISS_htmltable" hidden>
                     <section>
-
                     </section>
                 </div>
             </div>

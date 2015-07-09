@@ -20,7 +20,7 @@ $(document).ready(function(){
     $(document).on('click', '.next', function () {
         if(flag==1)
         {
-            loadcanvas()
+            loadcanvas();
         }
         flag=0;
 //        canvas.clear();
@@ -33,8 +33,6 @@ $(document).ready(function(){
 //        }
     });
     //drawing tool end
-
-
     //ENDING OF CUSTOM CODE
 //    $('.preloader').show();
 
@@ -49,6 +47,7 @@ $(document).ready(function(){
     var employeeid;
     var topicname=[];
     var mtransferitem=[];
+    var contractnos=[];
     var xmlhttp=new XMLHttpRequest();
     xmlhttp.onreadystatechange=function(){
         if (xmlhttp.readyState==4 && xmlhttp.status==200) {
@@ -65,6 +64,7 @@ $(document).ready(function(){
             topicname=value_array[7];
             var username=value_array[8];
             mtransferitem=value_array[9];
+            contractnos=value_array[10];
             if(teamname==null)
             {
                 var msg=errormessage[9].replace('[UNAME]',username);
@@ -78,7 +78,7 @@ $(document).ready(function(){
                     topic += '<option value="' + topicname[i] + '">' + topicname[i] + '</option>';
                 }
                 $('#mt_lb_topic').html(topic);
-                $('#tr_lb_team').val(teamname);
+                $('#tr_tb_team').val(teamname);
 
                 //MACHINERY_TYPE
                 var machinery_type='<option>SELECT</option>';
@@ -113,18 +113,68 @@ $(document).ready(function(){
                     mtransfer_item += '<option value="' + mtransferitem[i] + '">' + mtransferitem[i] + '</option>';
                 }
                 $('#mtransfer_item').html(mtransfer_item);
-
+                //CONTRACT NO
+                var contractno='<option>SELECT</option>';
+                for (var i=0;i<contractnos.length;i++) {
+                    contractno += '<option value="' + contractnos[i].id + '">' + contractnos[i].no + '</option>';
+                }
+                $('#tr_lb_contractno').html(contractno);
             }
         }
     }
     var option="COMMON_DATA";
     xmlhttp.open("GET","DB_PERMITS_ENTRY.php?option="+option);
     xmlhttp.send();
+// CHANGE EVENT FOR CONTACT NO
+    var item_array=[];
+    $(document).on('change','#tr_lb_contractno',function(){
+        if($('#tr_lb_contractno').val()!='SELECT') {
+            $('.preloader').show();
+            var slctdcontractno = $('#tr_lb_contractno').find('option:selected').text();
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    item_array = JSON.parse(xmlhttp.responseText);
+                    //ITEM NO FOR SITE STOCK USAGE
+                    var itemno = '<option>SELECT</option>';
+                    if (item_array.length > 0) {
+                        for (var i = 0; i < item_array.length; i++) {
+                            itemno += '<option value="' + item_array[i].no + '">' + item_array[i].no + '</option>';
+                        }
+                        $('.preloader').hide();
+                    }
+                    else {
+                        $('.preloader').hide();
+                        var errormsg = errormessage[13].toString().replace("[CONTRACTNO]", slctdcontractno);
+                        show_msgbox("REPORT SUBMISSION ENTRY", errormsg, "error", false);
+                    }
+                    $('#stock_itemno').html(itemno);
+                }
+            }
+            var option = "get_itemnos";
+            xmlhttp.open("GET", "DB_PERMITS_ENTRY.php?option=" + option + "&contct_no=" + $('#tr_lb_contractno').val());
+            xmlhttp.send();
+        }
+    });
+// CHANGE EVENT FOR STOCK USAGE ITEM NO
+    $(document).on('change','#stock_itemno',function(){
+        var contractid = $('#stock_itemno').val();
+        if(contractid!='SELECT') {
+            for (var i = 0; i < item_array.length; i++) {
+                if (contractid == item_array[i].no) {
+                    $('#stock_itemname').val(item_array[i].name);
+                }
+            }
+        }
+        else {
+            $('#stock_itemname').val('');
+        }
+    });
 //CHANGE EVENT FOR REPORT DATE
     $('#tr_txt_date').change(function(){
         $('.preloader').show();
         var reportdate=$('#tr_txt_date').val();
-        var teamname=$('#tr_lb_team').val();
+        var teamname=$('#tr_tb_team').val();
         if(reportdate!=""){
             var empname=[];
             var report_details=[];
@@ -232,7 +282,7 @@ $(document).ready(function(){
     });
 // text only
     $(".autosizealph").doValidation({rule:'alphabets',prop:{whitespace:true,autosize:true}});
-// LORRY NO VALIDATIN
+// LORRY NO VALIDATION
     $('.lorryno').keyup(function() {
         if (this.value.match(/[^a-zA-Z0-9\-\.\/]/g)) {
             this.value = this.value.replace(/[^a-zA-Z0-9\-\.\/]/g, '');
@@ -350,24 +400,30 @@ $(document).ready(function(){
         var mt_rowid=$('#mt_rowid').val();
         if((mt_topic!='SELECT'))
         {
-        var objUser = {"mt_id":mt_rowid,"mt_topic":mt_topic,"mt_remarks":mt_remarks};
-        var objKeys = ["","mt_topic","mt_remarks"];
-        $('#mt_tr_' + objUser.mt_id + ' td').each(function(i) {
-            $(this).text(objUser[objKeys[i]]);
-        });
+            var objUser = {"mt_id":mt_rowid,"mt_topic":mt_topic,"mt_remarks":mt_remarks};
+            var objKeys = ["","mt_topic","mt_remarks"];
+            $('#mt_tr_' + objUser.mt_id + ' td').each(function(i) {
+                $(this).text(objUser[objKeys[i]]);
+            });
+            $('#mt_btn_addrow').show();
+            $('#mt_btn_update').hide();
         }
         else if((mt_topic=='SELECT')&&(mt_remarks!=''))
         {
             var msg=errormessage[12].toString().replace('[NAME]','MEETING TOPIC');
             show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+            $('#mt_ta_remark').val(mt_remarks);
+            $('#mt_btn_addrow').hide();
+            $('#mt_btn_update').show();
         }
         else{
             show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
+            $('#mt_lb_topic').val(mt_topic);
+            $('#mt_btn_addrow').hide();
+            $('#mt_btn_update').show();
         }
-        $('#mt_btn_addrow').show();
-        $('#mt_btn_update').hide();
 //        $('#mt_btn_update,#mt_btn_addrow').attr("disabled", "disabled");
-        mt_formclear();
+//        mt_formclear();
     });
 // FORM VALIDATION FOR BUTTONS
     $(document).on("change",'.meetingform-validation', function (){
@@ -427,7 +483,7 @@ $(document).ready(function(){
 // CLICK EVENT FOR SITEVISIT REMOVE BUTTON
     $(document).on("click",'.sv_removebutton', function (){
         $(this).closest('tr').remove();
-        sv_formclear()
+        sv_formclear();
         $('#sv_btn_update').hide();
         $('#sv_btn_addrow').show();
         return false;
@@ -463,15 +519,15 @@ $(document).ready(function(){
         var sv_rowid=$('#sv_rowid').val();
         if((sv_desgn!='') || (sv_name!='') || (sv_start!='') || (sv_end!='') ||(sv_remarks!=''))
         {
-        var objUser = {"sv_id":sv_rowid,"sv_desgn":sv_desgn,"sv_name":sv_name,"sv_start":sv_start,"sv_end":sv_end,"sv_remark":sv_remarks};
-        var objKeys = ["","sv_desgn","sv_name", "sv_start", "sv_end","sv_remark"];
-        $('#sv_tr_' + objUser.sv_id + ' td').each(function(i) {
-            $(this).text(objUser[objKeys[i]]);
-        });
-            $('#sv_btn_addrow').show();
-            $('#sv_btn_update').hide();
-//        $('#sv_btn_update,#sv_btn_addrow').attr("disabled", "disabled");
-            sv_formclear();
+            var objUser = {"sv_id":sv_rowid,"sv_desgn":sv_desgn,"sv_name":sv_name,"sv_start":sv_start,"sv_end":sv_end,"sv_remark":sv_remarks};
+            var objKeys = ["","sv_desgn","sv_name", "sv_start", "sv_end","sv_remark"];
+            $('#sv_tr_' + objUser.sv_id + ' td').each(function(i) {
+                $(this).text(objUser[objKeys[i]]);
+            });
+                $('#sv_btn_addrow').show();
+                $('#sv_btn_update').hide();
+    //        $('#sv_btn_update,#sv_btn_addrow').attr("disabled", "disabled");
+                sv_formclear();
         }
         else
         {
@@ -580,14 +636,14 @@ $(document).ready(function(){
         var mtransfer_rowid=$('#mtransfer_rowid').val();
         if(mtransfer_item!='SELECT')
         {
-        var objUser = {"mtransferid":mtransfer_rowid,"mtranserfrom":mtranser_from,"mtransferitem":mtransfer_item,"mtransferto":mtransfer_to,"mtransferremark":mtransfer_remark};
-        var objKeys = ["","mtranserfrom", "mtransferitem", "mtransferto","mtransferremark"];
-        $('#mtranser_tr_' + objUser.mtransferid + ' td').each(function(i) {
-            $(this).text(objUser[objKeys[i]]);
-        });
+            var objUser = {"mtransferid":mtransfer_rowid,"mtranserfrom":mtranser_from,"mtransferitem":mtransfer_item,"mtransferto":mtransfer_to,"mtransferremark":mtransfer_remark};
+            var objKeys = ["","mtranserfrom", "mtransferitem", "mtransferto","mtransferremark"];
+            $('#mtranser_tr_' + objUser.mtransferid + ' td').each(function(i) {
+                $(this).text(objUser[objKeys[i]]);
+            });
             $('#mtransfer_addrow').show();
             $('#mtransfer_update').hide();
-//        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
+    //        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
             mtransferformclear();
         }
         else if((mtransfer_item=='SELECT') && ((mtranser_from!='') || (mtransfer_to!='') || (mtransfer_remark!='')))
@@ -597,7 +653,11 @@ $(document).ready(function(){
             $('#mtransfer_addrow').hide();
             $('#mtransfer_update').show();
 //        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
-            mtransferformclear();
+//            mtransferformclear();
+            $('#mtranser_from').val(mtranser_from);
+            $('#mtransfer_to').val(mtransfer_to);
+            $('#mtransfer_remark').val(mtransfer_remark);
+            $('#mtransfer_rowid').val(mtransfer_rowid);
         }
         else
         {
@@ -605,7 +665,8 @@ $(document).ready(function(){
             $('#mtransfer_addrow').hide();
             $('#mtransfer_update').show();
 //        $('#mtransfer_update,#mtransfer_addrow').attr("disabled", "disabled");
-            mtransferformclear();
+//            mtransferformclear();
+            $('#mtransfer_item').val(mtransfer_item);
         }
     });
 // FORM VALIDATION FOR BUTTONS
@@ -835,7 +896,10 @@ $(document).ready(function(){
             $('#machinery_addrow').hide();
             $('#machinery_update').show();
 //        $('#machinery_update,#machinery_addrow').attr("disabled", "disabled");
-            machineryformclear();
+//            machineryformclear();
+            $('#machinery_start').val(machinery_start);
+            $('#machinery_end').val(machinery_end);
+            $('#machinery_remarks').val(machinery_remarks);
         }
         else
          {
@@ -843,8 +907,9 @@ $(document).ready(function(){
              $('#machinery_addrow').hide();
              $('#machinery_update').show();
 //        $('#machinery_update,#machinery_addrow').attr("disabled", "disabled");
-            machineryformclear();
-         }
+//            machineryformclear();
+            $('#machinery_type').val(machinery_type);
+        }
     });
     // FORM VALIDATION FOR BUTTONS
     $(document).on("change blur",'.machineryform-validation', function (){
@@ -1066,14 +1131,18 @@ $(document).ready(function(){
             $('#fitting_addrow').hide();
             $('#fitting_updaterow').show();
 //        $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
-            fittingformclear();
+//            fittingformclear();
+            $('#fitting_size').val(size);
+            $('#fitting_quantity').val(qty);
+            $('#fitting_remarks').val(remarks);
         }
         else{
             show_msgbox("REPORT SUBMISSION ENTRY",errormessage[11],"error",false);
             $('#fitting_addrow').hide();
             $('#fitting_updaterow').show();
 //        $('#fitting_addrow,#fitting_updaterow').attr("disabled", "disabled");
-            fittingformclear();
+//            fittingformclear();
+            $('#fitting_items').val(items);
         }
     });
     //*****FITTING FORM CLEAR**********//
@@ -1182,7 +1251,9 @@ $(document).ready(function(){
             $('#material_addrow').hide();
             $('#material_updaterow').show();
 //        $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
-            MATERIALformclear();
+//            MATERIALformclear();
+            $('#material_receipt').val(material_receipt);
+            $('#material_quantity').val(material_quantity);
         }
         else
         {
@@ -1190,7 +1261,8 @@ $(document).ready(function(){
             $('#material_addrow').hide();
             $('#material_updaterow').show();
 //        $('#material_addrow,#material_updaterow').attr("disabled", "disabled");
-            MATERIALformclear();
+//            MATERIALformclear();
+            $('#material_items').val(material_items);
         }
     });
     //*****MATERIAL FORM CLEAR**********//
@@ -1213,10 +1285,127 @@ $(document).ready(function(){
 //        }
     });
 //END OF MATERIAL USAGE ADD,DELETE AND UPDATE ROW FUNCTION//
-    // full form clear
+//SITE STOCK USAGE ADD,DELETE AND UPDATE ROW FUNCTION//
+    $('#stock_updaterow').hide();
+    $(document).on("click",'#stock_addrow', function (){
+        var itemno=$('#stock_itemno').val();
+        var itemname=$('#stock_itemname').val();
+        var qty=$('#stock_quantity').val();
+        if((itemno!="SELECT") && (itemname!='') && (qty!=''))
+        {
+            var tablerowCount=$('#stockusage_table tr').length;
+            var stk_trrowid=tablerowCount;
+            if(tablerowCount>1){
+                var stk_lastid=$('#stockusage_table tr:last').attr('id');
+                var splittrid=stk_lastid.split('tr_');
+                stk_trrowid=parseInt(splittrid[1])+1;
+            }
+            var editid='stock_editrow/'+stk_trrowid;
+            var deleterowid='stock_deleterow/'+stk_trrowid;
+            var row_id="stock_tr_"+stk_trrowid;
+            var appendrow='<tr class="active" id='+row_id+'><td style="max-width: 150px"><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-edit stock_editbutton" id='+editid+'></div><div class="col-lg-1"><span style="display: block" class="glyphicon glyphicon-trash stock_removebutton"  id='+deleterowid+'></div></td><td style="max-width: 250px">'+itemno+'</td><td style="max-width: 250px">'+itemname+'</td><td style="max-width: 250px">'+qty+'</td></tr>';
+            $('#stockusage_table tr:last').after(appendrow);
+//            $("#stock_addrow").attr("disabled","disabled");
+            $('#stock_updaterow').hide();
+            stockformclear();
+        }
+        else if((itemno=="SELECT") && ((itemname=='') || (qty!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','SITE STOCK ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+        }
+        else
+        {
+            var errmsg=errormessage[11].toString().replace('ANY ONE', 'ALL');
+            show_msgbox("REPORT SUBMISSION ENTRY",errmsg,"error",false);
+        }
+    });
+    //**********DELETE ROW*************//
+    $(document).on("click",'.stock_removebutton', function (){
+        $('#stock_updaterow').hide();
+        $(this).closest('tr').remove();
+        $("#stock_addrow").show();
+        stockformclear();
+        return false;
+    });
+    // **********EDIT ROW**************//
+    $(document).on("click",'.stock_editbutton', function (event){
+        event.preventDefault();
+        var id = this.id;
+        var splitid=id.split('/');
+        var rowid=splitid[1];
+        $('#stock_id').val(rowid);
+        $('#stock_addrow').hide();
+        $('#stock_updaterow').show();
+        var $tds = $(this).closest('tr').children('td'),
+            itemno = $tds.eq(1).text(),
+            itemname = $tds.eq(2).text(),
+            quantity = $tds.eq(3).text();
+        $('#stock_itemno').val(itemno);
+        $('#stock_itemname').val(itemname);
+        $('#stock_quantity').val(quantity);
+    });
+    //********UPDATE ROW****************//
+    $(document).on("click",'.stockupdaterow', function (){
+        var stock_itemno=$('#stock_itemno').val();
+        var stock_itemname=$('#stock_itemname').val();
+        var stock_quantity=$('#stock_quantity').val();
+        var stock_id=$('#stock_id').val();
+        if((stock_itemno!="SELECT") && (stock_itemname!='') && (stock_quantity!=''))
+        {
+            var objUser = {"stockid":stock_id,"stockitemno":stock_itemno,"stockitemname":stock_itemname,"stockquantity":stock_quantity};
+            var objKeys = ["","stockitemno", "stockitemname", "stockquantity"];
+            $('#stock_tr_' + objUser.stockid + ' td').each(function(i) {
+                $(this).text(objUser[objKeys[i]]);
+            });
+            $('#stock_addrow').show();
+            $('#stock_updaterow').hide();
+//        $('#stock_addrow,#stock_updaterow').attr("disabled", "disabled");
+            stockformclear();
+        }
+        else if((stock_itemno=="SELECT") && ((stock_itemname=='') || (stock_quantity!='')))
+        {
+            var msg=errormessage[12].toString().replace('[NAME]','SITE STOCK ITEM');
+            show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+            $('#stock_addrow').hide();
+            $('#stock_updaterow').show();
+//        $('#stock_addrow,#stock_updaterow').attr("disabled", "disabled");
+//            stockformclear();
+        }
+        else
+        {
+            var errmsg=errormessage[11].toString().replace('ANY ONE', 'ALL');
+            show_msgbox("REPORT SUBMISSION ENTRY",errmsg,"error",false);
+            $('#stock_addrow').hide();
+            $('#stock_updaterow').show();
+//        $('#stock_addrow,#stock_updaterow').attr("disabled", "disabled");
+//            stockformclear();
+        }
+    });
+    //*****STOCK FORM CLEAR**********//
+    function stockformclear() {
+        $('#stock_itemno').val('SELECT').show();
+        $('#stock_itemname').val('');
+        $('#stock_quantity').val('');
+    }
+    $(document).on("change blur",'.stockform-validation', function (){
+        var itemno=$('#stock_itemno').val();
+        var itemname=$('#stock_itemname').val();
+        var qty=$('#stock_quantity').val();
+//        if(itemno!="SELECT" && itemname!="" && qty!="")
+//        {
+//            $('#stock_addrow,#stock_updaterow').removeAttr("disabled");
+//        }
+//        else
+//        {
+//            $('#stock_addrow,#stock_updaterow').attr("disabled", "disabled");
+//        }
+    });
+//END OF SITE STOCK USAGE ADD,DELETE AND UPDATE ROW FUNCTION//
+// full form clear
     function form_clear(){
         $('#tr_txt_location').val('');
-        $('#tr_txt_contractno').val('');
+        $('#tr_lb_contractno').val('SELECT');
         $('#tr_txt_date').val('');
         $('#tr_txt_weather').val('');
         $('#tr_txt_wftime').val('');
@@ -1250,6 +1439,7 @@ $(document).ready(function(){
         equipmentformclear();
         fittingformclear();
         MATERIALformclear();
+        stockformclear();
         mt_formclear();
         $('#Employee_table tr:not(:first)').remove();
         $('#sv_tbl tr:not(:first)').remove();
@@ -1259,6 +1449,7 @@ $(document).ready(function(){
         $('#equipment_table tr:not(:first)').remove();
         $('#fitting_table tr:not(:first)').remove();
         $('#material_table tr:not(:first)').remove();
+        $('#stockusage_table tr:not(:first)').remove();
         $('#meeting_table tr:not(:first)').remove();
         canvas.clear();
         $("#divImage").empty();
@@ -1301,6 +1492,7 @@ $(document).ready(function(){
         equipmentformclear();
         fittingformclear();
         MATERIALformclear();
+        stockformclear();
         mt_formclear();
         $('#Employee_table tr:not(:first)').remove();
         $('#sv_tbl tr:not(:first)').remove();
@@ -1310,6 +1502,7 @@ $(document).ready(function(){
         $('#equipment_table tr:not(:first)').remove();
         $('#fitting_table tr:not(:first)').remove();
         $('#material_table tr:not(:first)').remove();
+        $('#stockusage_table tr:not(:first)').remove();
         $('#meeting_table tr:not(:first)').remove();
         canvas.clear();
         $('#myTab a:first').tab('show');
@@ -1319,8 +1512,8 @@ $(document).ready(function(){
 //FINAL SUBMIT BUTTON VALIDATION
     $(document).on('change blur','#entryform',function(){
 //        var location=$('#tr_txt_location').val();
-//        var contractno=$('#tr_txt_contractno').val();
-//        var teamname=$('#tr_lb_team').val();
+//        var contractno=$('#tr_lb_contractno').val();
+//        var teamname=$('#tr_tb_team').val();
         var reportdate=$('#tr_txt_date').val();
         var weather=$('#tr_txt_weather').val();
         var reachsite=$('#tr_txt_reachsite').val();
@@ -1530,7 +1723,7 @@ $(document).ready(function(){
     $(document).on("change",'#material_items', function (){
         var metrialrefTab = document.getElementById("material_table");
         var materialitem=$('#material_items').val();
-        var errormsg=errormessage[8].toString().replace("[ITEM]",materialitem)
+        var errormsg=errormessage[8].toString().replace("[ITEM]",materialitem);
         for ( var i = 1; row = metrialrefTab.rows[i]; i++ )
         {
             row = metrialrefTab.rows[i];
@@ -1543,10 +1736,41 @@ $(document).ready(function(){
             }
         }
     });
+    //check stock usage item
+    $(document).on("change",'#stock_itemno', function (){
+        var stockrefTab = document.getElementById("stockusage_table");
+        var stockitem=$('#stock_itemno').val();
+        var errormsg=errormessage[8].toString().replace("[ITEM]",stockitem);
+        for ( var i = 1; row = stockrefTab.rows[i]; i++ )
+        {
+            row = stockrefTab.rows[i];
+            var stockinnerarray=[];
+            col = row.cells[1];
+            stockinnerarray.push(col.firstChild.nodeValue);
+            if(stockitem==stockinnerarray){
+                show_msgbox("REPORT SUBMISSION ENTRY",errormsg,"error",false);
+                $('#stock_itemno').val('SELECT').show();
+            }
+        }
+    });
 //FINAL SUBMIT FUNCTION
     $(document).on("click",'#Final_submit', function (){
         $('.preloader').show();
-        //MATERIAL DETAILS TABLE RECORDSvar fittingusage_array=[];
+        //STOCK USAGE DETAILS TABLE RECORDS
+        var stockusage_array=[];
+        var stockrefTab = document.getElementById('stockusage_table');
+        for (var r = 1, n = stockrefTab.rows.length; r < n; r++) {
+            var stockinnerarray=[];
+            for (var c = 1, m = stockrefTab.rows[r].cells.length; c < m; c++) {
+                stockinnerarray.push(stockrefTab.rows[r].cells[c].innerHTML);
+            }
+            stockusage_array.push(stockinnerarray)
+        }
+        if(stockusage_array.length==0)
+        {
+            stockusage_array='null';
+        }
+        //MATERIAL DETAILS TABLE RECORDS
         var materialusage_array=[];
         var metrialrefTab = document.getElementById('material_table');
         for (var r = 1, n = metrialrefTab.rows.length; r < n; r++) {
@@ -1687,14 +1911,13 @@ $(document).ready(function(){
          dataURL = JSON.stringify(canvas)+"DrawToolImageurl:"+canvas.toDataURL();
         }
         var formelement =$('#entryform').serialize();
-        var arraydata={"Option":"InputForm","MaterialDetails": materialusage_array,"FittingDetails":fittingusage_array,"EquipmentDetails":equipmentusage_array,"RentalDetails":rentalmechinery_array,"MechineryUsageDetails":mechineryusage_array,"MechEqptransfer":mech_eqp_array,"SiteVisit":SV_array,"MeetingDetails":meeting_array,"EmployeeDetails":EmployeeDetails,"imgData": dataURL};
+        var arraydata={"Option":"InputForm","StockDetails": stockusage_array,"MaterialDetails": materialusage_array,"FittingDetails":fittingusage_array,"EquipmentDetails":equipmentusage_array,"RentalDetails":rentalmechinery_array,"MechineryUsageDetails":mechineryusage_array,"MechEqptransfer":mech_eqp_array,"SiteVisit":SV_array,"MeetingDetails":meeting_array,"EmployeeDetails":EmployeeDetails,"imgData": dataURL};
         data=formelement + '&' + $.param(arraydata);
         $.ajax({
             type: "POST",
             url: "DB_PERMITS_ENTRY.php",
             data: data,
             success: function(msg){
-                $('.preloader').hide();
                 var msg_alert=JSON.parse(msg);
                 var spflag=msg_alert[0];
                 var dirflag=msg_alert[1];
@@ -1702,22 +1925,28 @@ $(document).ready(function(){
                 if(spflag==1){
                     show_msgbox("REPORT SUBMISSION ENTRY",errormessage[0],"success",false);
                     form_clear();
+                    $('#stock_itemno').html('<option>SELECT</option>');
+                    $('.preloader').hide();
                 }
                 else if(spflag==0)
                 {
                     show_msgbox("REPORT SUBMISSION ENTRY",errormessage[2],"error",false);
+                    $('.preloader').hide();
                 }
                 else if(dirflag==0)
                 {
                     show_msgbox("REPORT SUBMISSION ENTRY",errormessage[6],"error",false);
+                    $('.preloader').hide();
                 }
                 else if(writeable==0)
                 {
                     show_msgbox("REPORT SUBMISSION ENTRY",errormessage[10],"error",false);
+                    $('.preloader').hide();
                 }
                 else
                 {
                     show_msgbox("REPORT SUBMISSION ENTRY",msg,"error",false);
+                    $('.preloader').hide();
                 }
             }
         });
@@ -1758,8 +1987,8 @@ $(document).ready(function(){
 //TEAM REPORT VALIDATION
     $(document).on('change blur','#tab1',function(){
 //        var location=$('#tr_txt_location').val();
-//        var contractno=$('#tr_txt_contractno').val();
-//        var teamname=$('#tr_lb_team').val();
+        var contractno=$('#tr_lb_contractno').val();
+//        var teamname=$('#tr_tb_team').val();
         var reportdate=$('#tr_txt_date').val();
 //        var weather=$('#tr_txt_weather').val();
 //        var reachsite=$('#tr_txt_reachsite').val();
@@ -1897,7 +2126,7 @@ $(document).ready(function(){
 //                    $('#nextbtn').attr('disabled','disabled');
 //                }
 //            }
-        if(reportdate!='')
+        if(reportdate!=''&&contractno!='SELECT')
         {
             $('#nextbtn').removeAttr('disabled');
         }
@@ -1911,766 +2140,816 @@ $(document).ready(function(){
 </head>
 <body>
 <form id="entryform" class="form-horizontal">
-<div class="preloader"><span class="Centerer"></span><img class="preloaderimg"/> </div>
-<div class="container">
-<div class="panel panel-info">
-<div class="panel-heading">
-    <h2 class="panel-title">REPORT SUBMISSION ENTRY</h2>
-</div>
-<div class="panel-body">
-<div id="rootwizard">
-<ul class="hide" id="myTab">
-    <li><a href="#tab1" data-toggle="tab">First</a></li>
-    <li><a href="#tab2" data-toggle="tab">Second</a></li>
-</ul>
-<div class="tab-content">
-<div class="tab-pane" id="tab1">
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">TEAM REPORT</h3>
-    </div>
-    <div class="panel-body">
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label id="tr_lbl_location">LOCATION</label>
-                    <input type="text" class="form-control txtlen alphanumeric" id="tr_txt_location" name="tr_txt_location" maxlength="40" placeholder="Location">
-                </div>
-                <div class="col-md-3">
-                    <label  id="tr_lbl_contractno">CONTRACT NO</label>
-                    <input type="text" class="form-control decimal quantity" id="tr_txt_contractno" name="tr_txt_contractno" placeholder="Contract No">
-                </div>
-                <div class="col-md-3 selectContainer">
-                    <label id="tr_lbl_team">TEAM</label>
-                    <!--                    <select class="form-control employee" id="tr_lb_team" name="tr_lb_team" readonly>-->
-                    <!--                    </select>-->
-                    <input type="text" class="form-control" id="tr_lb_team" name="tr_lb_team" readonly/>
-                </div>
-                <div class="col-md-3">
-                    <label id="tr_lbl_date">DATE<em>*</em></label>
-                    <div class="input-group">
-                        <input id="tr_txt_date" name="tr_txt_date" type="text" class="date-picker datemandtry form-control employee" placeholder="Date"/>
-                        <label for="tr_txt_date" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span></label>
+    <div class="preloader"><span class="Centerer"></span><img class="preloaderimg"/> </div>
+    <div class="container">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h2 class="panel-title">REPORT SUBMISSION ENTRY</h2>
+            </div>
+            <div class="panel-body">
+                <div id="rootwizard">
+                    <ul class="hide" id="myTab">
+                        <li><a href="#tab1" data-toggle="tab">First</a></li>
+                        <li><a href="#tab2" data-toggle="tab">Second</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane" id="tab1">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">TEAM REPORT</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label id="tr_lbl_location">LOCATION</label>
+                                                <input type="text" class="form-control txtlen alphanumeric" id="tr_txt_location" name="tr_txt_location" maxlength="40" placeholder="Location">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label  id="tr_lbl_contractno">CONTRACT NO <em>*</em></label>
+                                                <select class="form-control" id="tr_lb_contractno" name="tr_lb_contractno"><option>SELECT</option></select>
+                                            </div>
+                                            <div class="col-md-3 selectContainer">
+                                                <label id="tr_lbl_team">TEAM</label>
+                                                <input type="text" class="form-control" id="tr_tb_team" name="tr_tb_team" placeholder="Team" readonly/>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label id="tr_lbl_date">DATE <em>*</em></label>
+                                                <div class="input-group">
+                                                    <input id="tr_txt_date" name="tr_txt_date" type="text" class="date-picker datemandtry form-control employee" placeholder="Date"/>
+                                                    <label for="tr_txt_date" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label id="tr_lbl_weather">WEATHER</label>
+                                                <input type="text" class="form-control txtlen alphanumeric" id="tr_txt_weather" name="tr_txt_weather" placeholder="Weather">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label id="tr_lbl_reachsite">FROM (Time)</label>
+                                                <input type="text" class="form-control time-picker" id="tr_txt_wftime" name="tr_txt_wftime" disabled placeholder="Weather Time">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label id="tr_lbl_leavesite">TO (Time)</label>
+                                                <input type="text" class="form-control time-picker" id="tr_txt_wttime" name="tr_txt_wttime" disabled placeholder="Weather Time">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label id="tr_lbl_reachsite">REACH SITE</label>
+                                                <input type="text" class="form-control time-picker" id="tr_txt_reachsite" name="tr_txt_reachsite" placeholder="Time">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label id="tr_lbl_leavesite">LEAVE SITE</label>
+                                                <input type="text" class="form-control time-picker" id="tr_txt_leavesite" name="tr_txt_leavesite" placeholder="Time">
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="checkbox-inline">
+                                                <label>TYPE OF JOB</label>
+                                                <div id="type_of_job">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab2">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">TOOLBOX MEETING</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label for="mt_lbl_topic" id="mt_lbl_topic">TOPIC</label>
+                                                <select class="form-control meetingform-validation" id="mt_lb_topic" name="mt_lb_topic">
+                                                    <option>SELECT</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <label for="mt_lbl_remark" id="mt_lbl_remark">REMARKS</label>
+                                                <textarea class="form-control meetingform-validation remarklen removecap" style="min-height: 35px;" rows="1" id="mt_ta_remark" name="mt_ta_remark" placeholder="Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="hidden" name="mt_rowid" id="mt_rowid" class="form-control">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="mt_btn_addrow" class="btn btn-info">ADD</button>
+                                            <button type="button" id="mt_btn_update" class="btn btn-info mt_btn_updaterow">UPDATE</button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="meeting_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th width="300px">EDIT/REMOVE</th>
+                                                <th>TOPIC</th>
+                                                <th>REMARKS</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab3">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">JOB DONE</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="table-responsive">
+                                            <table class="table" border="1" style=" border: #ddd;">
+                                                <tr>
+                                                    <td class="jobthl">
+                                                        <label style="padding-bottom: 15px"></label>
+                                                        <label id="tr_lbl_pipelaid">PIPE LAID</label>
+                                                    </td>
+                                                    <td colspan="2" style="text-align: center">
+                                                        <div>
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" id="jd_chk_road" name="jd_chk_road"> ROAD
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="2" style="text-align: center">
+                                                        <div>
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" id="jd_chk_contc" name="jd_chk_contc"> CONC
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="2" style="text-align: center" class="jobthr">
+                                                        <div>
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" id="jd_chk_truf" name="jd_chk_truf"> TURF
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="jobthl" style="border-top: 1px solid white;">
+                                                        <label style="padding-bottom: 15px"> </label>
+                                                        <label id="tr_lbl_location">SIZE/LENGTH</label>
+                                                    </td>
+                                                    <td class="jobtd" style="border-top: 1px solid white;">
+                                                        <div>
+                                                            <label>M</label>
+                                                            <input type="text" class="form-control decimal size" id="jd_chk_roadm" name="jd_chk_roadm" disabled placeholder="M">
+                                                        </div>
+                                                    </td>
+                                                    <td style="border-top: 1px solid white;">
+                                                        <div>
+                                                            <label>MM</label>
+                                                            <input type="text" class="form-control decimal size" id="jd_chk_roadmm" name="jd_chk_roadmm" disabled placeholder="MM">
+                                                        </div>
+                                                    </td>
+                                                    <td class="jobtd" style="border-top: 1px solid white;">
+                                                        <div>
+                                                            <label>M</label>
+                                                            <input type="text" class="form-control decimal size" id="jd_chk_concm" name="jd_chk_concm" disabled placeholder="M">
+                                                        </div>
+                                                    </td>
+                                                    <td style="border-top: 1px solid white;">
+                                                        <div>
+                                                            <label>MM</label>
+                                                            <input type="text" class="form-control decimal size" id="jd_chk_concmm" name="jd_chk_concmm" disabled placeholder="MM">
+                                                        </div>
+                                                    </td>
+                                                    <td class="jobtd" style="border-top: 1px solid white;">
+                                                        <div>
+                                                            <label>M</label>
+                                                            <input type="text" class="form-control decimal size" id="jd_chk_trufm" name="jd_chk_trufm" disabled placeholder="M">
+                                                        </div>
+                                                    </td>
+                                                    <td class="jobthr" style="border-top: 1px solid white;">
+                                                        <div>
+                                                            <label>MM</label>
+                                                            <input type="text" class="form-control decimal size" id="jd_chk_trufmm" name="jd_chk_trufmm" disabled placeholder="MM">
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-3">
+                                                <label for="jd_txt_testing" id="jd_lbl_testing">PIPE TESTING</label>
+                                                <input type="text" class="form-control txtlen alphanumeric" id="jd_txt_testing" name="jd_txt_testing" placeholder="Pipe Testing">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="jd_txt_start" id="jd_lbl_start" >START (PRESSURE)</label>
+                                                <input type="text" class="form-control quantity alphanumeric"  id="jd_txt_start" name="jd_txt_start" placeholder="Start Pressure">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="jd_txt_end" id="jd_lbl_end">END (PRESSURE)</label>
+                                                <input type="text" class="form-control quantity alphanumeric" id="jd_txt_end" name="jd_txt_end" placeholder="End Pressure">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="jd_ta_remark" id="jd_lbl_remark">REMARKS</label>
+                                                <textarea class="form-control remarklen removecap textareaaccinjured" rows="1" id="jd_ta_remark" name="jd_ta_remark" placeholder="Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab4">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">EMPLOYEE REPORT DETAILS</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form>-->
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="Employee_table" name="Employee_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th><div>NAME</div></th>
+                                                <th><div class="col-lg-10">START TIME</div></th>
+                                                <th><div class="col-lg-10">END TIME</div></th>
+                                                <th><div class="col-lg-10">OT</div></th>
+                                                <th><div>REMARKS</div></th>
+                                            </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab5">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">SITE VISIT</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-3">
+                                                <label>DESIGNATION</label>
+                                                <input class="form-control sitevisitform-validation txtlen alphanumeric" name="sv_txt_designation" id="sv_txt_designation" placeholder="Designation"/>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>NAME</label>
+                                                <input class="form-control sitevisitform-validation txtlen autosizealph " name="sv_txt_name" id="sv_txt_name" placeholder="Name"/>
+                                            </div>
+
+                                            <div class="col-md-1">
+                                                <label>START</label>
+                                                <input type="text" class="form-control sitevisitform-validation time-picker" name="sv_txt_start" id="sv_txt_start" placeholder="Time">
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label>END</label>
+                                                <input type="text" class="form-control sitevisitform-validation time-picker" name="sv_txt_end" id="sv_txt_end" placeholder="Time">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>REMARKS</label>
+                                                <textarea class="form-control sitevisitform-validation remarklen removecap textareaaccinjured" rows="1" name="sv_txt_remark" id="sv_txt_remark" placeholder="Remarks"></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="hidden" name="sv_rowid" id="sv_rowid" name="sv_rowid" class="form-control">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="sv_btn_addrow" class="btn btn-info" >ADD</button>
+                                            <button type="button" id="sv_btn_update" class="btn btn-info sv_btn_updaterow" >UPDATE</button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="sv_tbl">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>DESIGNATION</th>
+                                                <th>NAME</th>
+                                                <th>START TIME</th>
+                                                <th>END TIME</th>
+                                                <th>REMARKS</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab6">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">MACHINERY / EQUIPMENT TRANSFER</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-2">
+                                                <label>FROM (LORRY NO)</label>
+                                                <input type="text" class="form-control mtransferform-validation quantity lorryno" id="mtranser_from" name="mtranser_from" placeholder="From (Lorry No)">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>ITEMS</label>
+                                                <select class="form-control alphanumeric mtransferform-validation" id="mtransfer_item" name="mtransfer_item">
+                                                    <option>SELECT</option>
+                                                </select>
+                                                <!--                    <input type="text" class="form-control alphanumeric mtransferform-validation txtlen" id="mtransfer_item" name="mtransfer_item" placeholder="Item">-->
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label>TO (LORRY NO)</label>
+                                                <input type="text" class="form-control mtransferform-validation quantity lorryno" id="mtransfer_to"  name="mtransfer_to" placeholder="To (Lorry No)">
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label>REMARKS</label>
+                                                <textarea class="form-control mtransferform-validation remarklen removecap textareaaccinjured" id="mtransfer_remark"  rows="1" name="mtransfer_remark" placeholder="Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="hidden" id="mtransfer_rowid" name="mtransfer_rowid" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="mtransfer_addrow" class="btn btn-info" >ADD</button>
+                                            <button type="button" id="mtransfer_update" class="btn btn-info mtransfer_updaterow" >UPDATE</button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="mtransfer_table" name="mtransfer_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>FROM(LORRY NO)</th>
+                                                <th>ITEMS</th>
+                                                <th>TO(LORRY NO)</th>
+                                                <th>REMARKS</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab7">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">MACHINERY USAGE</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label>MACHINERY TYPE</label>
+                                                <select class="form-control alphanumeric machineryform-validation" id="machinery_type" name="machinery_type">
+                                                    <option>SELECT</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label>START (Time)</label>
+                                                <input type="text" class="form-control machineryform-validation time-picker"  id="machinery_start" name="machinery_start" placeholder="Time">
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label>END (Time)</label>
+                                                <input type="text" class="form-control machineryform-validation time-picker"  id="machinery_end"  name="machinery_end" placeholder="Time">
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label>REMARKS</label>
+                                                <textarea class="form-control remarklen removecap machineryform-validation textareaaccinjured" id="machinery_remarks" rows="1" name="machinery_remarks" placeholder="Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="hidden" id="machinery_rowid" name="machinery_rowid" class="form-control">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="machinery_addrow" class="btn btn-info" >ADD</button>
+                                            <button type="button" id="machinery_update" class="btn btn-info machinery_updaterow" >UPDATE</button>
+
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="machinery_table" name="machinery_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>MACHINERY TYPE</th>
+                                                <th>START TIME</th>
+                                                <th>END TIME</th>
+                                                <th>REMARKS</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab8">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">RENTAL MACHINERY</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label>LORRY NUMBER</label>
+                                                <input type="text" class="form-control rentalform-validation quantity lorryno" id="rental_lorryno" name="rental_lorryno" placeholder="Lorry Name">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>THROW EARTH(STORE)</label>
+                                                <input type="text" class="form-control rentalform-validation decimal size" id="rental_throwearthstore" name="rental_throwearthstore" placeholder="Throw Earth(Store)">
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label>THROW EARTH(OUTSIDE)</label>
+                                                <input type="text" class="form-control rentalform-validation decimal size" id="rental_throwearthoutside" name="rental_throwearthoutside" placeholder="Throwe Earth(Outside)">
+                                            </div>
+                                        </div>
+                                        <div class="row form-group">
+                                            <div class="col-md-2">
+                                                <label>START (Time)</label>
+                                                <input type="text" class="form-control rentalform-validation time-picker" id="rental_start" name="rental_start" placeholder="Time">
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <label>END (Time)</label>
+                                                <input type="text" class="form-control rentalform-validation time-picker" id="rental_end"  name="rental_end" placeholder="Time">
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label>REMARKS</label>
+                                                <textarea class="form-control rentalform-validation remarklen removecap textareaaccinjured" id="rental_remarks" rows="1" name="rental_remarks" placeholder="Remarks"></textarea>
+                                                <input type="hidden" class="form-control" id="rentalmechinery_id" name="rentalmechinery_id">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="rentalmechinery_addrow" class="btn btn-info" >ADD</button>
+                                            <button type="button" id="rentalmechinery_updaterow" class="btn btn-info rentalmechineryupdaterow" >UPDATE</button>
+
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="rental_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>LORRY NO</th>
+                                                <th>THROW EARTH (STORE)</th>
+                                                <th>THROW EARTH (OUTSIDE)</th>
+                                                <th>START TIME</th>
+                                                <th>END TIME</th>
+                                                <th>REMARKS</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab9">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">EQUIPMENT USAGE</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-3">
+                                                <label>AIR-COMPRESSOR</label>
+                                                <input type="text" class="form-control alphanumeric equipmentform-validation txtlen" id="equipment_aircompressor" name="equipment_aircompressor" placeholder="Air-Compressor">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label>LORRY NO(TRANSPORT)</label>
+                                                <input type="text" class="form-control equipmentform-validation quantity lorryno" id="equipment_lorryno" name="equipment_lorryno" placeholder="Lorry No(Transport)">
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label>START</label>
+                                                <input type="text" class="form-control equipmentform-validation time-picker" id="equipment_start"  name="equipment_start" placeholder="Time">
+                                            </div>
+                                            <div class="col-md-1">
+                                                <label>END</label>
+                                                <input type="text" class="form-control equipmentform-validation time-picker" id="equipment_end"  name="equipment_end" placeholder="Time">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>REMARKS</label>
+                                                <textarea class="form-control equipmentform-validation remarklen removecap textareaaccinjured" rows="1" id="equipment_remark"  name="equipment_remark" placeholder="Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="hidden" id="equipment_rowid" name="equipment_rowid" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="equipment_addrow" class="btn btn-info">ADD</button>
+                                            <button type="button" id="equipment_update" class="btn btn-info equipment_updaterow">UPDATE</button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="equipment_table" name="equipment_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>AIR COMPRESSOR</th>
+                                                <th>LORRY NO(TRANSPORT)</th>
+                                                <th>START TIME</th>
+                                                <th>END TIME</th>
+                                                <th>REMARKS</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab10">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">FITTINGS USAGE</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label>ITEMS</label>
+                                                <select class="form-control fittingform-validation" id="fitting_items" name="fitting_items" placeholder="Items">
+                                                    <option>SELECT</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label>SIZE</label>
+                                                <input type="text" class="form-control fittingform-validation decimal size" id="fitting_size" name="fitting_size" placeholder="MM">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label>QUANTITY</label>
+                                                <input type="text" class="form-control fittingform-validation decimal size" id="fitting_quantity" name="fitting_quantity" placeholder="Quantity">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>REMARKS</label>
+                                                <textarea class="form-control remarklen removecap fittingform-validation textareaaccinjured" rows="1" id="fitting_remarks" name="fitting_remarks" placeholder="Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="hidden" class="form-control" id="fitting_id" name="fitting_id">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="fitting_addrow" class="btn btn-info" >ADD</button>
+                                            <button type="button" id="fitting_updaterow" class="btn btn-info  fittingupdaterow" >UPDATE</button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="fitting_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>ITEMS</th>
+                                                <th>SIZE</th>
+                                                <th>QUANTITY</th>
+                                                <th>REMARKS</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <!--</div>-->
+                            <!--<div class="tab-pane" id="tab11">-->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">MATERIAL USAGE</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label>ITEMS</label>
+                                                <select class="form-control materialform-validation" id="material_items" name="material_items" placeholder="Items">
+                                                    <option>SELECT</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>RECEIPT NO</label>
+                                                <input type="text" class="form-control alphanumeric materialform-validation quantity" id="material_receipt" name="material_receipt" placeholder="Receipt No">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>QUANTITY</label>
+                                                <input type="text" class="form-control materialform-validation decimal size" id="material_quantity" name="material_quantity" placeholder="Quantity">
+                                                <input type="hidden" class="form-control" id="material_id" name="material_id">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="material_addrow" class="btn btn-info" >ADD</button>
+                                            <button type="button" id="material_updaterow" class="btn btn-info materialupdaterow" >UPDATE</button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="material_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>ITEMS</th>
+                                                <th>RECEIPT NO</th>
+                                                <th>QTY(KG/BAGS/LTR/PCS)</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">SITE STOCK USAGE</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <!--        <form class="form-horizontal">-->
+                                    <fieldset>
+                                        <div class="row form-group">
+                                            <div class="col-md-4">
+                                                <label>ITEM NO</label>
+                                                <select class="form-control stockusageform-validation" id="stock_itemno" name="stock_itemno">
+                                                    <option>SELECT</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>ITEM NAME</label>
+                                                <input type="text" class="form-control stockusageform-validation" id="stock_itemname" name="stock_itemname" placeholder="Item Name" disabled>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label>QUANTITY</label>
+                                                <input type="text" class="form-control stockusageform-validation decimal size" id="stock_quantity" name="stock_quantity" placeholder="Quantity">
+                                                <input type="hidden" class="form-control" id="stock_id" name="stock_id">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-9 col-lg-offset-11">
+                                            <button type="button" id="stock_addrow" class="btn btn-info" >ADD</button>
+                                            <button type="button" id="stock_updaterow" class="btn btn-info stockupdaterow" >UPDATE</button>
+                                        </div>
+                                    </fieldset>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="stockusage_table">
+                                            <thead>
+                                            <tr class="active">
+                                                <th>EDIT/REMOVE</th>
+                                                <th>ITEM NO</th>
+                                                <th>ITEM NAME</th>
+                                                <th>QUANTITY</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!--        </form>-->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="tab2">
+                            <!-- DRAWING SURFACE--->
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">DRAWING AREA</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="bs-example">
+                                        <div class="col-xs-9"><canvas id="canvas" style="border:1px solid #F5F5F5;" onclick="canvasonlick()"></canvas></div>
+                                        <div class="row">
+                                            <div class="col-xs-3 canvasshapes">
+                                                <div class="general" style="background-color:#F5F5F5;border:1px solid lavender;">
+                                                    <a onClick="setColor()"  class="btn primary a-img-btn" title='FILL WITH COLOR'><img src="../PAINT/IMAGES/fill.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="eclipse()"   class="btn primary a-img-btn" title='ECLIPSE'><img src="../PAINT/IMAGES/eclipse.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="triangle()"   class="btn primary a-img-btn" title='TRIANGLE'><img src="../PAINT/IMAGES/triangle.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="circle()"  class="btn primary a-img-btn-active" title='CIRCLE'><img src="../PAINT/IMAGES/cir.png"  class="img-rounded"/></a>
+                                                    <a onClick="rectangle()" class="btn primary a-img-btn" title='RECTANGLE'><img src="../PAINT/IMAGES/rectangle.png"  class="img-rounded"/></a>
+                                                    <a onClick="drawLine()"  class="btn primary a-img-btn" title='LINE' id="drawing-line"><img src="../PAINT/IMAGES/line.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="pencil()"  class="btn primary a-img-btn" title='PENCIL'><img src="../PAINT/IMAGES/pencil.png"  class="img-rounded"/></a>
+                                                    <a onClick="eraser()"  class="btn primary a-img-btn" title='ERASER'><img src="../PAINT/IMAGES/eraser.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="textEditor1()"  class="btn primary a-img-btn" title='TEXTd'><img src="../PAINT/IMAGES/text.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="clearCanvas()" class="btn primary a-img-btn" title='CLEAR'><img src="../PAINT/IMAGES/cancel.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="selector()" class="btn primary a-img-btn" title='SELECTOR'><img src="../PAINT/IMAGES/select.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="cut()" class="btn primary a-img-btn" title='REMOVE'><img src="../PAINT/IMAGES/cut.jpg"  class="img-rounded"/></a>
+                                                </div>
+                                                <div class="font" style="background-color:#F5F5F5;"><br>
+                                                    <label>Color:</label><input type="color" value="#36bac9" id="drawing-color" title="COLOR">&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    <label>Size:</label><input type="number"  value="10" id="drawing-line-width" title="SIZE" style="width:45" min="10" max="100" maxlength="2">
+                                                    <br>
+                                                    <a onClick="bold()" class="btn primary a-img-btn-font-rem font" title='BOLD' id="fontbold"><img src="../PAINT/IMAGES/bold.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="italic()" class="btn primary  a-img-btn-font-rem font" title='ITALIC' id="fontitalic"><img src="../PAINT/IMAGES/italic.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="underline()" class="btn primary  a-img-btn-font-rem font" title='UNDERLINE' id="fontunderline"><img src="../PAINT/IMAGES/underline.jpg"  class="img-rounded"/></a>
+                                                </div>
+                                                <div class="shapes" style="background-color:#F5F5F5;border:1px solid lavender;">
+                                                    <a onClick="tappingTee1()"  class="btn primary a-img-btn" title='TAPPING TEE'><img src="../PAINT/IMAGES/tappingtee.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="tJoint1()"  class="btn primary a-img-btn" title='T/JOINT'><img src="../PAINT/IMAGES/tjoint.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="stubBlang1()"  class="btn primary a-img-btn" title='STUB FLANGE'><img src="../PAINT/IMAGES/stubblang.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="reducer1()"  class="btn primary a-img-btn" title='REDUCER'><img src="../PAINT/IMAGES/reducer.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="lastDegelbow1()"  class="btn primary a-img-btn" title='45/90 DEG ELBOW'><img src="../PAINT/IMAGES/lastdegelbow.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="halfDegelbow1()"  class="btn primary a-img-btn" title='45 DEG ELBOW'><img src="../PAINT/IMAGES/halfdegelbow.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="fullDegelbow1()"  class="btn primary a-img-btn" title='90 DEG ELBOW'><img src="../PAINT/IMAGES/fulldegelbow.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="equalTee1()"  class="btn primary a-img-btn" title='EQUAL TEE'><img src="../PAINT/IMAGES/equaltee.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="endCap1()"  class="btn primary a-img-btn" title='END CAP'><img src="../PAINT/IMAGES/endcap.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="diTee1()"  class="btn primary a-img-btn" title='DI TEE'><img src="../PAINT/IMAGES/ditee.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="diGatevalue1()"  class="btn primary a-img-btn" title='DI GATE VALVE'><img src="../PAINT/IMAGES/digatevalue.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="diFlanging1()"  class="btn primary a-img-btn" title='DI FLANGE SPIGOT'><img src="../PAINT/IMAGES/diflanging.jpg"  class="img-rounded" width="25px"/></a>
+                                                    <a onClick="diFlangesotcket1()" class="btn primary a-img-btn" title='DI FLANGE STOCKET'><img src="../PAINT/IMAGES/diflangestocket.jpg"  class="img-rounded"  /></a>
+                                                    <a onClick="diColor1()"  class="btn primary a-img-btn" title='DI COLLAR'><img src="../PAINT/IMAGES/dicolor.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="diCap1()"  class="btn primary a-img-btn" title='DI CAP'><img src="../PAINT/IMAGES/dicap.jpg"  class="img-rounded" width="25px"/></a>
+                                                    <a onClick="coupler1()"  class="btn primary a-img-btn" title='COUPLER'><img src="../PAINT/IMAGES/dicolor.jpg"  class="img-rounded" width="25px"/></a>
+                                                    <a onClick="beEndCateValue1()"  class="btn primary a-img-btn" title='PE END GATE VALUE'><img src="../PAINT/IMAGES/beendcatevalue.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="di90degElbow()"  class="btn primary a-img-btn" title='DI 90 DEG ELBOW'><img src="../PAINT/IMAGES/90degElbow.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="di45DegElbow()"  class="btn primary a-img-btn" title='DI 45 DEG ELBOW'><img src="../PAINT/IMAGES/di45DegElbow.jpg"  class="img-rounded"/></a>
+                                                    <a onClick="diReducer()"  class="btn primary a-img-btn" title='DI REDUCER'><img src="../PAINT/IMAGES/diReducer.jpg"  class="img-rounded"/></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="divImage"></div>
+                            </div><!-- ENDING DRAWING SURFACE--->
+                        </div>
+                        <ul class="pager wizard">
+                            <li class="previous first" style="display:none;"><a href="#">First</a></li>
+                            <li class="previous"><a class="btn btn-primary" type="button" href="#" id="prevbtn" disabled>PREVIOUS</a></li>
+                            <li class="next last" style="display:none;"><a href="#">Last</a></li>
+                            <li class="next"><a class="btn btn-primary" type="button" href="#" id="nextbtn" disabled>NEXT</a></li>
+                        </ul>
+                        <div class="col-lg-offset-10">
+                            <a class="btn btn-primary btn-lg" type="button" id="Final_submit" name="Final_submit" disabled >FINAL SUBMIT</a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label id="tr_lbl_weather">WEATHER</label>
-                    <input type="text" class="form-control txtlen alphanumeric" id="tr_txt_weather" name="tr_txt_weather" placeholder="Weather">
-                </div>
-                <div class="col-md-2">
-                    <label id="tr_lbl_reachsite">FROM (Time)</label>
-                    <input type="text" class="form-control time-picker" id="tr_txt_wftime" name="tr_txt_wftime" disabled placeholder="Weather Time">
-                </div>
-                <div class="col-md-2">
-                    <label id="tr_lbl_leavesite">TO (Time)</label>
-                    <input type="text" class="form-control time-picker" id="tr_txt_wttime" name="tr_txt_wttime" disabled placeholder="Weather Time">
-                </div>
-                <div class="col-md-2">
-                    <label id="tr_lbl_reachsite">REACH SITE</label>
-                    <input type="text" class="form-control time-picker" id="tr_txt_reachsite" name="tr_txt_reachsite" placeholder="Time">
-                </div>
-                <div class="col-md-2">
-                    <label id="tr_lbl_leavesite">LEAVE SITE</label>
-                    <input type="text" class="form-control time-picker" id="tr_txt_leavesite" name="tr_txt_leavesite" placeholder="Time">
-                </div>
-            </div>
-            <div class="row form-group">
-                <div class="checkbox-inline">
-                    <label>TYPE OF JOB</label>
-                    <div id="type_of_job">
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab2">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">TOOLBOX MEETING</h3>
-    </div>
-    <div class="panel-body">
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label for="mt_lbl_topic" id="mt_lbl_topic">TOPIC</label>
-                    <select class="form-control meetingform-validation" id="mt_lb_topic" name="mt_lb_topic">
-                    </select>
-                </div>
-                <div class="col-md-8">
-                    <label for="mt_lbl_remark" id="mt_lbl_remark">REMARKS</label>
-                    <textarea class="form-control meetingform-validation remarklen removecap" style="min-height: 35px;" rows="1" id="mt_ta_remark" name="mt_ta_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" name="mt_rowid" id="mt_rowid" class="form-control">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="mt_btn_addrow" class="btn btn-info">ADD</button>
-                <button type="button" id="mt_btn_update" class="btn btn-info mt_btn_updaterow">UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="meeting_table">
-                <thead>
-                <tr class="active">
-                    <th width="300px">EDIT/REMOVE</th>
-                    <th>TOPIC</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab3">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">JOB DONE</h3>
-    </div>
-    <div class="panel-body">
-        <fieldset>
-            <div class="table-responsive">
-                <table class="table" border="1" style=" border: #ddd;">
-                    <tr>
-                        <td class="jobthl">
-                            <label style="padding-bottom: 15px"></label>
-                            <label id="tr_lbl_pipelaid">PIPE LAID</label>
-                        </td>
-                        <td colspan="2" style="text-align: center">
-                            <div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="jd_chk_road" name="jd_chk_road"> ROAD
-                                    </label>
-                                </div>
-                            </div>
-                        </td>
-                        <td colspan="2" style="text-align: center">
-                            <div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="jd_chk_contc" name="jd_chk_contc"> CONC
-                                    </label>
-                                </div>
-                            </div>
-                        </td>
-                        <td colspan="2" style="text-align: center" class="jobthr">
-                            <div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="jd_chk_truf" name="jd_chk_truf"> TURF
-                                    </label>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="jobthl" style="border-top: 1px solid white;">
-                            <label style="padding-bottom: 15px"> </label>
-                            <label id="tr_lbl_location">SIZE/LENGTH</label>
-                        </td>
-                        <td class="jobtd" style="border-top: 1px solid white;">
-                            <div>
-                                <label>M</label>
-                                <input type="text" class="form-control decimal size" id="jd_chk_roadm" name="jd_chk_roadm" disabled placeholder="M">
-                            </div>
-                        </td>
-                        <td style="border-top: 1px solid white;">
-                            <div>
-                                <label>MM</label>
-                                <input type="text" class="form-control decimal size" id="jd_chk_roadmm" name="jd_chk_roadmm" disabled placeholder="MM">
-                            </div>
-                        </td>
-                        <td class="jobtd" style="border-top: 1px solid white;">
-                            <div>
-                                <label>M</label>
-                                <input type="text" class="form-control decimal size" id="jd_chk_concm" name="jd_chk_concm" disabled placeholder="M">
-                            </div>
-                        </td>
-                        <td style="border-top: 1px solid white;">
-                            <div>
-                                <label>MM</label>
-                                <input type="text" class="form-control decimal size" id="jd_chk_concmm" name="jd_chk_concmm" disabled placeholder="MM">
-                            </div>
-                        </td>
-                        <td class="jobtd" style="border-top: 1px solid white;">
-                            <div>
-                                <label>M</label>
-                                <input type="text" class="form-control decimal size" id="jd_chk_trufm" name="jd_chk_trufm" disabled placeholder="M">
-                            </div>
-                        </td>
-                        <td class="jobthr" style="border-top: 1px solid white;">
-                            <div>
-                                <label>MM</label>
-                                <input type="text" class="form-control decimal size" id="jd_chk_trufmm" name="jd_chk_trufmm" disabled placeholder="MM">
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label for="jd_txt_testing" id="jd_lbl_testing">PIPE TESTING</label>
-                    <input type="text" class="form-control txtlen alphanumeric" id="jd_txt_testing" name="jd_txt_testing" placeholder="Pipe Testing">
-                </div>
-                <div class="col-md-3">
-                    <label for="jd_txt_start" id="jd_lbl_start" >START (PRESSURE)</label>
-                    <input type="text" class="form-control quantity alphanumeric"  id="jd_txt_start" name="jd_txt_start" placeholder="Start Pressure">
-                </div>
-                <div class="col-md-3">
-                    <label for="jd_txt_end" id="jd_lbl_end">END (PRESSURE)</label>
-                    <input type="text" class="form-control quantity alphanumeric" id="jd_txt_end" name="jd_txt_end" placeholder="End Pressure">
-                </div>
-                <div class="col-md-3">
-                    <label for="jd_ta_remark" id="jd_lbl_remark">REMARKS</label>
-                    <textarea class="form-control remarklen removecap textareaaccinjured" rows="1" id="jd_ta_remark" name="jd_ta_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-        </fieldset>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab4">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">EMPLOYEE REPORT DETAILS</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form>-->
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="Employee_table" name="Employee_table">
-                <thead>
-                <tr class="active">
-                    <th><div>NAME</div></th>
-                    <th><div class="col-lg-10">START TIME</div></th>
-                    <th><div class="col-lg-10">END TIME</div></th>
-                    <th><div class="col-lg-10">OT</div></th>
-                    <th><div>REMARKS</div></th>
-                </tr>
-                </thead>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab5">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">SITE VISIT</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label>DESIGNATION</label>
-                    <input class="form-control sitevisitform-validation txtlen alphanumeric" name="sv_txt_designation" id="sv_txt_designation" placeholder="Designation"/>
-                </div>
-                <div class="col-md-3">
-                    <label>NAME</label>
-                    <input class="form-control sitevisitform-validation txtlen autosizealph " name="sv_txt_name" id="sv_txt_name" placeholder="Name"/>
-                </div>
-
-                <div class="col-md-1">
-                    <label>START</label>
-                    <input type="text" class="form-control sitevisitform-validation time-picker" name="sv_txt_start" id="sv_txt_start" placeholder="Time">
-                </div>
-                <div class="col-md-1">
-                    <label>END</label>
-                    <input type="text" class="form-control sitevisitform-validation time-picker" name="sv_txt_end" id="sv_txt_end" placeholder="Time">
-                </div>
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control sitevisitform-validation remarklen removecap textareaaccinjured" rows="1" name="sv_txt_remark" id="sv_txt_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" name="sv_rowid" id="sv_rowid" name="sv_rowid" class="form-control">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="sv_btn_addrow" class="btn btn-info" >ADD</button>
-                <button type="button" id="sv_btn_update" class="btn btn-info sv_btn_updaterow" >UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="sv_tbl">
-                <thead>
-                <tr class="active">
-                    <th>EDIT/REMOVE</th>
-                    <th>DESIGNATION</th>
-                    <th>NAME</th>
-                    <th>START TIME</th>
-                    <th>END TIME</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab6">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">MACHINERY / EQUIPMENT TRANSFER</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-2">
-                    <label>FROM (LORRY NO)</label>
-                    <input type="text" class="form-control mtransferform-validation quantity lorryno" id="mtranser_from" name="mtranser_from" placeholder="From (Lorry No)">
-                </div>
-                <div class="col-md-4">
-                    <label>ITEMS</label>
-                    <select class="form-control alphanumeric mtransferform-validation" id="mtransfer_item" name="mtransfer_item">
-                    </select>
-<!--                    <input type="text" class="form-control alphanumeric mtransferform-validation txtlen" id="mtransfer_item" name="mtransfer_item" placeholder="Item">-->
-                </div>
-
-                <div class="col-md-2">
-                    <label>TO (LORRY NO)</label>
-                    <input type="text" class="form-control mtransferform-validation quantity lorryno" id="mtransfer_to"  name="mtransfer_to" placeholder="To (Lorry No)">
-                </div>
-
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control mtransferform-validation remarklen removecap textareaaccinjured" id="mtransfer_remark"  rows="1" name="mtransfer_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" id="mtransfer_rowid" name="mtransfer_rowid" class="form-control">
-                </div>
-            </div>
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="mtransfer_addrow" class="btn btn-info" >ADD</button>
-                <button type="button" id="mtransfer_update" class="btn btn-info mtransfer_updaterow" >UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="mtransfer_table" name="mtransfer_table">
-                <thead>
-                <tr class="active">
-                    <th>EDIT/REMOVE</th>
-                    <th>FROM(LORRY NO)</th>
-                    <th>ITEMS</th>
-                    <th>TO(LORRY NO)</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab7">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">MACHINERY USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>MACHINERY TYPE</label>
-                    <select class="form-control alphanumeric machineryform-validation" id="machinery_type" name="machinery_type">
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>START (Time)</label>
-                    <input type="text" class="form-control machineryform-validation time-picker"  id="machinery_start" name="machinery_start" placeholder="Time">
-                </div>
-
-                <div class="col-md-2">
-                    <label>END (Time)</label>
-                    <input type="text" class="form-control machineryform-validation time-picker"  id="machinery_end"  name="machinery_end" placeholder="Time">
-                </div>
-
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control remarklen removecap machineryform-validation textareaaccinjured" id="machinery_remarks" rows="1" name="machinery_remarks" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" id="machinery_rowid" name="machinery_rowid" class="form-control">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="machinery_addrow" class="btn btn-info" >ADD</button>
-                <button type="button" id="machinery_update" class="btn btn-info machinery_updaterow" >UPDATE</button>
-
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="machinery_table" name="machinery_table">
-                <thead>
-                <tr class="active">
-                    <th>EDIT/REMOVE</th>
-                    <th>MACHINERY TYPE</th>
-                    <th>START TIME</th>
-                    <th>END TIME</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab8">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">RENTAL MACHINERY</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>LORRY NUMBER</label>
-                    <input type="text" class="form-control rentalform-validation quantity lorryno" id="rental_lorryno" name="rental_lorryno" placeholder="Lorry Name">
-                </div>
-                <div class="col-md-4">
-                    <label>THROW EARTH(STORE)</label>
-                    <input type="text" class="form-control rentalform-validation decimal size" id="rental_throwearthstore" name="rental_throwearthstore" placeholder="Throw Earth(Store)">
-                </div>
-
-                <div class="col-md-4">
-                    <label>THROW EARTH(OUTSIDE)</label>
-                    <input type="text" class="form-control rentalform-validation decimal size" id="rental_throwearthoutside" name="rental_throwearthoutside" placeholder="Throwe Earth(Outside)">
-                </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-2">
-                    <label>START (Time)</label>
-                    <input type="text" class="form-control rentalform-validation time-picker" id="rental_start" name="rental_start" placeholder="Time">
-                </div>
-
-                <div class="col-md-2">
-                    <label>END (Time)</label>
-                    <input type="text" class="form-control rentalform-validation time-picker" id="rental_end"  name="rental_end" placeholder="Time">
-                </div>
-
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control rentalform-validation remarklen removecap textareaaccinjured" id="rental_remarks" rows="1" name="rental_remarks" placeholder="Remarks"></textarea>
-                    <input type="hidden" class="form-control" id="rentalmechinery_id" name="rentalmechinery_id">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="rentalmechinery_addrow" class="btn btn-info" >ADD</button>
-                <button type="button" id="rentalmechinery_updaterow" class="btn btn-info rentalmechineryupdaterow" >UPDATE</button>
-
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="rental_table">
-                <thead>
-                <tr class="active">
-                    <th>EDIT/REMOVE</th>
-                    <th>LORRY NO</th>
-                    <th>THROW EARTH (STORE)</th>
-                    <th>THROW EARTH (OUTSIDE)</th>
-                    <th>START TIME</th>
-                    <th>END TIME</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab9">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">EQUIPMENT USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label>AIR-COMPRESSOR</label>
-                    <input type="text" class="form-control alphanumeric equipmentform-validation txtlen" id="equipment_aircompressor" name="equipment_aircompressor" placeholder="Air-Compressor">
-                </div>
-                <div class="col-md-3">
-                    <label>LORRY NO(TRANSPORT)</label>
-                    <input type="text" class="form-control equipmentform-validation quantity lorryno" id="equipment_lorryno" name="equipment_lorryno" placeholder="Lorry No(Transport)">
-                </div>
-                <div class="col-md-1">
-                    <label>START</label>
-                    <input type="text" class="form-control equipmentform-validation time-picker" id="equipment_start"  name="equipment_start" placeholder="Time">
-                </div>
-                <div class="col-md-1">
-                    <label>END</label>
-                    <input type="text" class="form-control equipmentform-validation time-picker" id="equipment_end"  name="equipment_end" placeholder="Time">
-                </div>
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control equipmentform-validation remarklen removecap textareaaccinjured" rows="1" id="equipment_remark"  name="equipment_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" id="equipment_rowid" name="equipment_rowid" class="form-control">
-                </div>
-            </div>
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="equipment_addrow" class="btn btn-info">ADD</button>
-                <button type="button" id="equipment_update" class="btn btn-info equipment_updaterow">UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="equipment_table" name="equipment_table">
-                <thead>
-                <tr class="active">
-                    <th>EDIT/REMOVE</th>
-                    <th>AIR COMPRESSOR</th>
-                    <th>LORRY NO(TRANSPORT)</th>
-                    <th>START TIME</th>
-                    <th>END TIME</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab10">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">FITTINGS USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>ITEMS</label>
-                    <select class="form-control fittingform-validation" id="fitting_items" name="fitting_items" placeholder="Items">
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>SIZE</label>
-                    <input type="text" class="form-control fittingform-validation decimal size" id="fitting_size" name="fitting_size" placeholder="MM">
-                </div>
-                <div class="col-md-2">
-                    <label>QUANTITY</label>
-                    <input type="text" class="form-control fittingform-validation decimal size" id="fitting_quantity" name="fitting_quantity" placeholder="Quantity">
-                </div>
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control remarklen removecap fittingform-validation textareaaccinjured" rows="1" id="fitting_remarks" name="fitting_remarks" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" class="form-control" id="fitting_id" name="fitting_id">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="fitting_addrow" class="btn btn-info" >ADD</button>
-                <button type="button" id="fitting_updaterow" class="btn btn-info  fittingupdaterow" >UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="fitting_table">
-                <thead>
-                <tr class="active">
-                    <th>EDIT/REMOVE</th>
-                    <th>ITEMS</th>
-                    <th>SIZE</th>
-                    <th>QUANTITY</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<!--</div>-->
-<!--<div class="tab-pane" id="tab11">-->
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">MATERIAL USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>ITEMS</label>
-                    <select class="form-control materialform-validation" id="material_items" name="material_items" placeholder="Items">
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label>RECEIPT NO</label>
-                    <input type="text" class="form-control alphanumeric materialform-validation quantity" id="material_receipt" name="material_receipt" placeholder="Receipt No">
-                </div>
-
-                <div class="col-md-4">
-                    <label>QUANTITY</label>
-                    <input type="text" class="form-control materialform-validation decimal size" id="material_quantity" name="material_quantity" placeholder="Quantity">
-                    <input type="hidden" class="form-control" id="material_id" name="material_id">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="material_addrow" class="btn btn-info" >ADD</button>
-                <button type="button" id="material_updaterow" class="btn btn-info materialupdaterow" >UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="material_table">
-                <thead>
-                <tr class="active">
-                    <th>EDIT/REMOVE</th>
-                    <th>ITEMS</th>
-                    <th>RECEIPT NO</th>
-                    <th>QTY(KG/BAGS/LTR/PCS)</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-</div>
-
-<div class="tab-pane" id="tab2">
-    <!-- DRAWING SURFACE--->
-    <div class="panel panel-primary">
-        <div class="panel-heading">
-            <h3 class="panel-title">DRAWING AREA</h3>
-        </div>
-        <div class="panel-body">
-            <div class="bs-example">
-                <div class="col-xs-9"><canvas id="canvas" style="border:1px solid #F5F5F5;" onclick="canvasonlick()"></canvas></div>
-                <div class="row">
-                    <div class="col-xs-3 canvasshapes"><div class="general" style="background-color:#F5F5F5;border:1px solid lavender;">
-                            <a onClick="setColor()"  class="btn primary a-img-btn" title='FILL WITH COLOR'><img src="../PAINT/IMAGES/fill.jpg"  class="img-rounded"/></a>
-                            <a onClick="eclipse()"   class="btn primary a-img-btn" title='ECLIPSE'><img src="../PAINT/IMAGES/eclipse.jpg"  class="img-rounded"/></a>
-                            <a onClick="triangle()"   class="btn primary a-img-btn" title='TRIANGLE'><img src="../PAINT/IMAGES/triangle.jpg"  class="img-rounded"/></a>
-                            <a onClick="circle()"  class="btn primary a-img-btn-active" title='CIRCLE'><img src="../PAINT/IMAGES/cir.png"  class="img-rounded"/></a>
-                            <a onClick="rectangle()" class="btn primary a-img-btn" title='RECTANGLE'><img src="../PAINT/IMAGES/rectangle.png"  class="img-rounded"/></a>
-                            <a onClick="drawLine()"  class="btn primary a-img-btn" title='LINE' id="drawing-line"><img src="../PAINT/IMAGES/line.jpg"  class="img-rounded"/></a>
-                            <a onClick="pencil()"  class="btn primary a-img-btn" title='PENCIL'><img src="../PAINT/IMAGES/pencil.png"  class="img-rounded"/></a>
-                            <a onClick="eraser()"  class="btn primary a-img-btn" title='ERASER'><img src="../PAINT/IMAGES/eraser.jpg"  class="img-rounded"/></a>
-                            <a onClick="textEditor1()"  class="btn primary a-img-btn" title='TEXTd'><img src="../PAINT/IMAGES/text.jpg"  class="img-rounded"/></a>
-                            <a onClick="clearCanvas()" class="btn primary a-img-btn" title='CLEAR'><img src="../PAINT/IMAGES/cancel.jpg"  class="img-rounded"/></a>
-                            <a onClick="selector()" class="btn primary a-img-btn" title='SELECTOR'><img src="../PAINT/IMAGES/select.jpg"  class="img-rounded"/></a>
-                            <a onClick="cut()" class="btn primary a-img-btn" title='REMOVE'><img src="../PAINT/IMAGES/cut.jpg"  class="img-rounded"/></a>
-                        </div>
-                        <div class="font" style="background-color:#F5F5F5;"><br>
-                            <label>Color:</label><input type="color" value="#36bac9" id="drawing-color" title="COLOR">&nbsp;&nbsp;&nbsp;&nbsp;
-                            <label>Size:</label><input type="number"  value="10" id="drawing-line-width" title="SIZE" style="width:45" min="10" max="100" maxlength="2">
-                            <br>
-                            <a onClick="bold()" class="btn primary a-img-btn-font-rem font" title='BOLD' id="fontbold"><img src="../PAINT/IMAGES/bold.jpg"  class="img-rounded"/></a>
-                            <a onClick="italic()" class="btn primary  a-img-btn-font-rem font" title='ITALIC' id="fontitalic"><img src="../PAINT/IMAGES/italic.jpg"  class="img-rounded"/></a>
-                            <a onClick="underline()" class="btn primary  a-img-btn-font-rem font" title='UNDERLINE' id="fontunderline"><img src="../PAINT/IMAGES/underline.jpg"  class="img-rounded"/></a>
-                        </div>
-                        <div class="shapes" style="background-color:#F5F5F5;border:1px solid lavender;">
-                            <a onClick="tappingTee1()"  class="btn primary a-img-btn" title='TAPPING TEE'><img src="../PAINT/IMAGES/tappingtee.jpg"  class="img-rounded"/></a>
-                            <a onClick="tJoint1()"  class="btn primary a-img-btn" title='T/JOINT'><img src="../PAINT/IMAGES/tjoint.jpg"  class="img-rounded"/></a>
-                            <a onClick="stubBlang1()"  class="btn primary a-img-btn" title='STUB FLANGE'><img src="../PAINT/IMAGES/stubblang.jpg"  class="img-rounded"/></a>
-                            <a onClick="reducer1()"  class="btn primary a-img-btn" title='REDUCER'><img src="../PAINT/IMAGES/reducer.jpg"  class="img-rounded"/></a>
-                            <a onClick="lastDegelbow1()"  class="btn primary a-img-btn" title='45/90 DEG ELBOW'><img src="../PAINT/IMAGES/lastdegelbow.jpg"  class="img-rounded"/></a>
-                            <a onClick="halfDegelbow1()"  class="btn primary a-img-btn" title='45 DEG ELBOW'><img src="../PAINT/IMAGES/halfdegelbow.jpg"  class="img-rounded"/></a>
-                            <a onClick="fullDegelbow1()"  class="btn primary a-img-btn" title='90 DEG ELBOW'><img src="../PAINT/IMAGES/fulldegelbow.jpg"  class="img-rounded"/></a>
-                            <a onClick="equalTee1()"  class="btn primary a-img-btn" title='EQUAL TEE'><img src="../PAINT/IMAGES/equaltee.jpg"  class="img-rounded"/></a>
-                            <a onClick="endCap1()"  class="btn primary a-img-btn" title='END CAP'><img src="../PAINT/IMAGES/endcap.jpg"  class="img-rounded"/></a>
-                            <a onClick="diTee1()"  class="btn primary a-img-btn" title='DI TEE'><img src="../PAINT/IMAGES/ditee.jpg"  class="img-rounded"/></a>
-                            <a onClick="diGatevalue1()"  class="btn primary a-img-btn" title='DI GATE VALVE'><img src="../PAINT/IMAGES/digatevalue.jpg"  class="img-rounded"/></a>
-                            <a onClick="diFlanging1()"  class="btn primary a-img-btn" title='DI FLANGE SPIGOT'><img src="../PAINT/IMAGES/diflanging.jpg"  class="img-rounded" width="25px"/></a>
-                            <a onClick="diFlangesotcket1()" class="btn primary a-img-btn" title='DI FLANGE STOCKET'><img src="../PAINT/IMAGES/diflangestocket.jpg"  class="img-rounded"  /></a>
-                            <a onClick="diColor1()"  class="btn primary a-img-btn" title='DI COLLAR'><img src="../PAINT/IMAGES/dicolor.jpg"  class="img-rounded"/></a>
-                            <a onClick="diCap1()"  class="btn primary a-img-btn" title='DI CAP'><img src="../PAINT/IMAGES/dicap.jpg"  class="img-rounded" width="25px"/></a>
-                            <a onClick="coupler1()"  class="btn primary a-img-btn" title='COUPLER'><img src="../PAINT/IMAGES/dicolor.jpg"  class="img-rounded" width="25px"/></a>
-                            <a onClick="beEndCateValue1()"  class="btn primary a-img-btn" title='PE END GATE VALUE'><img src="../PAINT/IMAGES/beendcatevalue.jpg"  class="img-rounded"/></a>
-                            <a onClick="di90degElbow()"  class="btn primary a-img-btn" title='DI 90 DEG ELBOW'><img src="../PAINT/IMAGES/90degElbow.jpg"  class="img-rounded"/></a>
-                            <a onClick="di45DegElbow()"  class="btn primary a-img-btn" title='DI 45 DEG ELBOW'><img src="../PAINT/IMAGES/di45DegElbow.jpg"  class="img-rounded"/></a>
-                            <a onClick="diReducer()"  class="btn primary a-img-btn" title='DI REDUCER'><img src="../PAINT/IMAGES/diReducer.jpg"  class="img-rounded"/></a>
-                        </div></div>
-                </div>
-
+            <div class="form-group-sm">
+                <ul class="nav-pills">
+                    <li class="pull-right"><a href="#top">Back to top</a></li>
+                </ul>
             </div>
         </div>
-        <div id="divImage"></div>
-    </div><!-- ENDING DRAWING SURFACE--->
-
-</div>
-<ul class="pager wizard">
-    <li class="previous first" style="display:none;"><a href="#">First</a></li>
-    <li class="previous"><a class="btn btn-primary" type="button" href="#" id="prevbtn" disabled>PREVIOUS</a></li>
-    <li class="next last" style="display:none;"><a href="#">Last</a></li>
-    <li class="next"><a class="btn btn-primary" type="button" href="#" id="nextbtn" disabled>NEXT</a></li>
-</ul>
-<div class="col-lg-offset-10">
-    <a class="btn btn-primary btn-lg" type="button" id="Final_submit" name="Final_submit" disabled >FINAL SUBMIT</a>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+    </div>
 </form>
 <script src="../PAINT/JS/customShape.js"> </script>
 </body>

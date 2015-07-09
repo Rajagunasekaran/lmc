@@ -90,393 +90,444 @@ $(document).ready(function(){
                 var value_array=JSON.parse(xmlhttp.responseText);
                 error_message=value_array[16];
                 $('#backtotop').show();
-                if(value_array[8]!=null)
-                {
-                empname=value_array[0];
-                var sitevisit=value_array[1];
-                var mech_equip_transfer=value_array[2];
-                var machinery_details=value_array[3];
-                var rentalmachinery_details=value_array[4];
-                var equipmentusage_details=value_array[5];
-                var fittingusage_details=value_array[6];
-                var material_details=value_array[7];
-                var teamreport_details=value_array[8];
-                var teamjob=value_array[10];
-                employee_id=value_array[11];
-                if(value_array[12]!='')
-                {
-                var jobdone_pipilaid=((value_array[12]).toString()).split(',');
-                }
-                if(value_array[13]!='')
-                {
-                    var jobdone_size=((value_array[13]).toString()).split(',');
-                }
-                if(value_array[14]!='')
-                {
-                    var jobdone_length=((value_array[14]).toString()).split(',');
-                }
-                var srchimgdata=value_array[15];
-                imagefolderid=value_array[17];
-                var meeting_details=value_array[18];
-                $('#SRCH_tr_txt_wftime').val('');
-                $('#SRCH_tr_txt_wttime').val('');
-                $('#SRCH_tr_txt_weather').val('');
-                if(srchimgdata!=null)
-                {
-                    $('<div><img src="'+srchimgdata+'" width="500" height="400" alt="embedded folder icon"></div>').appendTo($("#appendimg"));
-                }
-                else{
-                    $('<div>No Image Available</div>').appendTo($("#appendimg"));
-                }
-                if((value_array[12]!='') && (value_array[13]!='') && (value_array[14]!=''))
-                {
-                    if(jobdone_pipilaid[0]=='ROAD' || jobdone_pipilaid[1]=='ROAD' || jobdone_pipilaid[2]=='ROAD')
-                    {
-                        $('#SRCH_jd_chk_road').attr('checked', true);
-                        $('#SRCH_jd_chk_roadm').val(jobdone_size[0]);
-                        $('#SRCH_jd_chk_roadmm').val(jobdone_length[0]);
+                if(value_array[8]!=null) {
+                    empname = value_array[0];
+                    var sitevisit = value_array[1];
+                    var mech_equip_transfer = value_array[2];
+                    var machinery_details = value_array[3];
+                    var rentalmachinery_details = value_array[4];
+                    var equipmentusage_details = value_array[5];
+                    var fittingusage_details = value_array[6];
+                    var material_details = value_array[7];
+                    var teamreport_details = value_array[8];
+                    var teamjob = value_array[10];
+                    employee_id = value_array[11];
+                    if (value_array[12] != '') {
+                        var jobdone_pipilaid = ((value_array[12]).toString()).split(',');
                     }
-                    if(jobdone_pipilaid[0]=='CONC' || jobdone_pipilaid[1]=='CONC' || jobdone_pipilaid[2]=='CONC')
-                    {
-                        if(jobdone_pipilaid[0]=='CONC')
-                        {
-                        $('#SRCH_jd_chk_contc').attr('checked', true);
-                        $('#SRCH_jd_chk_concm').val(jobdone_size[0]);
-                        $('#SRCH_jd_chk_concmm').val(jobdone_length[0]);
+                    if (value_array[13] != '') {
+                        var jobdone_size = ((value_array[13]).toString()).split(',');
+                    }
+                    if (value_array[14] != '') {
+                        var jobdone_length = ((value_array[14]).toString()).split(',');
+                    }
+                    var srchimgdata = value_array[15];
+                    imagefolderid = value_array[17];
+                    var meeting_details = value_array[18];
+                    var stock_details=value_array[19];
+                    $('#SRCH_tr_txt_wftime').val('');
+                    $('#SRCH_tr_txt_wttime').val('');
+                    $('#SRCH_tr_txt_weather').val('');
+                    if (srchimgdata != null) {
+                        $('<div><img src="' + srchimgdata + '" width="500" height="400" alt="embedded folder icon"></div>').appendTo($("#appendimg"));
+                    }
+                    else {
+                        $('<div>No Image Available</div>').appendTo($("#appendimg"));
+                    }
+                    if ((value_array[12] != '') && (value_array[13] != '') && (value_array[14] != '')) {
+                        if (jobdone_pipilaid[0] == 'ROAD' || jobdone_pipilaid[1] == 'ROAD' || jobdone_pipilaid[2] == 'ROAD') {
+                            $('#SRCH_jd_chk_road').attr('checked', true);
+                            $('#SRCH_jd_chk_roadm').val(jobdone_size[0]);
+                            $('#SRCH_jd_chk_roadmm').val(jobdone_length[0]);
                         }
-                        else if(jobdone_pipilaid[1]=='CONC')
-                        {
-                            $('#SRCH_jd_chk_contc').attr('checked', true);
-                            $('#SRCH_jd_chk_concm').val(jobdone_size[1]);
-                            $('#SRCH_jd_chk_concmm').val(jobdone_length[1]);
+                        if (jobdone_pipilaid[0] == 'CONC' || jobdone_pipilaid[1] == 'CONC' || jobdone_pipilaid[2] == 'CONC') {
+                            if (jobdone_pipilaid[0] == 'CONC') {
+                                $('#SRCH_jd_chk_contc').attr('checked', true);
+                                $('#SRCH_jd_chk_concm').val(jobdone_size[0]);
+                                $('#SRCH_jd_chk_concmm').val(jobdone_length[0]);
+                            }
+                            else if (jobdone_pipilaid[1] == 'CONC') {
+                                $('#SRCH_jd_chk_contc').attr('checked', true);
+                                $('#SRCH_jd_chk_concm').val(jobdone_size[1]);
+                                $('#SRCH_jd_chk_concmm').val(jobdone_length[1]);
+                            }
+                            else if (jobdone_pipilaid[2] == 'CONC') {
+                                $('#SRCH_jd_chk_contc').attr('checked', true);
+                                $('#SRCH_jd_chk_concm').val(jobdone_size[2]);
+                                $('#SRCH_jd_chk_concmm').val(jobdone_length[2]);
+                            }
                         }
-                        else if(jobdone_pipilaid[2]=='CONC')
-                        {
-                            $('#SRCH_jd_chk_contc').attr('checked', true);
-                            $('#SRCH_jd_chk_concm').val(jobdone_size[2]);
-                            $('#SRCH_jd_chk_concmm').val(jobdone_length[2]);
+                        if (jobdone_pipilaid[0] == 'TURF' || jobdone_pipilaid[1] == 'TURF' || jobdone_pipilaid[2] == 'TURF') {
+                            if (jobdone_pipilaid[0] == 'TURF') {
+                                $('#SRCH_jd_chk_truf').attr('checked', true);
+                                $('#SRCH_jd_chk_trufm').val(jobdone_size[0]);
+                                $('#SRCH_jd_chk_trufmm').val(jobdone_length[0]);
+                            }
+                            else if (jobdone_pipilaid[1] == 'TURF') {
+                                $('#SRCH_jd_chk_truf').attr('checked', true);
+                                $('#SRCH_jd_chk_trufm').val(jobdone_size[1]);
+                                $('#SRCH_jd_chk_trufmm').val(jobdone_length[1]);
+                            }
+                            else if (jobdone_pipilaid[2] == 'TURF') {
+                                $('#SRCH_jd_chk_truf').attr('checked', true);
+                                $('#SRCH_jd_chk_trufm').val(jobdone_size[2]);
+                                $('#SRCH_jd_chk_trufmm').val(jobdone_length[2]);
+                            }
+
                         }
                     }
-                    if(jobdone_pipilaid[0]=='TURF' || jobdone_pipilaid[1]=='TURF' || jobdone_pipilaid[2]=='TURF')
-                    {
-                        if(jobdone_pipilaid[0]=='TURF')
-                        {
-                        $('#SRCH_jd_chk_truf').attr('checked', true);
-                        $('#SRCH_jd_chk_trufm').val(jobdone_size[0]);
-                        $('#SRCH_jd_chk_trufmm').val(jobdone_length[0]);
+                    if ((teamjob != '') || (teamjob != null)) {
+                        for (var t = 0; t < teamjob.length; t++) {
+                            var id = teamjob[t][0];
+                            id = id.replace(" ", "");
+                            $('#' + id).attr('checked', false);
                         }
-                        else if(jobdone_pipilaid[1]=='TURF')
-                        {
-                            $('#SRCH_jd_chk_truf').attr('checked', true);
-                            $('#SRCH_jd_chk_trufm').val(jobdone_size[1]);
-                            $('#SRCH_jd_chk_trufmm').val(jobdone_length[1]);
+                    }
+                    if (value_array[9] != null) {
+                        var jobdetails = value_array[9].split(',');
+                        for (var s = 0; s < jobdetails.length; s++) {
+                            var id = jobdetails[s];
+                            id = id.replace(" ", "");
+                            $('#' + id).attr('checked', true);
                         }
-                        else if(jobdone_pipilaid[2]=='TURF')
-                        {
-                            $('#SRCH_jd_chk_truf').attr('checked', true);
-                            $('#SRCH_jd_chk_trufm').val(jobdone_size[2]);
-                            $('#SRCH_jd_chk_trufmm').val(jobdone_length[2]);
+                    }
+                    //TEAM REPORT DETAILS
+                    for (var a = 0; a < teamreport_details.length; a++) {
+
+                        if (teamreport_details[a][1] == null) {
+                            teamreport_details[a][1] = "";
+                        }
+                        if (teamreport_details[a][2] == null) {
+                            teamreport_details[a][2] = "";
+                        }
+                        if (teamreport_details[a][3] == null) {
+                            teamreport_details[a][3] = "";
+                        }
+                        if (teamreport_details[a][4] == null || teamreport_details[a][4] == '00:00') {
+                            teamreport_details[a][4] = "";
+                        }
+                        if (teamreport_details[a][5] == null || teamreport_details[a][5] == '00:00') {
+                            teamreport_details[a][5] = "";
+                        }
+                        if (teamreport_details[a][6] == null) {
+                            teamreport_details[a][6] = "";
+                        }
+                        if (teamreport_details[a][7] == null) {
+                            teamreport_details[a][7] = "";
+                        }
+                        if (teamreport_details[a][8] == null) {
+                            teamreport_details[a][8] = "";
+                        }
+                        if (teamreport_details[a][9] == null) {
+                            teamreport_details[a][9] = "";
+                        }
+                        if (teamreport_details[a][10] == null || teamreport_details[a][10] == '00:00') {
+                            teamreport_details[a][10] = "";
+                        }
+                        if (teamreport_details[a][11] == null || teamreport_details[a][11] == '00:00') {
+                            teamreport_details[a][11] = "";
+                        }
+                        if (teamreport_details[a][12] == null) {
+                            teamreport_details[a][12] = "";
                         }
 
+                        $('#SRCH_tr_txt_location').val(teamreport_details[a][1]);
+                        $('#SRCH_tr_txt_date').val(teamreport_details[a][0]);
+                        $('#SRCH_tr_txt_contractno').val(teamreport_details[a][2]);
+                        $('#SRCH_tr_tb_team').val(teamreport_details[a][3]);
+                        $('#SRCH_tr_txt_wftime').val(teamreport_details[a][7]);
+                        $('#SRCH_tr_txt_wttime').val(teamreport_details[a][8]);
+                        $('#SRCH_tr_txt_reachsite').val(teamreport_details[a][4]);
+                        $('#SRCH_tr_txt_leavesite').val(teamreport_details[a][5]);
+                        $('#SRCH_jd_txt_pipetesting').val(teamreport_details[a][9]);
+                        $('#SRCH_jd_txt_start').val(teamreport_details[a][10]);
+                        $('#SRCH_jd_txt_end').val(teamreport_details[a][11]);
+                        $('#SRCH_jd_ta_remark').val(teamreport_details[a][12]).height(22);
+                        $('#SRCH_tr_txt_weather').val(teamreport_details[a][13]);
+                        if (teamreport_details[a][13] == '') {
+                            $("#SRCH_tr_txt_wftime").val('');
+                            $("#SRCH_tr_txt_wttime").val('');
+                        }
                     }
-                }
-                if((teamjob!='') || (teamjob!=null))
-                {
-                    for(var t=0;t<teamjob.length;t++)
-                    {
-                        var id=teamjob[t][0];
-                        id=id.replace(" ","");
-                        $('#'+id).attr('checked', false);
-                    }
-                }
-                if(value_array[9]!=null)
-                {
-                    var jobdetails=value_array[9].split(',');
-                    for(var s=0;s<jobdetails.length;s++)
-                    {
-                        var id=jobdetails[s];
-                        id=id.replace(" ","");
-                        $('#'+id).attr('checked', true);
-                    }
-                }
-                //TEAM REPORT DETAILS
-                for(var a=0;a<teamreport_details.length;a++)
-                {
+                    //EMPLOYEE DETAILS
+                    $('#SRCH_Employee_table tr:not(:first)').remove();
+                    for (var i = 0; i < empname.length; i++) {
+                        var autoid = i + 1;
+                        var emp_name = "SRCH_Emp_name" + autoid;
+                        var emp_id = "SRCH_Emp_id" + autoid;
+                        var emp_start = "SRCH_Emp_starttime" + autoid;
+                        var emp_end = "SRCH_Emp_endtime" + autoid;
+                        var emp_ot = "SRCH_Emp_ot" + autoid;
+                        var emp_remark = "SRCH_Emp_remark" + autoid;
+                        if (empname[i][5] == null) {
+                            empname[i][5] = "";
+                        }
+                        if (empname[i][4] == null) {
+                            empname[i][4] = "";
+                        }
+                        if (empname[i][3] == null || empname[i][3] == '00:00') {
+                            empname[i][3] = "";
+                        }
+                        if (empname[i][2] == null || empname[i][2] == '00:00') {
+                            empname[i][2] = "";
+                        }
 
-                    if(teamreport_details[a][1]==null){teamreport_details[a][1]="";}
-                    if(teamreport_details[a][2]==null){teamreport_details[a][2]="";}
-                    if(teamreport_details[a][3]==null){teamreport_details[a][3]="";}
-                    if(teamreport_details[a][4]==null || teamreport_details[a][4]=='00:00'){teamreport_details[a][4]="";}
-                    if(teamreport_details[a][5]==null || teamreport_details[a][5]=='00:00'){teamreport_details[a][5]="";}
-                    if(teamreport_details[a][6]==null){teamreport_details[a][6]="";}
-                    if(teamreport_details[a][7]==null){teamreport_details[a][7]="";}
-                    if(teamreport_details[a][8]==null){teamreport_details[a][8]="";}
-                    if(teamreport_details[a][9]==null){teamreport_details[a][9]="";}
-                    if(teamreport_details[a][10]==null || teamreport_details[a][10]=='00:00'){teamreport_details[a][10]="";}
-                    if(teamreport_details[a][11]==null || teamreport_details[a][11]=='00:00'){teamreport_details[a][11]="";}
-                    if(teamreport_details[a][12]==null){teamreport_details[a][12]="";}
-
-                    $('#SRCH_tr_txt_location').val(teamreport_details[a][1]);
-                    $('#SRCH_tr_txt_date').val(teamreport_details[a][0]);
-                    $('#SRCH_tr_txt_contractno').val(teamreport_details[a][2]);
-                    $('#SRCH_tr_lb_team').val(teamreport_details[a][3]);
-                    $('#SRCH_tr_txt_wftime').val(teamreport_details[a][7]);
-                    $('#SRCH_tr_txt_wttime').val(teamreport_details[a][8]);
-                    $('#SRCH_tr_txt_reachsite').val(teamreport_details[a][4]);
-                    $('#SRCH_tr_txt_leavesite').val(teamreport_details[a][5]);
-                    $('#SRCH_jd_txt_pipetesting').val(teamreport_details[a][9]);
-                    $('#SRCH_jd_txt_start').val(teamreport_details[a][10]);
-                    $('#SRCH_jd_txt_end').val(teamreport_details[a][11]);
-                    $('#SRCH_jd_ta_remark').val(teamreport_details[a][12]);
-                    $('#SRCH_tr_txt_weather').val(teamreport_details[a][13]);
-                    if(teamreport_details[a][13]=='')
-                    {
-                        $("#SRCH_tr_txt_wftime").val('');
-                        $("#SRCH_tr_txt_wttime").val('');
+                        if (employee_id == empname[i][0]) {
+                            var appendrow = '<tr class="active"><td><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="' + emp_name + '" value="' + empname[i][1] + '"><input type="hidden" class="form-control" style="max-width: 100px" id="' + emp_id + '" value="' + empname[i][0] + '"></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker stime" style="max-width: 100px" id="' + emp_start + '" value="' + empname[i][2] + '"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker etime" style="max-width: 100px" id="' + emp_end + '" value="' + empname[i][3] + '"></div></td><td><input type="text" readonly class="form-control" style="max-width: 100px" id="' + emp_ot + '" value="' + empname[i][4] + '"></td><td><textarea readonly class="form-control" rows="1" id="' + emp_remark + '">' + empname[i][5] + '</textarea></td></tr>';
+                        }
+                        else {
+                            appendrow = '<tr class="active"><td><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="' + emp_name + '" value="' + empname[i][1] + '"><input type="hidden" class="form-control" style="max-width: 100px" id="' + emp_id + '" value="' + empname[i][0] + '"></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker stime" style="max-width: 100px" id="' + emp_start + '" value="' + empname[i][2] + '"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker etime" style="max-width: 100px" id="' + emp_end + '" value="' + empname[i][3] + '"></div></td><td><input type="text" readonly class="form-control" style="max-width: 100px" id="' + emp_ot + '" value="' + empname[i][4] + '"></td><td><textarea readonly class="form-control" rows="1" id="' + emp_remark + '">' + empname[i][5] + '</textarea></td></tr>';
+                        }
+                        $('#SRCH_Employee_table tr:last').after(appendrow);
+                        $('.time-picker').datetimepicker({
+                            format: 'H:mm'
+                        });
+                        $('#SRCH_entryform').show();
+                        $("textarea").autogrow({vertical: true, horizontal: true});
                     }
-                }
-                //EMPLOYEE DETAILS
-                $('#SRCH_Employee_table tr:not(:first)').remove();
-                for(var i=0;i<empname.length;i++)
-                {
-                    var autoid=i+1;
-                    var emp_name="SRCH_Emp_name"+autoid;
-                    var emp_id="SRCH_Emp_id"+autoid;
-                    var emp_start="SRCH_Emp_starttime"+autoid;
-                    var emp_end="SRCH_Emp_endtime"+autoid;
-                    var emp_ot="SRCH_Emp_ot"+autoid;
-                    var emp_remark="SRCH_Emp_remark"+autoid;
-                    if(empname[i][5]==null){empname[i][5]="";}
-                    if(empname[i][4]==null){empname[i][4]="";}
-                    if(empname[i][3]==null || empname[i][3]=='00:00'){empname[i][3]="";}
-                    if(empname[i][2]==null || empname[i][2]=='00:00'){empname[i][2]="";}
-
-                    if(employee_id==empname[i][0])
-                    {
-                        var appendrow='<tr class="active"><td><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="'+emp_name+'" value="'+empname[i][1]+'"><input type="hidden" class="form-control" style="max-width: 100px" id="'+emp_id+'" value="'+empname[i][0]+'"></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker stime" style="max-width: 100px" id="'+emp_start+'" value="'+empname[i][2]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker etime" style="max-width: 100px" id="'+emp_end+'" value="'+empname[i][3]+'"></div></td><td><input type="text" readonly class="form-control" style="max-width: 100px" id="'+emp_ot+'" value="'+empname[i][4]+'"></td><td><textarea readonly class="form-control" rows="1" id="'+emp_remark+'">'+empname[i][5]+'</textarea></td></tr>';
-                    }
-                    else
-                    {
-                        appendrow='<tr class="active"><td><input type="text" class="form-control" readonly style="max-width: 560px" name="name" id="'+emp_name+'" value="'+empname[i][1]+'"><input type="hidden" class="form-control" style="max-width: 100px" id="'+emp_id+'" value="'+empname[i][0]+'"></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker stime" style="max-width: 100px" id="'+emp_start+'" value="'+empname[i][2]+'"></div></td><td><div class="col-lg-10"><input type="text" readonly class="form-control time-picker etime" style="max-width: 100px" id="'+emp_end+'" value="'+empname[i][3]+'"></div></td><td><input type="text" readonly class="form-control" style="max-width: 100px" id="'+emp_ot+'" value="'+empname[i][4]+'"></td><td><textarea readonly class="form-control" rows="1" id="'+emp_remark+'">'+empname[i][5]+'</textarea></td></tr>';
-                    }
-                    $('#SRCH_Employee_table tr:last').after(appendrow);
-                    $('.time-picker').datetimepicker({
-                        format:'H:mm'
-                    });
-                    $('#SRCH_entryform').show();
-                    $( "textarea" ).autogrow( { vertical : true, horizontal : true } );
-                }
-                //MEETING DETAILS
+                    //MEETING DETAILS
                     $('#SRCH_meeting_table tr:not(:first)').remove();
-                    if(meeting_details!=null)
-                    {
-                        for(var v=0;v<meeting_details.length;v++)
-                        {
-                            var mt_tablerowcount=$('#SRCH_meeting_table tr').length;
-                            var mt_editid='SRCH_mt_editrow/'+mt_tablerowcount;
-                            var mt_deleterowid='SRCH_mt_deleterow/'+mt_tablerowcount;
-                            var mt_row_id="SRCH_mt_tr_"+mt_tablerowcount;
-                            var temp_textbox_id="SRCH_mttemp_id"+mt_tablerowcount;
+                    if (meeting_details != null) {
+                        for (var v = 0; v < meeting_details.length; v++) {
+                            var mt_tablerowcount = $('#SRCH_meeting_table tr').length;
+                            var mt_editid = 'SRCH_mt_editrow/' + mt_tablerowcount;
+                            var mt_deleterowid = 'SRCH_mt_deleterow/' + mt_tablerowcount;
+                            var mt_row_id = "SRCH_mt_tr_" + mt_tablerowcount;
+                            var temp_textbox_id = "SRCH_mttemp_id" + mt_tablerowcount;
                             var mt_remark;
-                            if(meeting_details[v][2]==null){
-                                mt_remark="";
+                            if (meeting_details[v][2] == null) {
+                                mt_remark = "";
                             }
-                            else
-                            {
-                                mt_remark=meeting_details[v][2];
+                            else {
+                                mt_remark = meeting_details[v][2];
                             }
-                            var appendrow='<tr class="active" id='+mt_row_id+'><td style="max-width: 450px">'+meeting_details[v][1]+'</td><td style="max-width: 300px">'+mt_remark+'</td></tr>';
+                            var appendrow = '<tr class="active" id=' + mt_row_id + '><td style="max-width: 450px">' + meeting_details[v][1] + '</td><td style="max-width: 300px">' + mt_remark + '</td></tr>';
                             $('#SRCH_meeting_table tr:last').after(appendrow);
                         }
                     }
-                //SITE VISIT DETAILS
-                $('#SRCH_sv_tbl tr:not(:first)').remove();
-                if(sitevisit!=null)
-                {
-                    for(var j=0;j<sitevisit.length;j++)
-                    {
-                        var sv_tablerowcount=$('#SRCH_sv_tbl tr').length;
-                        var sv_editid='SRCH_sv_editrow/'+sv_tablerowcount;
-                        var sv_deleterowid='SRCH_sv_deleterow/'+sv_tablerowcount;
-                        var sv_row_id="SRCH_sv_tr_"+sv_tablerowcount;
-                        var temp_textbox_id="SRCH_svtemp_id"+sv_tablerowcount;
-                        if(sitevisit[j][1]==null){sitevisit[j][1]="";}
-                        if(sitevisit[j][2]==null){sitevisit[j][2]="";}
-                        if(sitevisit[j][3]==null || sitevisit[j][3]=='00:00'){sitevisit[j][3]="";}
-                        if(sitevisit[j][4]==null || sitevisit[j][4]=='00:00'){sitevisit[j][4]="";}
-                        var siteremarks;
-                        if(sitevisit[j][5]==null)
-                        {
-                            siteremarks='';
-                        }
-                        else{
-                            siteremarks=sitevisit[j][5];
-                        }
+                    //SITE VISIT DETAILS
+                    $('#SRCH_sv_tbl tr:not(:first)').remove();
+                    if (sitevisit != null) {
+                        for (var j = 0; j < sitevisit.length; j++) {
+                            var sv_tablerowcount = $('#SRCH_sv_tbl tr').length;
+                            var sv_editid = 'SRCH_sv_editrow/' + sv_tablerowcount;
+                            var sv_deleterowid = 'SRCH_sv_deleterow/' + sv_tablerowcount;
+                            var sv_row_id = "SRCH_sv_tr_" + sv_tablerowcount;
+                            var temp_textbox_id = "SRCH_svtemp_id" + sv_tablerowcount;
+                            if (sitevisit[j][1] == null) {
+                                sitevisit[j][1] = "";
+                            }
+                            if (sitevisit[j][2] == null) {
+                                sitevisit[j][2] = "";
+                            }
+                            if (sitevisit[j][3] == null || sitevisit[j][3] == '00:00') {
+                                sitevisit[j][3] = "";
+                            }
+                            if (sitevisit[j][4] == null || sitevisit[j][4] == '00:00') {
+                                sitevisit[j][4] = "";
+                            }
+                            var siteremarks;
+                            if (sitevisit[j][5] == null) {
+                                siteremarks = '';
+                            }
+                            else {
+                                siteremarks = sitevisit[j][5];
+                            }
 
-                        var appendrow='<tr class="active" id='+sv_row_id+'><td style="max-width: 250px">'+sitevisit[j][2]+'</td><td style="max-width: 250px">'+sitevisit[j][1]+'</td><td style="max-width: 250px">'+sitevisit[j][3]+'</td><td style="max-width: 250px">'+sitevisit[j][4]+'</td><td style="max-width: 250px">'+siteremarks+'</td></tr>';
-                        $('#SRCH_sv_tbl tr:last').after(appendrow);
+                            var appendrow = '<tr class="active" id=' + sv_row_id + '><td style="max-width: 250px">' + sitevisit[j][2] + '</td><td style="max-width: 250px">' + sitevisit[j][1] + '</td><td style="max-width: 250px">' + sitevisit[j][3] + '</td><td style="max-width: 250px">' + sitevisit[j][4] + '</td><td style="max-width: 250px">' + siteremarks + '</td></tr>';
+                            $('#SRCH_sv_tbl tr:last').after(appendrow);
+                        }
                     }
-                }
 //                MACHINERY_EQUIPMENT DETAILS
-                $('#SRCH_mtransfer_table tr:not(:first)').remove();
-                if(mech_equip_transfer!=null)
-                {
-                    for(var k=0;k<mech_equip_transfer.length;k++)
-                    {
-                        var mtransfertablerowcount=$('#SRCH_mtransfer_table tr').length;
-                        var mtransfereditid='SRCH_mtransfereditrow/'+mtransfertablerowcount;
-                        var mtransferdeleterowid='SRCH_mtransferdeleterow/'+mtransfertablerowcount;
-                        var mtransfer_row_id="SRCH_mtranser_tr_"+mtransfertablerowcount;
-                        var temp_textbox_id="SRCH_mtransfertemp_id"+mtransfertablerowcount;
-                        if(mech_equip_transfer[k][1]==null){mech_equip_transfer[k][1]="";}
-                        if(mech_equip_transfer[k][2]==null){mech_equip_transfer[k][2]="";}
-                        if(mech_equip_transfer[k][3]==null){mech_equip_transfer[k][3]="SELECT";}
-                        var mech_equip_remarks;
-                        if(mech_equip_transfer[k][4]==null)
-                        {
-                            mech_equip_remarks='';
+                    $('#SRCH_mtransfer_table tr:not(:first)').remove();
+                    if (mech_equip_transfer != null) {
+                        for (var k = 0; k < mech_equip_transfer.length; k++) {
+                            var mtransfertablerowcount = $('#SRCH_mtransfer_table tr').length;
+                            var mtransfereditid = 'SRCH_mtransfereditrow/' + mtransfertablerowcount;
+                            var mtransferdeleterowid = 'SRCH_mtransferdeleterow/' + mtransfertablerowcount;
+                            var mtransfer_row_id = "SRCH_mtranser_tr_" + mtransfertablerowcount;
+                            var temp_textbox_id = "SRCH_mtransfertemp_id" + mtransfertablerowcount;
+                            if (mech_equip_transfer[k][1] == null) {
+                                mech_equip_transfer[k][1] = "";
+                            }
+                            if (mech_equip_transfer[k][2] == null) {
+                                mech_equip_transfer[k][2] = "";
+                            }
+                            if (mech_equip_transfer[k][3] == null) {
+                                mech_equip_transfer[k][3] = "SELECT";
+                            }
+                            var mech_equip_remarks;
+                            if (mech_equip_transfer[k][4] == null) {
+                                mech_equip_remarks = '';
+                            }
+                            else {
+                                mech_equip_remarks = mech_equip_transfer[k][4];
+                            }
+                            var appendrow = '<tr class="active" id=' + mtransfer_row_id + '><td style="max-width: 250px">' + mech_equip_transfer[k][1] + '</td><td style="max-width: 250px">' + mech_equip_transfer[k][3] + '</td><td style="max-width: 250px">' + mech_equip_transfer[k][2] + '</td><td style="max-width: 250px">' + mech_equip_remarks + '</td></tr>';
+                            $('#SRCH_mtransfer_table tr:last').after(appendrow);
                         }
-                        else
-                        {
-                            mech_equip_remarks=mech_equip_transfer[k][4];
-                        }
-                        var appendrow='<tr class="active" id='+mtransfer_row_id+'><td style="max-width: 250px">'+mech_equip_transfer[k][1]+'</td><td style="max-width: 250px">'+mech_equip_transfer[k][3]+'</td><td style="max-width: 250px">'+mech_equip_transfer[k][2]+'</td><td style="max-width: 250px">'+mech_equip_remarks+'</td></tr>';
-                        $('#SRCH_mtransfer_table tr:last').after(appendrow);
                     }
-                }
-                //MACHINERY USAGE DETAILS
-                $('#SRCH_machinery_table tr:not(:first)').remove();
-                if(machinery_details!=null)
-                {
-                    for(var l=0;l<machinery_details.length;l++)
-                    {
-                        var machinerytablerowcount=$('#SRCH_machinery_table tr').length;
-                        var machineryeditid='SRCH_machineryeditrow/'+machinerytablerowcount;
-                        var machinerydeleterowid='SRCH_machinerydeleterow/'+machinerytablerowcount;
-                        var machinery_row_id="SRCH_machinery_tr_"+machinerytablerowcount;
-                        var temp_textbox_id="SRCH_machinerytemp_id"+machinerytablerowcount;
-                        if(machinery_details[l][1]==null){machinery_details[l][1]="SELECT";}
-                        if(machinery_details[l][2]==null || machinery_details[l][2]=='00:00'){machinery_details[l][2]="";}
-                        if(machinery_details[l][3]==null || machinery_details[l][3]=='00:00'){machinery_details[l][3]="";}
-                        var machineryremarks;
-                        if(machinery_details[l][4]==null)
-                        {
-                            machineryremarks='';
+                    //MACHINERY USAGE DETAILS
+                    $('#SRCH_machinery_table tr:not(:first)').remove();
+                    if (machinery_details != null) {
+                        for (var l = 0; l < machinery_details.length; l++) {
+                            var machinerytablerowcount = $('#SRCH_machinery_table tr').length;
+                            var machineryeditid = 'SRCH_machineryeditrow/' + machinerytablerowcount;
+                            var machinerydeleterowid = 'SRCH_machinerydeleterow/' + machinerytablerowcount;
+                            var machinery_row_id = "SRCH_machinery_tr_" + machinerytablerowcount;
+                            var temp_textbox_id = "SRCH_machinerytemp_id" + machinerytablerowcount;
+                            if (machinery_details[l][1] == null) {
+                                machinery_details[l][1] = "SELECT";
+                            }
+                            if (machinery_details[l][2] == null || machinery_details[l][2] == '00:00') {
+                                machinery_details[l][2] = "";
+                            }
+                            if (machinery_details[l][3] == null || machinery_details[l][3] == '00:00') {
+                                machinery_details[l][3] = "";
+                            }
+                            var machineryremarks;
+                            if (machinery_details[l][4] == null) {
+                                machineryremarks = '';
+                            }
+                            else {
+                                machineryremarks = machinery_details[l][4];
+                            }
+                            var appendrow = '<tr class="active" id=' + machinery_row_id + '><td style="max-width: 250px">' + machinery_details[l][1] + '</td><td style="max-width: 250px">' + machinery_details[l][2] + '</td><td style="max-width: 250px">' + machinery_details[l][3] + '</td><td style="max-width: 250px">' + machineryremarks + '</td></tr>';
+                            $('#SRCH_machinery_table tr:last').after(appendrow);
                         }
-                        else
-                        {
-                            machineryremarks=machinery_details[l][4];
-                        }
-                        var appendrow='<tr class="active" id='+machinery_row_id+'><td style="max-width: 250px">'+machinery_details[l][1]+'</td><td style="max-width: 250px">'+machinery_details[l][2]+'</td><td style="max-width: 250px">'+machinery_details[l][3]+'</td><td style="max-width: 250px">'+machineryremarks+'</td></tr>';
-                        $('#SRCH_machinery_table tr:last').after(appendrow);
                     }
-                }
-                //RENTAL MACHINERY DETAILS
-                $('#SRCH_rental_table tr:not(:first)').remove();
-                if(rentalmachinery_details!=null)
-                {
-                    for(var m=0;m<rentalmachinery_details.length;m++)
-                    {
-                        var rentaltablerowcount=$('#SRCH_rental_table tr').length;
-                        var rentaleditid='SRCH_machineryeditrow/'+rentaltablerowcount;
-                        var rentaldeleterowid='SRCH_machinerydeleterow/'+rentaltablerowcount;
-                        var rental_row_id="SRCH_rental_tr_"+rentaltablerowcount;
-                        var temp_textbox_id="SRCH_rentaltemp_id"+rentaltablerowcount;
-                        if(rentalmachinery_details[m][1]==null){rentalmachinery_details[m][1]="";}
-                        if(rentalmachinery_details[m][2]==null){rentalmachinery_details[m][2]="";}
-                        if(rentalmachinery_details[m][3]==null){rentalmachinery_details[m][3]="";}
-                        if(rentalmachinery_details[m][4]==null || rentalmachinery_details[m][4]=='00:00'){rentalmachinery_details[m][4]="";}
-                        if(rentalmachinery_details[m][5]==null || rentalmachinery_details[m][5]=='00:00'){rentalmachinery_details[m][5]="";}
-                        var rentalremarks;
-                        if(rentalmachinery_details[m][6]==null)
-                        {
-                            rentalremarks='';
+                    //RENTAL MACHINERY DETAILS
+                    $('#SRCH_rental_table tr:not(:first)').remove();
+                    if (rentalmachinery_details != null) {
+                        for (var m = 0; m < rentalmachinery_details.length; m++) {
+                            var rentaltablerowcount = $('#SRCH_rental_table tr').length;
+                            var rentaleditid = 'SRCH_machineryeditrow/' + rentaltablerowcount;
+                            var rentaldeleterowid = 'SRCH_machinerydeleterow/' + rentaltablerowcount;
+                            var rental_row_id = "SRCH_rental_tr_" + rentaltablerowcount;
+                            var temp_textbox_id = "SRCH_rentaltemp_id" + rentaltablerowcount;
+                            if (rentalmachinery_details[m][1] == null) {
+                                rentalmachinery_details[m][1] = "";
+                            }
+                            if (rentalmachinery_details[m][2] == null) {
+                                rentalmachinery_details[m][2] = "";
+                            }
+                            if (rentalmachinery_details[m][3] == null) {
+                                rentalmachinery_details[m][3] = "";
+                            }
+                            if (rentalmachinery_details[m][4] == null || rentalmachinery_details[m][4] == '00:00') {
+                                rentalmachinery_details[m][4] = "";
+                            }
+                            if (rentalmachinery_details[m][5] == null || rentalmachinery_details[m][5] == '00:00') {
+                                rentalmachinery_details[m][5] = "";
+                            }
+                            var rentalremarks;
+                            if (rentalmachinery_details[m][6] == null) {
+                                rentalremarks = '';
+                            }
+                            else {
+                                rentalremarks = rentalmachinery_details[m][6];
+                            }
+                            var appendrow = '<tr class="active" id=' + rental_row_id + '><td style="max-width: 250px">' + rentalmachinery_details[m][1] + '</td><td style="max-width: 250px">' + rentalmachinery_details[m][2] + '</td><td style="max-width: 250px">' + rentalmachinery_details[m][3] + '</td><td style="max-width: 250px">' + rentalmachinery_details[m][4] + '</td><td style="max-width: 250px">' + rentalmachinery_details[m][5] + '</td><td style="max-width: 250px">' + rentalremarks + '</td>';
+                            $('#SRCH_rental_table tr:last').after(appendrow);
                         }
-                        else
-                        {
-                            rentalremarks=rentalmachinery_details[m][6];
-                        }
-                        var appendrow='<tr class="active" id='+rental_row_id+'><td style="max-width: 250px">'+rentalmachinery_details[m][1]+'</td><td style="max-width: 250px">'+rentalmachinery_details[m][2]+'</td><td style="max-width: 250px">'+rentalmachinery_details[m][3]+'</td><td style="max-width: 250px">'+rentalmachinery_details[m][4]+'</td><td style="max-width: 250px">'+rentalmachinery_details[m][5]+'</td><td style="max-width: 250px">'+rentalremarks+'</td>';
-                        $('#SRCH_rental_table tr:last').after(appendrow);
                     }
-                }
-                //EQUIPMENT USAGE DETAILS
-                $('#SRCH_equipment_table tr:not(:first)').remove();
-                if(equipmentusage_details!=null)
-                {
-                    for(var n=0;n<equipmentusage_details.length;n++)
-                    {
-                        var equipmenttablerowcount=$('#SRCH_equipment_table tr').length;
-                        var equipmenteditid='SRCH_equipmenteditrow/'+equipmenttablerowcount;
-                        var equipmentdeleterowid='SRCH_equipementdeleterow/'+equipmenttablerowcount;
-                        var equipment_row_id="SRCH_equipment_tr_"+equipmenttablerowcount;
-                        var temp_textbox_id="SRCH_equipmenttemp_id"+equipmenttablerowcount;
-                        if(equipmentusage_details[n][1]==null){equipmentusage_details[n][1]="";}
-                        if(equipmentusage_details[n][2]==null){equipmentusage_details[n][2]="";}
-                        if(equipmentusage_details[n][3]==null || equipmentusage_details[n][3]=='00:00'){equipmentusage_details[n][3]="";}
-                        if(equipmentusage_details[n][4]==null || equipmentusage_details[n][4]=='00:00'){equipmentusage_details[n][4]="";}
-                        var equipmentremarks;
-                        if(equipmentusage_details[n][5]==null)
-                        {
-                            equipmentremarks='';
+                    //EQUIPMENT USAGE DETAILS
+                    $('#SRCH_equipment_table tr:not(:first)').remove();
+                    if (equipmentusage_details != null) {
+                        for (var n = 0; n < equipmentusage_details.length; n++) {
+                            var equipmenttablerowcount = $('#SRCH_equipment_table tr').length;
+                            var equipmenteditid = 'SRCH_equipmenteditrow/' + equipmenttablerowcount;
+                            var equipmentdeleterowid = 'SRCH_equipementdeleterow/' + equipmenttablerowcount;
+                            var equipment_row_id = "SRCH_equipment_tr_" + equipmenttablerowcount;
+                            var temp_textbox_id = "SRCH_equipmenttemp_id" + equipmenttablerowcount;
+                            if (equipmentusage_details[n][1] == null) {
+                                equipmentusage_details[n][1] = "";
+                            }
+                            if (equipmentusage_details[n][2] == null) {
+                                equipmentusage_details[n][2] = "";
+                            }
+                            if (equipmentusage_details[n][3] == null || equipmentusage_details[n][3] == '00:00') {
+                                equipmentusage_details[n][3] = "";
+                            }
+                            if (equipmentusage_details[n][4] == null || equipmentusage_details[n][4] == '00:00') {
+                                equipmentusage_details[n][4] = "";
+                            }
+                            var equipmentremarks;
+                            if (equipmentusage_details[n][5] == null) {
+                                equipmentremarks = '';
+                            }
+                            else {
+                                equipmentremarks = equipmentusage_details[n][5];
+                            }
+                            var appendrow = '<tr class="active" id=' + equipment_row_id + '><td style="max-width: 250px">' + equipmentusage_details[n][1] + '</td><td style="max-width: 250px">' + equipmentusage_details[n][2] + '</td><td style="max-width: 250px">' + equipmentusage_details[n][3] + '</td><td style="max-width: 250px">' + equipmentusage_details[n][4] + '</td><td style="max-width: 250px">' + equipmentremarks + '</td></tr>';
+                            $('#SRCH_equipment_table tr:last').after(appendrow);
                         }
-                        else
-                        {
-                            equipmentremarks=equipmentusage_details[n][5];
-                        }
-                        var appendrow='<tr class="active" id='+equipment_row_id+'><td style="max-width: 250px">'+equipmentusage_details[n][1]+'</td><td style="max-width: 250px">'+equipmentusage_details[n][2]+'</td><td style="max-width: 250px">'+equipmentusage_details[n][3]+'</td><td style="max-width: 250px">'+equipmentusage_details[n][4]+'</td><td style="max-width: 250px">'+equipmentremarks+'</td></tr>';
-                        $('#SRCH_equipment_table tr:last').after(appendrow);
                     }
-                }
-                //FITTING USAGE DETAILS
-                $('#SRCH_fitting_table tr:not(:first)').remove();
-                if(fittingusage_details!=null)
-                {
-                    for(var o=0;o<fittingusage_details.length;o++)
-                    {
-                        var tablerowCount=$('#SRCH_fitting_table tr').length;
-                        var editid='SRCH_fitting_editrow/'+tablerowCount;
-                        var deleterowid='SRCH_fitting_deleterow/'+tablerowCount;
-                        var row_id="SRCH_fitting_tr_"+tablerowCount;
-                        var temp_textbox_id="SRCH_fittingtemp_id"+tablerowCount;
-                        if(fittingusage_details[o][1]==null){fittingusage_details[o][1]="SELECT";}
-                        if(fittingusage_details[o][2]==null){fittingusage_details[o][2]="";}
-                        if(fittingusage_details[o][3]==null){fittingusage_details[o][3]="";}
-                        var fittingremarks;
-                        if(fittingusage_details[o][4]==null)
-                        {
-                            fittingremarks='';
+                    //FITTING USAGE DETAILS
+                    $('#SRCH_fitting_table tr:not(:first)').remove();
+                    if (fittingusage_details != null) {
+                        for (var o = 0; o < fittingusage_details.length; o++) {
+                            var tablerowCount = $('#SRCH_fitting_table tr').length;
+                            var editid = 'SRCH_fitting_editrow/' + tablerowCount;
+                            var deleterowid = 'SRCH_fitting_deleterow/' + tablerowCount;
+                            var row_id = "SRCH_fitting_tr_" + tablerowCount;
+                            var temp_textbox_id = "SRCH_fittingtemp_id" + tablerowCount;
+                            if (fittingusage_details[o][1] == null) {
+                                fittingusage_details[o][1] = "SELECT";
+                            }
+                            if (fittingusage_details[o][2] == null) {
+                                fittingusage_details[o][2] = "";
+                            }
+                            if (fittingusage_details[o][3] == null) {
+                                fittingusage_details[o][3] = "";
+                            }
+                            var fittingremarks;
+                            if (fittingusage_details[o][4] == null) {
+                                fittingremarks = '';
+                            }
+                            else {
+                                fittingremarks = fittingusage_details[o][4];
+                            }
+                            var appendrow = '<tr  class="active" id=' + row_id + '><td style="max-width: 250px">' + fittingusage_details[o][1] + '</td><td style="max-width: 250px">' + fittingusage_details[o][2] + '</td><td style="max-width: 250px">' + fittingusage_details[o][3] + '</td><td style="max-width: 250px">' + fittingremarks + '</td></tr>';
+                            $('#SRCH_fitting_table tr:last').after(appendrow);
                         }
-                        else
-                        {
-                            fittingremarks=fittingusage_details[o][4];
+                    }
+                    //MATERIAL USAGE DETAILS
+                    $('#SRCH_material_table tr:not(:first)').remove();
+                    if (material_details != null) {
+                        for (var p = 0; p < material_details.length; p++) {
+                            var tablerowCount = $('#SRCH_material_table tr').length;
+                            var editid = 'SRCH_material_editrow/' + tablerowCount;
+                            var deleterowid = 'SRCH_material_deleterow/' + tablerowCount;
+                            var row_id = "SRCH_material_tr_" + tablerowCount;
+                            var temp_textbox_id = "SRCH_materialtemp_id" + tablerowCount;
+                            if (material_details[p][1] == null) {
+                                material_details[p][1] = "SELECT";
+                            }
+                            if (material_details[p][2] == null) {
+                                material_details[p][2] = "";
+                            }
+                            if (material_details[p][3] == null) {
+                                material_details[p][3] = "";
+                            }
+                            var appendrow = '<tr class="active" id=' + row_id + '><td style="max-width: 250px">' + material_details[p][1] + '</td><td style="max-width: 250px">' + material_details[p][2] + '</td><td style="max-width: 250px">' + material_details[p][3] + '</td></tr>';
+                            $('#SRCH_material_table tr:last').after(appendrow);
                         }
-                        var appendrow='<tr  class="active" id='+row_id+'><td style="max-width: 250px">'+fittingusage_details[o][1]+'</td><td style="max-width: 250px">'+fittingusage_details[o][2]+'</td><td style="max-width: 250px">'+fittingusage_details[o][3]+'</td><td style="max-width: 250px">'+fittingremarks+'</td></tr>';
-                        $('#SRCH_fitting_table tr:last').after(appendrow);
                     }
-                }
-                //MATERIAL USAGE DETAILS
-
-                $('#SRCH_material_table tr:not(:first)').remove();
-                if(material_details!=null)
-                {
-                    for(var p=0;p<material_details.length;p++)
-                    {
-                        var tablerowCount=$('#SRCH_material_table tr').length;
-                        var editid='SRCH_material_editrow/'+tablerowCount;
-                        var deleterowid='SRCH_material_deleterow/'+tablerowCount;
-                        var row_id="SRCH_material_tr_"+tablerowCount;
-                        var temp_textbox_id="SRCH_materialtemp_id"+tablerowCount;
-                        if(material_details[p][1]==null){material_details[p][1]="SELECT";}
-                        if(material_details[p][2]==null){material_details[p][2]="";}
-                        if(material_details[p][3]==null){material_details[p][3]="";}
-                        var appendrow='<tr class="active" id='+row_id+'><td style="max-width: 250px">'+material_details[p][1]+'</td><td style="max-width: 250px">'+material_details[p][2]+'</td><td style="max-width: 250px">'+material_details[p][3]+'</td></tr>';
-                        $('#SRCH_material_table tr:last').after(appendrow);
+                    //STOCK USAGE DETAILS
+                    $('#SRCH_stockusage_table tr:not(:first)').remove();
+                    if (stock_details != null) {
+                        for (var q = 0; q < stock_details.length; q++) {
+                            var tablerowCount = $('#SRCH_stockusage_table tr').length;
+                            var editid = 'SRCH_stock_editrow/' + tablerowCount;
+                            var deleterowid = 'SRCH_stock_deleterow/' + tablerowCount;
+                            var row_id = "SRCH_stock_tr_" + tablerowCount;
+                            var temp_textbox_id = "SRCH_stocktemp_id" + tablerowCount;
+                            if (stock_details[q][1] == null) {
+                                stock_details[q][1] = "SELECT";
+                            }
+                            if (stock_details[q][2] == null) {
+                                stock_details[q][2] = "";
+                            }
+                            if (stock_details[q][3] == null) {
+                                stock_details[q][3] = "";
+                            }
+                            var appendrow = '<tr class="active" id=' + row_id + '><td style="max-width: 250px">' + stock_details[q][1] + '</td><td style="max-width: 250px">' + stock_details[q][2] + '</td><td style="max-width: 250px">' + stock_details[q][3] + '</td></tr>';
+                            $('#SRCH_stockusage_table tr:last').after(appendrow);
+                        }
                     }
-                }
-                    $('#SRCH_searchbtn').attr('disabled','disabled');
+                    $('#SRCH_searchbtn').attr('disabled', 'disabled');
                     $('.preloader').hide();
-
                 }
                 else
                 {
@@ -515,7 +566,7 @@ $(document).ready(function(){
             for (var i=0;i<teamname.length;i++) {
                 team += '<option value="' + teamname[i] + '">' + teamname[i] + '</option>';
             }
-            $('#SRCH_tr_lb_team').html(team);
+            $('#SRCH_tr_tb_team').html(team);
             $('#SRCH_team_lb_team').html(team);
             //MACHINERY_TYPE
             var machinery_type='<option>SELECT</option>';
@@ -1429,697 +1480,742 @@ $(document).ready(function(){
 <body>
 <div class="preloader"><span class="Centerer"></span><img class="preloaderimg"/> </div>
 <div class="container">
-<div class="panel panel-info">
-<div class="panel-heading">
-    <h3 class="panel-title">REPORT SUBMISSION SEARCH</h3>
-</div>
-<div class="panel-body">
-<div class="row form-group">
-    <div class="col-md-1"></div>
-    <div class="col-md-2">
-        <label>DATE</label>
-        <div class="input-group">
-            <input id="SRCH_search_date" name="SRCH_search_date" type="text" class="date-picker datemandtry form-control" placeholder="Date"/>
-            <label for="SRCH_search_date" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
-            </label>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">REPORT SUBMISSION SEARCH</h3>
         </div>
-    </div>
-    <div class="col-md-3">
-        <label style="color: white">*</label>
-        <div class="input-group">
-            <button type="button" id="SRCH_searchbtn" class="btn btn-info" disabled>SEARCH</button>
-        </div>
-    </div>
-</div>
-<form id="SRCH_entryform" class="form-horizontal" hidden>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">TEAM REPORT</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form id="teamreport" class="form-horizontal">-->
-        <fieldset disabled>
+        <div class="panel-body">
             <div class="row form-group">
-                <div class="col-md-3">
-                    <label id="tr_lbl_location">LOCATION</label>
-                    <input type="text" class="form-control txtlen" id="SRCH_tr_txt_location" name="SRCH_tr_txt_location" placeholder="Location">
-                </div>
-                <div class="col-md-3">
-                    <label  id="tr_lbl_contactno">CONTRACT NO</label>
-                    <input type="text" class="form-control decimal quantity" id="SRCH_tr_txt_contractno" name="SRCH_tr_txt_contractno" placeholder="Contact No">
-                </div>
-                <div class="col-md-3 selectContainer">
-                    <label id="tr_lbl_team">TEAM</label>
-                    <input type="text" class="form-control" id="SRCH_tr_lb_team" disabled name="SRCH_tr_lb_team" placeholder="Team" />
-                </div>
-                <div class="col-md-3">
-                    <label id="tr_lbl_date">DATE<em>*</em></label>
+                <div class="col-md-1"></div>
+                <div class="col-md-2">
+                    <label>DATE</label>
                     <div class="input-group">
-                        <input id="SRCH_tr_txt_date" name="SRCH_tr_txt_date" type="text" class="form-control" placeholder="Date"/>
-                        <label for="SRCH_tr_txt_date" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+                        <input id="SRCH_search_date" name="SRCH_search_date" type="text" class="date-picker datemandtry form-control" placeholder="Date"/>
+                        <label for="SRCH_search_date" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
                         </label>
                     </div>
                 </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label id="SRCH_tr_lbl_weather">WEATHER</label>
-                    <input type="text" class="form-control txtlen" id="SRCH_tr_txt_weather" name="SRCH_tr_txt_weather" placeholder="Weather">
-                </div>
-                <div class="col-md-2">
-                    <label id="SRCH_tr_lbl_reachsite">FROM</label>
-                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_wftime" name="SRCH_tr_txt_wftime" placeholder="Weather Time">
-                </div>
-                <div class="col-md-2">
-                    <label id="tr_lbl_leavesite">TO</label>
-                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_wttime" name="SRCH_tr_txt_wttime" placeholder="Weather Time">
-                </div>
-                <div class="col-md-2">
-                    <label id="tr_lbl_reachsite">REACH SITE</label>
-                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_reachsite"  name="SRCH_tr_txt_reachsite" placeholder="Time">
-                </div>
-                <div class="col-md-2">
-                    <label id="tr_lbl_leavesite">LEAVE SITE</label>
-                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_leavesite" name="SRCH_tr_txt_leavesite" placeholder="Time">
-                </div>
-            </div>
-            <div class="row form-group">
-                <div class="checkbox-inline">
-                    <label>TYPE OF JOB</label>
-                    <div id="type_of_job">
+                <div class="col-md-3">
+                    <div class="col-md-3" style="padding-top:25px">
+                        <button type="button" id="SRCH_searchbtn" class="btn btn-info" disabled>SEARCH</button>
                     </div>
                 </div>
             </div>
-        </fieldset>
-        <!--      </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">TOOLBOX MEETING</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form>-->
-        <fieldset disabled hidden>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label for="SRCH_mt_lbl_topic" id="SRCH_mt_lbl_topic">TOPIC</label>
-                    <input type="text" class="form-control meetingform-validation" id="SRCH_mt_lb_topic" name="SRCH_mt_lb_topic" placeholder="Topic">
-                </div>
-                <div class="col-md-8">
-                    <label for="SRCH_mt_lbl_remark" id="SRCH_mt_lbl_remark">REMARKS</label>
-                    <textarea class="form-control meetingform-validation" rows="1" id="SRCH_mt_ta_remark" name="SRCH_mt_ta_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" name="SRCH_mt_rowid" id="SRCH_mt_rowid" class="form-control">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_mt_btn_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_mt_btn_update" class="btn btn-info SRCH_mt_btn_updaterow" disabled>UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover" id="SRCH_meeting_table">
-                <thead>
-                <tr class="active">
-<!--                    <th width="300px">EDIT/REMOVE</th>-->
-                    <th width="500">TOPIC</th>
-                    <th>REMARKS</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">JOB DONE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form id="jobdone" class="form-horizontal" role="form">-->
-        <fieldset disabled>
-            <div class="table-responsive">
-                <table class="table" border="1" style="border: #ddd;">
-                    <tr>
-                        <td class="jobthl">
-                            <label style="padding-bottom: 15px"></label>
-                            <label id="SRCH_tr_lbl_pipelaid">PIPE LAID</label>
-                        </td>
-                        <td colspan="2" style="text-align: center">
-                            <div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="SRCH_jd_chk_road" name="SRCH_jd_chk_road"> ROAD
-                                    </label>
+            <form id="SRCH_entryform" class="form-horizontal" hidden>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">TEAM REPORT</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form id="teamreport" class="form-horizontal">-->
+                        <fieldset disabled>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label id="tr_lbl_location">LOCATION</label>
+                                    <input type="text" class="form-control txtlen" id="SRCH_tr_txt_location" name="SRCH_tr_txt_location" placeholder="Location">
+                                </div>
+                                <div class="col-md-3">
+                                    <label  id="tr_lbl_contactno">CONTRACT NO <em>*</em></label>
+                                    <input type="text" class="form-control" id="SRCH_tr_txt_contractno" name="SRCH_tr_txt_contractno" placeholder="Contract No">
+                                </div>
+                                <div class="col-md-3 selectContainer">
+                                    <label id="tr_lbl_team">TEAM</label>
+                                    <input type="text" class="form-control" id="SRCH_tr_tb_team" disabled name="SRCH_tr_tb_team" placeholder="Team" />
+                                </div>
+                                <div class="col-md-2">
+                                    <label id="tr_lbl_date">DATE <em>*</em></label>
+                                    <div class="input-group">
+                                        <input id="SRCH_tr_txt_date" name="SRCH_tr_txt_date" type="text" class="form-control" placeholder="Date"/>
+                                        <label for="SRCH_tr_txt_date" class="input-group-addon btn"><span class="glyphicon glyphicon-calendar"></span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-                        </td>
-                        <td colspan="2" style="text-align: center">
-                            <div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="SRCH_jd_chk_contc" name="SRCH_jd_chk_contc"> CONC
-                                    </label>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label id="SRCH_tr_lbl_weather">WEATHER</label>
+                                    <input type="text" class="form-control txtlen" id="SRCH_tr_txt_weather" name="SRCH_tr_txt_weather" placeholder="Weather">
+                                </div>
+                                <div class="col-md-2">
+                                    <label id="SRCH_tr_lbl_reachsite">FROM</label>
+                                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_wftime" name="SRCH_tr_txt_wftime" placeholder="Weather Time">
+                                </div>
+                                <div class="col-md-2">
+                                    <label id="tr_lbl_leavesite">TO</label>
+                                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_wttime" name="SRCH_tr_txt_wttime" placeholder="Weather Time">
+                                </div>
+                                <div class="col-md-2">
+                                    <label id="tr_lbl_reachsite">REACH SITE</label>
+                                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_reachsite"  name="SRCH_tr_txt_reachsite" placeholder="Time">
+                                </div>
+                                <div class="col-md-2">
+                                    <label id="tr_lbl_leavesite">LEAVE SITE</label>
+                                    <input type="text" class="form-control time-picker" id="SRCH_tr_txt_leavesite" name="SRCH_tr_txt_leavesite" placeholder="Time">
                                 </div>
                             </div>
-                        </td>
-                        <td colspan="2" style="text-align: center">
-                            <div>
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" id="SRCH_jd_chk_truf" name="SRCH_jd_chk_truf"> TURF
-                                    </label>
+                            <div class="row form-group">
+                                <div class="checkbox-inline">
+                                    <label>TYPE OF JOB</label>
+                                    <div id="type_of_job">
+                                    </div>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="jobthl" style="border-top: 1px solid white;">
-                            <label style="padding-bottom: 15px"> </label>
-                            <label id="SRCH_tr_lbl_location">SIZE/LENGTH</label>
-                        </td>
-                        <td class="jobtd" style="border-top: 1px solid white;">
-                            <div>
-                                <label>M</label>
-                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadm" name="SRCH_jd_chk_roadm" placeholder="M">
+                        </fieldset>
+                        <!--      </form>-->
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">TOOLBOX MEETING</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form>-->
+                        <fieldset disabled hidden>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label for="SRCH_mt_lbl_topic" id="SRCH_mt_lbl_topic">TOPIC</label>
+                                    <input type="text" class="form-control meetingform-validation" id="SRCH_mt_lb_topic" name="SRCH_mt_lb_topic" placeholder="Topic">
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="SRCH_mt_lbl_remark" id="SRCH_mt_lbl_remark">REMARKS</label>
+                                    <textarea class="form-control meetingform-validation" rows="1" id="SRCH_mt_ta_remark" name="SRCH_mt_ta_remark" placeholder="Remarks"></textarea>
+                                </div>
                             </div>
-                        </td>
-                        <td style="border-top: 1px solid white;">
-                            <div>
-                                <label>MM</label>
-                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadmm"  name="SRCH_jd_chk_roadmm" placeholder="MM">
+                            <div class="row">
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" name="SRCH_mt_rowid" id="SRCH_mt_rowid" class="form-control">
+                                </div>
                             </div>
-                        </td>
-                        <td class="jobtd" style="border-top: 1px solid white;">
-                            <div>
-                                <label>M</label>
-                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concm"   name="SRCH_jd_chk_concm" placeholder="M">
+
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_mt_btn_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_mt_btn_update" class="btn btn-info SRCH_mt_btn_updaterow" disabled>UPDATE</button>
                             </div>
-                        </td>
-                        <td style="border-top: 1px solid white;">
-                            <div>
-                                <label>MM</label>
-                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concmm" name="SRCH_jd_chk_concmm" placeholder="MM">
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_meeting_table">
+                                <thead>
+                                <tr class="active">
+                                    <!--                    <th width="300px">EDIT/REMOVE</th>-->
+                                    <th width="500">TOPIC</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">JOB DONE</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form id="jobdone" class="form-horizontal" role="form">-->
+                        <fieldset disabled>
+                            <div class="table-responsive">
+                                <table class="table" border="1" style="border: #ddd;">
+                                    <tr>
+                                        <td class="jobthl">
+                                            <label style="padding-bottom: 15px"></label>
+                                            <label id="SRCH_tr_lbl_pipelaid">PIPE LAID</label>
+                                        </td>
+                                        <td colspan="2" style="text-align: center">
+                                            <div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" id="SRCH_jd_chk_road" name="SRCH_jd_chk_road"> ROAD
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td colspan="2" style="text-align: center">
+                                            <div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" id="SRCH_jd_chk_contc" name="SRCH_jd_chk_contc"> CONC
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td colspan="2" style="text-align: center">
+                                            <div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" id="SRCH_jd_chk_truf" name="SRCH_jd_chk_truf"> TURF
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="jobthl" style="border-top: 1px solid white;">
+                                            <label style="padding-bottom: 15px"> </label>
+                                            <label id="SRCH_tr_lbl_location">SIZE/LENGTH</label>
+                                        </td>
+                                        <td class="jobtd" style="border-top: 1px solid white;">
+                                            <div>
+                                                <label>M</label>
+                                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadm" name="SRCH_jd_chk_roadm" placeholder="M">
+                                            </div>
+                                        </td>
+                                        <td style="border-top: 1px solid white;">
+                                            <div>
+                                                <label>MM</label>
+                                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_roadmm"  name="SRCH_jd_chk_roadmm" placeholder="MM">
+                                            </div>
+                                        </td>
+                                        <td class="jobtd" style="border-top: 1px solid white;">
+                                            <div>
+                                                <label>M</label>
+                                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concm"   name="SRCH_jd_chk_concm" placeholder="M">
+                                            </div>
+                                        </td>
+                                        <td style="border-top: 1px solid white;">
+                                            <div>
+                                                <label>MM</label>
+                                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_concmm" name="SRCH_jd_chk_concmm" placeholder="MM">
+                                            </div>
+                                        </td>
+                                        <td class="jobtd" style="border-top: 1px solid white;">
+                                            <div>
+                                                <label>M</label>
+                                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufm" name="SRCH_jd_chk_trufm" placeholder="M">
+                                            </div>
+                                        </td>
+                                        <td class="jobthr" style="border-top: 1px solid white;">
+                                            <div>
+                                                <label>MM</label>
+                                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufmm" name="SRCH_jd_chk_trufmm" placeholder="MM">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
-                        </td>
-                        <td class="jobtd" style="border-top: 1px solid white;">
-                            <div>
-                                <label>M</label>
-                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufm" name="SRCH_jd_chk_trufm" placeholder="M">
+                        </fieldset>
+                        <div class="row form-group">
+                            <div class="col-md-3">
+                                <label for="SRCH_jd_txt_testing" id="SRCH_jd_lbl_testing">PIPE TESTING</label>
+                                <input type="text" class="form-control txtlen" id="SRCH_jd_txt_pipetesting" name="SRCH_jd_txt_pipetesting" placeholder="Pipe Testing" disabled>
                             </div>
-                        </td>
-                        <td class="jobthr" style="border-top: 1px solid white;">
-                            <div>
-                                <label>MM</label>
-                                <input type="text" class="form-control decimal size" id="SRCH_jd_chk_trufmm" name="SRCH_jd_chk_trufmm" placeholder="MM">
+                            <div class="col-md-3">
+                                <label for="SRCH_jd_txt_start" id="SRCH_jd_lbl_start" >START (PRESSURE)</label>
+                                <input type="text" class="form-control quantity"  id="SRCH_jd_txt_start" name="SRCH_jd_txt_start" placeholder="Start Pressure" disabled>
                             </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                            <div class="col-md-3">
+                                <label for="SRCH_jd_txt_end" id="SRCH_jd_lbl_end">END (PRESSURE)</label>
+                                <input type="text" class="form-control quantity" id="SRCH_jd_txt_end" name="SRCH_jd_txt_end" placeholder="End Pressure" disabled>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="SRCH_jd_ta_remark" id="SRCH_jd_lbl_remark">REMARKS</label>
+                                <textarea class="form-control" rows="1" id="SRCH_jd_ta_remark" name="SRCH_jd_ta_remark" placeholder="Remarks" readonly></textarea>
+                            </div>
+                        </div>
+<!--                        </fieldset>-->
+                        <!--        </form>-->
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">EMPLOYEE REPORT DETAILS</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form>-->
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_Employee_table" readonly name="SRCH_Employee_table">
+                                <thead>
+                                <tr class="active">
+                                    <th>NAME</th>
+                                    <th>START TIME</th>
+                                    <th>END TIME</th>
+                                    <th>OT</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">SITE VISIT</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    <label>DESIGNATION</label>
+                                    <input class="form-control form-validation txtlen" id="SRCH_sv_txt_designation" placeholder="Designation"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>NAME</label>
+                                    <input class="form-control form-validation txtlen" id="SRCH_sv_txt_name" placeholder="Name"/>
+                                </div>
 
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label for="SRCH_jd_txt_testing" id="SRCH_jd_lbl_testing">PIPE TESTING</label>
-                    <input type="text" class="form-control txtlen" id="SRCH_jd_txt_pipetesting" name="SRCH_jd_txt_pipetesting" placeholder="Pipe Testing">
-                </div>
-                <div class="col-md-3">
-                    <label for="SRCH_jd_txt_start" id="SRCH_jd_lbl_start" >START (PRESSURE)</label>
-                    <input type="text" class="form-control quantity"  id="SRCH_jd_txt_start" name="SRCH_jd_txt_start" placeholder="Start Pressure">
-                </div>
-                <div class="col-md-3">
-                    <label for="SRCH_jd_txt_end" id="SRCH_jd_lbl_end">END (PRESSURE)</label>
-                    <input type="text" class="form-control quantity" id="SRCH_jd_txt_end" name="SRCH_jd_txt_end" placeholder="End Pressure">
-                </div>
-                <div class="col-md-3">
-                    <label for="SRCH_jd_ta_remark" id="SRCH_jd_lbl_remark">REMARKS</label>
-                    <textarea class="form-control" rows="1" id="SRCH_jd_ta_remark" name="SRCH_jd_ta_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-        </fieldset>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">EMPLOYEE REPORT DETAILS</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form>-->
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_Employee_table" readonly name="SRCH_Employee_table">
-            <thead>
-            <tr class="active">
-                <th>NAME</th>
-                <th>START TIME</th>
-                <th>END TIME</th>
-                <th>OT</th>
-                <th>REMARKS</th>
-            </tr>
-            </thead>
-        </table>
-            </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">SITE VISIT</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset hidden disabled>
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label>DESIGNATION</label>
-                    <input class="form-control form-validation txtlen" id="SRCH_sv_txt_designation" placeholder="Designation"/>
-                </div>
-                <div class="col-md-3">
-                    <label>NAME</label>
-                    <input class="form-control form-validation txtlen" id="SRCH_sv_txt_name" placeholder="Name"/>
-                </div>
+                                <div class="col-md-1">
+                                    <label>START</label>
+                                    <input type="text" class="form-control form-validation time-picker" id="SRCH_sv_txt_start" placeholder="Time">
+                                </div>
+                                <div class="col-md-1">
+                                    <label>END</label>
+                                    <input type="text" class="form-control form-validation time-picker" id="SRCH_sv_txt_end" placeholder="Time">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>REMARKS</label>
+                                    <textarea class="form-control form-validation"  rows="1" id="SRCH_sv_txt_remark" placeholder="Remarks"></textarea>
+                                </div>
+                            </div>
 
-                <div class="col-md-1">
-                    <label>START</label>
-                    <input type="text" class="form-control form-validation time-picker" id="SRCH_sv_txt_start" placeholder="Time">
-                </div>
-                <div class="col-md-1">
-                    <label>END</label>
-                    <input type="text" class="form-control form-validation time-picker" id="SRCH_sv_txt_end" placeholder="Time">
-                </div>
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control form-validation"  rows="1" id="SRCH_sv_txt_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" id="SRCH_sv_rowid" name="sv_rowid" class="form-control">
+                                </div>
+                            </div>
 
-            <div class="row">
-                <div class="col-md-4">
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_sv_btn_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_sv_btn_update" class="btn btn-info SRCH_sv_btn_updaterow" disabled>UPDATE</button>
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_sv_tbl">
+                                <thead>
+                                <tr class="active">
+                                    <!--                <th>Edit Remove</th>-->
+                                    <th>DESIGNATION</th>
+                                    <th>NAME</th>
+                                    <th>START</th>
+                                    <th>END</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <input type="hidden" id="SRCH_sv_rowid" name="sv_rowid" class="form-control">
-                </div>
-            </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">MACHINERY / EQUIPMENT TRANSFER</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    <label>FROM (LORRY NO)</label>
+                                    <input type="text" class="form-control SRCH_form-validation quantity" id="SRCH_mtranser_from" name="SRCH_mtranser_from" placeholder="From (Lorry No)">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>ITEM</label>
+                                    <input type="text" class="form-control SRCH_form-validation txtlen" id="SRCH_mtransfer_item" name="SRCH_mtransfer_item" placeholder="Item">
+                                </div>
 
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_sv_btn_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_sv_btn_update" class="btn btn-info SRCH_sv_btn_updaterow" disabled>UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_sv_tbl">
-            <thead>
-            <tr class="active">
-<!--                <th>Edit Remove</th>-->
-                <th>DESIGNATION</th>
-                <th>NAME</th>
-                <th>START</th>
-                <th>END</th>
-                <th>REMARKS</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-       </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">MACHINERY / EQUIPMENT TRANSFER</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset hidden disabled>
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label>FROM (LORRY NO)</label>
-                    <input type="text" class="form-control SRCH_form-validation quantity" id="SRCH_mtranser_from" name="SRCH_mtranser_from" placeholder="From (Lorry No)">
-                </div>
-                <div class="col-md-3">
-                    <label>ITEM</label>
-                    <input type="text" class="form-control SRCH_form-validation txtlen" id="SRCH_mtransfer_item" name="SRCH_mtransfer_item" placeholder="Item">
-                </div>
+                                <div class="col-md-3">
+                                    <label>TO (LORRY NO)</label>
+                                    <input type="text" class="form-control SRCH_form-validation quantity" id="SRCH_mtransfer_to"  name="SRCH_mtransfer_to" placeholder="To (Lorry No)">
+                                </div>
 
-                <div class="col-md-3">
-                    <label>TO (LORRY NO)</label>
-                    <input type="text" class="form-control SRCH_form-validation quantity" id="SRCH_mtransfer_to"  name="SRCH_mtransfer_to" placeholder="To (Lorry No)">
+                                <div class="col-md-3">
+                                    <label>REMARK</label>
+                                    <textarea class="form-control SRCH_form-validation" id="SRCH_mtransfer_remark"  rows="1" name="SRCH_mtransfer_remark" placeholder="Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" id="SRCH_mtransfer_rowid" name="SRCH_mtransfer_rowid" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_mtransfer_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_mtransfer_update" class="btn btn-info SRCH_mtransfer_updaterow" disabled>UPDATE</button>
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_mtransfer_table" name="SRCH_mtransfer_table">
+                                <thead>
+                                <tr class="active">
+                                    <!--                <th>Edit Remove</th>-->
+                                    <th>FROM(LORRY NO)</th>
+                                    <th>ITEM</th>
+                                    <th>TO(LORRY NO)</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
                 </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">MACHINERY USAGE</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label>MACHINERY TYPE</label>
+                                    <select class="form-control SRCH_machineryform-validation" id="SRCH_machinery_type" name="SRCH_machinery_type">
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>START</label>
+                                    <input type="text" class="form-control SRCH_machineryform-validation time-picker"  id="SRCH_machinery_start" name="SRCH_machinery_start" placeholder="Time">
+                                </div>
 
-                <div class="col-md-3">
-                    <label>REMARK</label>
-                    <textarea class="form-control SRCH_form-validation" id="SRCH_mtransfer_remark"  rows="1" name="SRCH_mtransfer_remark" placeholder="Remarks"></textarea>
+                                <div class="col-md-2">
+                                    <label>END</label>
+                                    <input type="text" class="form-control SRCH_machineryform-validation time-picker"  id="SRCH_machinery_end"  name="SRCH_machinery_end" placeholder="Time">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>REMARKS</label>
+                                    <textarea class="form-control SRCH_machineryform-validation" id="SRCH_machinery_remarks" rows="1" name="SRCH_machinery_remarks" placeholder="Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" id="SRCH_machinery_rowid" name="SRCH_machinery_rowid" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_machinery_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_machinery_update" class="btn btn-info SRCH_machinery_updaterow" disabled>UPDATE</button>
+
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_machinery_table" name="SRCH_machinery_table">
+                                <thead>
+                                <tr class="active">
+                                    <!--                <th>Edit Remove</th>-->
+                                    <th>MACHINERY TYPE</th>
+                                    <th>START TIME</th>
+                                    <th>END TIME</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">RENTAL MACHINERY</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label>LORRY NUMBER</label>
+                                    <input type="text" class="form-control SRCH_rentalform-validation quantity lorryno" id="SRCH_rental_lorryno" name="SRCH_rental_lorryno" placeholder="Lorry Name">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>THROW EARTH(STORE)</label>
+                                    <input type="text" class="form-control SRCH_rentalform-validation decimal size" id="SRCH_rental_throwearthstore" name="SRCH_rental_throwearthstore" placeholder="Throw Earth(Store)">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>THROW EARTH(OUTSIDE)</label>
+                                    <input type="text" class="form-control SRCH_rentalform-validation decimal size" id="SRCH_rental_throwearthoutside" name="SRCH_rental_throwearthoutside" placeholder="Throwe Earth(Outside)">
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-2">
+                                    <label>START TIME</label>
+                                    <input type="text" class="form-control SRCH_rentalform-validation time-picker" id="SRCH_rental_start" name="SRCH_rental_start" placeholder="Time">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label>END TIME</label>
+                                    <input type="text" class="form-control SRCH_rentalform-validation  time-picker" id="SRCH_rental_end"  name="SRCH_rental_end" placeholder="Time">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>REMARK</label>
+                                    <textarea class="form-control SRCH_rentalform-validation" id="SRCH_rental_remarks" rows="1" name="SRCH_rental_remarks" placeholder="Remarks"></textarea>
+                                    <input type="hidden" class="form-control" id="SRCH_rentalmechinery_id" name="SRCH_rentalmechinery_id">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_rentalmechinery_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_rentalmechinery_updaterow" class="btn btn-info SRCH_rentalmechineryupdaterow" disabled>UPDATE</button>
+
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_rental_table">
+                                <thead>
+                                <tr class="active">
+                                    <!--                <th>Edit Remove</th>-->
+                                    <th>LORRY NO</th>
+                                    <th>THROW EARTH(STORE)</th>
+                                    <th>THROW EARTH(OUTSIDE)</th>
+                                    <th>START TIME</th>
+                                    <th>END TIME</th>
+                                    <th>REMAKRS</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <input type="hidden" id="SRCH_mtransfer_rowid" name="SRCH_mtransfer_rowid" class="form-control">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">EQUIPMENT USAGE</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    <label>AIR-COMPRESSOR</label>
+                                    <input type="text" class="form-control SRCH_equipmentform-validation txtlen "  id="SRCH_equipment_aircompressor" name="SRCH_equipment_aircompressor" placeholder="Air-Compressor">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>LORRY NO(TRANSPORT)</label>
+                                    <input type="text" class="form-control SRCH_equipmentform-validation quantity lorryno" id="SRCH_equipment_lorryno" name="SRCH_equipment_lorryno" placeholder="Lorry No(Transport)">
+                                </div>
+                                <div class="col-md-1">
+                                    <label>START</label>
+                                    <input type="text" class="form-control SRCH_equipmentform-validation time-picker" id="SRCH_equipment_start"  name="SRCH_equipment_start" placeholder="Time">
+                                </div>
+                                <div class="col-md-1">
+                                    <label>END</label>
+                                    <input type="text" class="form-control SRCH_equipmentform-validation time-picker" id="SRCH_equipment_end"  name="SRCH_equipment_end" placeholder="Time">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>REMARK</label>
+                                    <textarea class="form-control SRCH_equipmentform-validation" rows="1" id="SRCH_equipment_remark"  name="SRCH_equipment_remark" placeholder="Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" id="SRCH_equipment_rowid" name="SRCH_equipment_rowid" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_equipment_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_equipment_update" class="btn btn-info SRCH_equipment_updaterow" disabled>UPDATE</button>
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_equipment_table" name="SRCH_equipment_table">
+                                <thead>
+                                <tr class="active">
+                                    <!--                <th>Edit Remove</th>-->
+                                    <th>AIR COMPRESSOR</th>
+                                    <th>LORRY NO(TRANSPORT)</th>
+                                    <th>START TIME</th>
+                                    <th>END TIME</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
                 </div>
-            </div>
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_mtransfer_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_mtransfer_update" class="btn btn-info SRCH_mtransfer_updaterow" disabled>UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_mtransfer_table" name="SRCH_mtransfer_table">
-            <thead>
-            <tr class="active">
-<!--                <th>Edit Remove</th>-->
-                <th>FROM(LORRY NO)</th>
-                <th>ITEM</th>
-                <th>TO(LORRY NO)</th>
-                <th>REMARKS</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">FITTINGS USAGE</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label>ITEMS</label>
+                                    <select class="form-control SRCH_fittingform-validation" id="SRCH_fitting_items" name="SRCH_fitting_items" placeholder="Items">
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label>SIZE</label>
+                                    <input type="text" class="form-control SRCH_fittingform-validation decimal size" id="SRCH_fitting_size" name="SRCH_fitting_size" placeholder="MM">
+                                </div>
+                                <div class="col-md-2">
+                                    <label>QUANTITY</label>
+                                    <input type="text" class="form-control SRCH_fittingform-validation decimal size" id="SRCH_fitting_quantity" name="SRCH_fitting_quantity" placeholder="Quantity">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>REMARKS</label>
+                                    <textarea class="form-control SRCH_fittingform-validation" rows="1" id="SRCH_fitting_remarks" name="SRCH_fitting_remarks" placeholder="Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="hidden" class="form-control" id="SRCH_fitting_id" name="SRCH_fitting_id">
+                                </div>
+                            </div>
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_fitting_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_fitting_updaterow" class="btn btn-info  SRCH_fittingupdaterow" disabled>UPDATE</button>
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_fitting_table">
+                                <thead>
+                                <tr class="active">
+                                    <!--                <th>Edit Remove</th>-->
+                                    <th>ITEMS</th>
+                                    <th>SIZE</th>
+                                    <th>QUANTITY</th>
+                                    <th>REMARKS</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">MATERIAL USAGE</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label>ITEMS</label>
+                                    <select class="form-control SRCH_materialform-validation" id="SRCH_material_items" name="SRCH_material_items" placeholder="Items">
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>RECEIPT NO</label>
+                                    <input type="text" class="form-control SRCH_materialform-validation quantity" id="SRCH_material_receipt" name="SRCH_material_receipt" placeholder="Receipt No">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>QUANTITY</label>
+                                    <input type="text" class="form-control SRCH_materialform-validation decimal" id="SRCH_material_quantity" name="SRCH_material_quantity" placeholder="Quantity">
+                                    <input type="hidden" class="form-control" id="SRCH_material_id" name="SRCH_material_id">
+                                </div>
+                            </div>
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_material_addrow" class="btn btn-info" disabled>ADD</button>
+                                <button type="button" id="SRCH_material_updaterow" class="btn btn-info SRCH_materialupdaterow" disabled>UPDATE</button>
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_material_table">
+                                <thead>
+                                <tr class="active">
+                                    <!--                    <th>Edit Remove</th>-->
+                                    <th>ITEMS</th>
+                                    <th>RECEIPT NO</th>
+                                    <th>QTY (KG/BAGS/LTR/PCS)</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">SITE STOCK USAGE</h3>
+                    </div>
+                    <div class="panel-body">
+                        <!--        <form class="form-horizontal">-->
+                        <fieldset hidden disabled>
+                            <div class="row form-group">
+                                <div class="col-md-4">
+                                    <label>ITEM NO</label>
+                                    <select class="form-control SRCH_stockusageform-validation" id="SRCH_stock_itemno" name="SRCH_stock_itemno">
+                                        <option>SELECT</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>ITEM NAME</label>
+                                    <input type="text" class="form-control SRCH_stockusageform-validation" id="SRCH_stock_itemname" name="SRCH_stock_itemname" placeholder="Item Name" disabled>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>QUANTITY</label>
+                                    <input type="text" class="form-control SRCH_stockusageform-validation decimal size" id="SRCH_stock_quantity" name="SRCH_stock_quantity" placeholder="Quantity">
+                                    <input type="hidden" class="form-control" id="SRCH_stock_id" name="SRCH_stock_id">
+                                </div>
+                            </div>
+                            <div class="col-lg-9 col-lg-offset-11">
+                                <button type="button" id="SRCH_stock_addrow" class="btn btn-info" >ADD</button>
+                                <button type="button" id="SRCH_stock_updaterow" class="btn btn-info SRCH_stockupdaterow" >UPDATE</button>
+                            </div>
+                        </fieldset>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="SRCH_stockusage_table">
+                                <thead>
+                                <tr class="active">
+<!--                                    <th>EDIT/REMOVE</th>-->
+                                    <th>ITEM NO</th>
+                                    <th>ITEM NAME</th>
+                                    <th>QUANTITY</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!--        </form>-->
+                    </div>
+                </div>
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">DRAWING AREA</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div id="appendimg">
+
+                        </div>
+                        <!--        </form>-->
+                    </div>
+                </div>
+            </form>
         </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">MACHINERY USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset hidden disabled>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>MACHINERY TYPE</label>
-                    <select class="form-control SRCH_machineryform-validation" id="SRCH_machinery_type" name="SRCH_machinery_type">
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>START</label>
-                    <input type="text" class="form-control SRCH_machineryform-validation time-picker"  id="SRCH_machinery_start" name="SRCH_machinery_start" placeholder="Time">
-                </div>
-
-                <div class="col-md-2">
-                    <label>END</label>
-                    <input type="text" class="form-control SRCH_machineryform-validation time-picker"  id="SRCH_machinery_end"  name="SRCH_machinery_end" placeholder="Time">
-                </div>
-
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control SRCH_machineryform-validation" id="SRCH_machinery_remarks" rows="1" name="SRCH_machinery_remarks" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" id="SRCH_machinery_rowid" name="SRCH_machinery_rowid" class="form-control">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_machinery_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_machinery_update" class="btn btn-info SRCH_machinery_updaterow" disabled>UPDATE</button>
-
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_machinery_table" name="SRCH_machinery_table">
-            <thead>
-            <tr class="active">
-<!--                <th>Edit Remove</th>-->
-                <th>MACHINERY TYPE</th>
-                <th>START TIME</th>
-                <th>END TIME</th>
-                <th>REMARKS</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-       </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">RENTAL MACHINERY</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset hidden disabled>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>LORRY NUMBER</label>
-                    <input type="text" class="form-control SRCH_rentalform-validation quantity lorryno" id="SRCH_rental_lorryno" name="SRCH_rental_lorryno" placeholder="Lorry Name">
-                </div>
-                <div class="col-md-4">
-                    <label>THROW EARTH(STORE)</label>
-                    <input type="text" class="form-control SRCH_rentalform-validation decimal size" id="SRCH_rental_throwearthstore" name="SRCH_rental_throwearthstore" placeholder="Throw Earth(Store)">
-                </div>
-
-                <div class="col-md-4">
-                    <label>THROW EARTH(OUTSIDE)</label>
-                    <input type="text" class="form-control SRCH_rentalform-validation decimal size" id="SRCH_rental_throwearthoutside" name="SRCH_rental_throwearthoutside" placeholder="Throwe Earth(Outside)">
-                </div>
-            </div>
-            <div class="row form-group">
-                <div class="col-md-2">
-                    <label>START TIME</label>
-                    <input type="text" class="form-control SRCH_rentalform-validation time-picker" id="SRCH_rental_start" name="SRCH_rental_start" placeholder="Time">
-                </div>
-
-                <div class="col-md-2">
-                    <label>END TIME</label>
-                    <input type="text" class="form-control SRCH_rentalform-validation  time-picker" id="SRCH_rental_end"  name="SRCH_rental_end" placeholder="Time">
-                </div>
-
-                <div class="col-md-4">
-                    <label>REMARK</label>
-                    <textarea class="form-control SRCH_rentalform-validation" id="SRCH_rental_remarks" rows="1" name="SRCH_rental_remarks" placeholder="Remarks"></textarea>
-                    <input type="hidden" class="form-control" id="SRCH_rentalmechinery_id" name="SRCH_rentalmechinery_id">
-                </div>
-            </div>
-
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_rentalmechinery_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_rentalmechinery_updaterow" class="btn btn-info SRCH_rentalmechineryupdaterow" disabled>UPDATE</button>
-
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_rental_table">
-            <thead>
-            <tr class="active">
-<!--                <th>Edit Remove</th>-->
-                <th>LORRY NO</th>
-                <th>THROW EARTH(STORE)</th>
-                <th>THROW EARTH(OUTSIDE)</th>
-                <th>START TIME</th>
-                <th>END TIME</th>
-                <th>REMAKRS</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+        <div class="form-group-sm" id="backtotop">
+            <ul class="nav-pills">
+                <li class="pull-right"><a href="#top">Back to top</a></li>
+            </ul>
         </div>
-        <!--        </form>-->
+        <script src="../PAINT/JS/customShape1.js"> </script>
     </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">EQUIPMENT USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset hidden disabled>
-            <div class="row form-group">
-                <div class="col-md-3">
-                    <label>AIR-COMPRESSOR</label>
-                    <input type="text" class="form-control SRCH_equipmentform-validation txtlen "  id="SRCH_equipment_aircompressor" name="SRCH_equipment_aircompressor" placeholder="Air-Compressor">
-                </div>
-                <div class="col-md-3">
-                    <label>LORRY NO(TRANSPORT)</label>
-                    <input type="text" class="form-control SRCH_equipmentform-validation quantity lorryno" id="SRCH_equipment_lorryno" name="SRCH_equipment_lorryno" placeholder="Lorry No(Transport)">
-                </div>
-                <div class="col-md-1">
-                    <label>START</label>
-                    <input type="text" class="form-control SRCH_equipmentform-validation time-picker" id="SRCH_equipment_start"  name="SRCH_equipment_start" placeholder="Time">
-                </div>
-                <div class="col-md-1">
-                    <label>END</label>
-                    <input type="text" class="form-control SRCH_equipmentform-validation time-picker" id="SRCH_equipment_end"  name="SRCH_equipment_end" placeholder="Time">
-                </div>
-                <div class="col-md-4">
-                    <label>REMARK</label>
-                    <textarea class="form-control SRCH_equipmentform-validation" rows="1" id="SRCH_equipment_remark"  name="SRCH_equipment_remark" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" id="SRCH_equipment_rowid" name="SRCH_equipment_rowid" class="form-control">
-                </div>
-            </div>
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_equipment_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_equipment_update" class="btn btn-info SRCH_equipment_updaterow" disabled>UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_equipment_table" name="SRCH_equipment_table">
-            <thead>
-            <tr class="active">
-<!--                <th>Edit Remove</th>-->
-                <th>AIR COMPRESSOR</th>
-                <th>LORRY NO(TRANSPORT)</th>
-                <th>START TIME</th>
-                <th>END TIME</th>
-                <th>REMARKS</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-            </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">FITTINGS USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset hidden disabled>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>ITEMS</label>
-                    <select class="form-control SRCH_fittingform-validation" id="SRCH_fitting_items" name="SRCH_fitting_items" placeholder="Items">
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>SIZE</label>
-                    <input type="text" class="form-control SRCH_fittingform-validation decimal size" id="SRCH_fitting_size" name="SRCH_fitting_size" placeholder="MM">
-                </div>
-                <div class="col-md-2">
-                    <label>QUANTITY</label>
-                    <input type="text" class="form-control SRCH_fittingform-validation decimal size" id="SRCH_fitting_quantity" name="SRCH_fitting_quantity" placeholder="Quantity">
-                </div>
-                <div class="col-md-4">
-                    <label>REMARKS</label>
-                    <textarea class="form-control SRCH_fittingform-validation" rows="1" id="SRCH_fitting_remarks" name="SRCH_fitting_remarks" placeholder="Remarks"></textarea>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                </div>
-                <div class="col-md-4">
-                    <input type="hidden" class="form-control" id="SRCH_fitting_id" name="SRCH_fitting_id">
-                </div>
-            </div>
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_fitting_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_fitting_updaterow" class="btn btn-info  SRCH_fittingupdaterow" disabled>UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_fitting_table">
-            <thead>
-            <tr class="active">
-<!--                <th>Edit Remove</th>-->
-                <th>ITEMS</th>
-                <th>SIZE</th>
-                <th>QUANTITY</th>
-                <th>REMARKS</th>
-            </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-        </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">MATERIAL USAGE</h3>
-    </div>
-    <div class="panel-body">
-        <!--        <form class="form-horizontal">-->
-        <fieldset hidden disabled>
-            <div class="row form-group">
-                <div class="col-md-4">
-                    <label>ITEMS</label>
-                    <select class="form-control SRCH_materialform-validation" id="SRCH_material_items" name="SRCH_material_items" placeholder="Items">
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label>RECEIPT NO</label>
-                    <input type="text" class="form-control SRCH_materialform-validation quantity" id="SRCH_material_receipt" name="SRCH_material_receipt" placeholder="Receipt No">
-                </div>
-
-                <div class="col-md-4">
-                    <label>QUANTITY</label>
-                    <input type="text" class="form-control SRCH_materialform-validation decimal" id="SRCH_material_quantity" name="SRCH_material_quantity" placeholder="Quantity">
-                    <input type="hidden" class="form-control" id="SRCH_material_id" name="SRCH_material_id">
-                </div>
-            </div>
-            <div class="col-lg-9 col-lg-offset-11">
-                <button type="button" id="SRCH_material_addrow" class="btn btn-info" disabled>ADD</button>
-                <button type="button" id="SRCH_material_updaterow" class="btn btn-info SRCH_materialupdaterow" disabled>UPDATE</button>
-            </div>
-        </fieldset>
-        <div class="table-responsive">
-        <table class="table table-striped table-hover" id="SRCH_material_table">
-                <thead>
-                <tr class="active">
-<!--                    <th>Edit Remove</th>-->
-                    <th>ITEMS</th>
-                    <th>RECEIPT NO</th>
-                    <th>QTY (KG/BAGS/LTR/PCS)</th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-       </div>
-        <!--        </form>-->
-    </div>
-</div>
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title">DRAWING AREA</h3>
-    </div>
-    <div class="panel-body">
-            <div id="appendimg">
-                
-            </div>
-        <!--        </form>-->
-    </div>
-</div>
-</form>
-</div>
-<div class="form-group-sm" id="backtotop">
-    <ul class="nav-pills">
-        <li class="pull-right"><a href="#top">Back to top</a></li>
-    </ul>
-</div>
-<script src="../PAINT/JS/customShape1.js"> </script>
-</div>
 </div>
 </body>
 </html>

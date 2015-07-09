@@ -50,7 +50,7 @@ if($_REQUEST['option']=='COMMON_DATA')
 //TEAM CREATION
     $team=mysqli_query($con,"SELECT TC.TEAM_NAME FROM LMC_EMPLOYEE_TEAM_DETAILS ED JOIN LMC_TEAM_CREATION TC WHERE TC.TC_ID = ED.TC_ID AND ED.ULD_ID=$activeemp");
     if($row=mysqli_fetch_array($team)){
-        $teamname[]=$row["TEAM_NAME"];
+        $teamname=$row["TEAM_NAME"];
     }
 //MACHINERY TYPE
     $machtype=mysqli_query($con,"select MCU_MACHINERY_TYPE from LMC_MACHINERY_USAGE ORDER BY MCU_MACHINERY_TYPE ASC");
@@ -82,10 +82,25 @@ if($_REQUEST['option']=='COMMON_DATA')
     while($row=mysqli_fetch_array($mtitem)){
         $mtransferitem[]=$row["MI_ITEM"];
     }
+    // CONTRACT NOs
+    $contract_no=mysqli_query($con,"SELECT CLD_ID,CLD_CONTRACT_NO FROM LMC_CONTRACT_DETAILS WHERE LCS_ID = 1 AND TC_ID=(SELECT TC_ID FROM LMC_TEAM_CREATION WHERE TEAM_NAME='$teamname')");
+    while($row=mysqli_fetch_array($contract_no)){
+        $contractnos[]=array('id'=>$row["CLD_ID"],'no'=>$row["CLD_CONTRACT_NO"]);
+    }
     //ERRPOR MESSAGE
-    $errormsg=get_error_msg('3,6,7,21,143,144,145,147,148,151,152,156,157');
-    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename,$topicname,$UserStamp,$mtransferitem);
+    $errormsg=get_error_msg('3,6,7,21,143,144,145,147,148,151,152,156,157,166');
+    $values=array($teamname,$machinerytype,$fittingitems,$materialitem,$joptype,$errormsg,$employeename,$topicname,$UserStamp,$mtransferitem,$contractnos);
     echo json_encode($values);
+}
+if($_REQUEST['option']=="get_itemnos"){
+    $contct_no=$_REQUEST['contct_no'];
+    // ITEM CODE NAME
+    $itemno=array();
+    $itemdtl=mysqli_query($con,"SELECT LID_ID,LID_ITEM_NO,LID_DESCRIPTION FROM LMC_INVENTORY_ITEM_DETAILS IID,LMC_CONTRACT_DETAILS LCD WHERE IID.CLD_ID=LCD.CLD_ID AND IID.CLD_ID=$contct_no ORDER BY LID_ITEM_NO");
+    while($row=mysqli_fetch_array($itemdtl)){
+        $itemno[]=array('id'=>$row["LID_ID"],'no'=>$row["LID_ITEM_NO"],'name'=>$row["LID_DESCRIPTION"]);
+    }
+    echo json_encode($itemno);
 }
 if($_REQUEST['option']=="checktopic"){
     $topicname=$_GET['topic_name'];
@@ -107,8 +122,8 @@ elseif($_REQUEST['Option']=='InputForm')
 {
     //TEAM REPORT ELEMENTS
     $teamlocation=$_POST["tr_txt_location"];
-    $contractno=$_POST["tr_txt_contractno"];
-    $teamname=$_POST['tr_lb_team'];
+    $contractid=$_POST["tr_lb_contractno"];
+    $teamname=$_POST['tr_tb_team'];
     $reportdate=$_POST['tr_txt_date'];
     $weather=$_POST['tr_txt_weather'];
     $weatherfrom=$_POST['tr_txt_wftime'];
@@ -125,6 +140,11 @@ elseif($_REQUEST['Option']=='InputForm')
         else{
             $typeofjob=$typeofjob .",".$joptype[$i];
         }
+    }
+    // CONTRACT NOs
+    $contract_no=mysqli_query($con,"SELECT CLD_CONTRACT_NO FROM LMC_CONTRACT_DETAILS WHERE CLD_ID = $contractid");
+    while($row=mysqli_fetch_array($contract_no)){
+        $contractno= $row["CLD_CONTRACT_NO"];
     }
 //JOB DONE ELEMENTS
     $pipelaidroad=$_POST['jd_chk_road'];
@@ -163,6 +183,7 @@ elseif($_REQUEST['Option']=='InputForm')
     $size=  $roadm.'^'. $concm.'^'.$turfm;
     $length=  $roadmm.'^'.$concmm.'^'.$turfmm;
     $meeting=$_POST['MeetingDetails'];
+    $stockusage=$_POST['StockDetails'];
     $material=$_POST["MaterialDetails"];
     $fitting=$_POST["FittingDetails"];
     $equipment=$_POST["EquipmentDetails"];
@@ -291,6 +312,7 @@ elseif($_REQUEST['Option']=='InputForm')
     $EUrowNumber='';
     $FUrowNumber='';
     $MIUrowNumber='';
+    $SSUrowNumber='';
 //MEETING SECTION
     $MS_topic;$MS_remarks;
     if($meeting!='null')
@@ -707,6 +729,7 @@ elseif($_REQUEST['Option']=='InputForm')
     if($material!='null')
     {
         $MIUrowNumber=$maxrowNo;
+        $maxrowNo=$maxrowNo+count($material)+3;
         $materialusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>RECEIPT NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->getFont()->setBold(true);
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->applyFromArray($styleArray);
@@ -746,6 +769,50 @@ elseif($_REQUEST['Option']=='InputForm')
         $materialusagetable=$materialusagetable.'</table>';
         $finaltable=$finaltable.'<br><br><tr><td>'.$materialusagetable.'</td></tr>';
     }
+//Site Stock Usage //
+    $stockitemno;$stockitemname;$stockqty;
+    if($stockusage!='null')
+    {
+        $SSUrowNumber=$maxrowNo;
+        $stockusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">SITE STOCK USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" height=20px><td height=20px align="center" style="color:white;" nowrap><b>ITEM NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>ITEM NAME</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SSUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SSUrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$SSUrowNumber,'SITE STOCK USAGE');
+        $SSUrowNumber++;
+        $objPHPExcel->getActiveSheet()->getStyle($SSUrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SSUrowNumber.':G'.$SSUrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$SSUrowNumber,'ITEM NO');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$SSUrowNumber.':C'.$SSUrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('B'.$SSUrowNumber,'ITEM NAME');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$SSUrowNumber.':G'.$SSUrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('D'.$SSUrowNumber,'QUANTITY');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SSUrowNumber.':G'.$SSUrowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SSUrowNumber.':G'.$SSUrowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$SSUrowNumber.':G'.$SSUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $SSUrowNumber++;
+        for($i=0;$i<count($stockusage);$i++)
+        {
+            $stockusagetable=$stockusagetable."<tr style='padding-left: 10px;' height=20px ><td height=20px nowrap style='padding-left: 10px;text-align:center;'>".$stockusage[$i][0]."</td><td height=20px nowrap>".$stockusage[$i][1]."</td><td height=20px nowrap style='text-align:center;'>".$stockusage[$i][2]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('B'.$SSUrowNumber.':G'.$SSUrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$SSUrowNumber.':G'.$SSUrowNumber)->applyFromArray($styleArray);
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$SSUrowNumber,$stockusage[$i][0]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$SSUrowNumber.':C'.$SSUrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('B'.$SSUrowNumber,$stockusage[$i][1]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$SSUrowNumber.':G'.$SSUrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('D'.$SSUrowNumber,$stockusage[$i][2]);
+            if($i==0)
+            {
+                $stockitemno=$stockusage[$i][0]; $stockitemname=$stockusage[$i][1];$stockqty=$stockusage[$i][2];
+            }
+            else
+            {
+                $stockitemno=$stockitemno.'^'.$stockusage[$i][0]; $stockitemname=$stockitemname.'^'.$stockusage[$i][1];$stockqty=$stockqty.'^'.$stockusage[$i][2];
+            }
+            $SSUrowNumber++;
+        }
+        $stockusagetable=$stockusagetable.'</table>';
+        $finaltable=$finaltable.'<br><br><tr><td>'.$stockusagetable.'</td></tr>';
+    }
     header('Content-Type: application/vnd.ms-excel');
     header('Content-Disposition: attachment;filename="simple.xls"');
     header('Cache-Control: max-age=0');
@@ -772,7 +839,6 @@ elseif($_REQUEST['Option']=='InputForm')
     $mech_remark=$con->real_escape_string($mech_remark);
     $mechineryremark=$con->real_escape_string($mechineryremark);
     $fittingremark=$con->real_escape_string($fittingremark);
-    $materialqty=$con->real_escape_string($materialqty);
     $rental_remark=$con->real_escape_string($rental_remark);
     $equipmentremark=$con->real_escape_string($equipmentremark);
     $MS_remarks=$con->real_escape_string($MS_remarks);
@@ -780,18 +846,17 @@ elseif($_REQUEST['Option']=='InputForm')
 //Save Part
     if($imgflag==1){
         $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(1,'$teamname','$EmployeeReport[0]',
-       '$reportdate','$teamlocation','$contractno','$reachsite','$leavesite','$typeofjob','$weather',
-       '$weatherfrom','$weatherto','$pipetesting','$pressurestart','$pressureend','$teamremarks','$imgfilename',
-       '$pipelaid','$size','$length',
-       '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$Employeeremark',
-       ' ','$SV_name','$SV_designation','$SV_start','$SV_end','$SV_remarks',
-       ' ','$mech_from','$mech_to','$mech_item','$mech_remark',
-       ' ','$mechinerytype','$mechinerystart','$mechineryend','$mechineryremark',
-       ' ','$fittingitems','$fittingsize','$fittingqty','$fittingremark',
-       ' ','$materialitems','$materialreceipt','$materialqty',
-       ' ','$rental_lorryno','$rental_store', '$rental_outside','$rental_start','$rental_end','$rental_remark',
-       ' ','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark',
-       ' ','$MS_topic','$MS_remarks','$UserStamp',@SUCCESS_MESSAGE)";
+        '$reportdate','$teamlocation','$contractid','$reachsite','$leavesite','$typeofjob','$weather',
+        '$weatherfrom','$weatherto','$pipetesting','$pressurestart','$pressureend','$teamremarks','$imgfilename',
+        '$pipelaid','$size','$length','$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$Employeeremark',
+        ' ','$SV_name','$SV_designation','$SV_start','$SV_end','$SV_remarks',
+        ' ','$mech_from','$mech_to','$mech_item','$mech_remark',
+        ' ','$mechinerytype','$mechinerystart','$mechineryend','$mechineryremark',
+        ' ','$fittingitems','$fittingsize','$fittingqty','$fittingremark',
+        ' ','$materialitems','$materialreceipt','$materialqty',
+        ' ','$rental_lorryno','$rental_store', '$rental_outside','$rental_start','$rental_end','$rental_remark',
+        ' ','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark',
+        ' ','$MS_topic','$MS_remarks',' ','$stockitemno','$stockqty','$UserStamp',@SUCCESS_MESSAGE)";
 //        echo $callquery;exit;
         $result = $con->query($callquery);
         if(!$result){
@@ -812,8 +877,8 @@ elseif($_REQUEST['Option']=='InputForm')
             $sub=$row["ETD_EMAIL_SUBJECT"];
             $msgbody=$row["ETD_EMAIL_BODY"];
         }
-        $replace= array( "[SADMIN]","[UNAME]","[DATE]");
-        $str_replaced  = array('', $EmployeeReport[5],date('d-m-Y',strtotime($reportdate)));
+        $replace= array("[UNAME]","[DATE]");
+        $str_replaced  = array($EmployeeReport[5],date('d-m-Y',strtotime($reportdate)));
         $emailbody = str_replace($replace, $str_replaced, $msgbody);
         // pdf attachment name
         $reportfilename='TIME SHEET REPORT FOR '.$EmployeeReport[5].' ON '.date('d-m-Y',strtotime($reportdate)).'.pdf';
@@ -822,7 +887,7 @@ elseif($_REQUEST['Option']=='InputForm')
         Mail_part($sub,$emailbody,$finaltable,$reportfilename,$entry_exldata,$xlreportfilename);
     }
     $flagvalues=array($flag,$dirflag,$writable);
-    echo json_encode($flagvalues);exit;
+    echo json_encode($flagvalues);
 }
 // REPORT SUBMISSION ENTRY FORM - EMPLOYEE'S DATA
 elseif($_REQUEST['option']=='EMPLOYEE_NAME')
@@ -865,7 +930,8 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
     $team=$_REQUEST['team'];
     $date=date('Y-m-d',strtotime($_REQUEST['date']));
     //TEAM REPORT DETAILS
-    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_DATE='$date' AND L.ULD_ID='$activeemp'");
+    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,CLD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME
+FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1,LMC_CONTRACT_DETAILS LCD WHERE L.TC_ID=T1.TC_ID AND L.TRD_CONTRACT_NO=LCD.CLD_ID AND TRD_DATE='$date' AND L.ULD_ID='$activeemp'");
     while($row=mysqli_fetch_array($teamreport_details))
     {
         $jobid=$row["TOJ_ID"];
@@ -880,7 +946,7 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
 //            $data = file_get_contents($path);
             $base64 = $fileimgeurl[1];//'data:image/' . $type . ';base64,' . base64_encode($data);
         }
-        $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
+        $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["CLD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
     }
     //JOB ID DETAILS
     $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM LMC_TYPE_OF_JOB WHERE TOJ_ID IN($jobid)");
@@ -936,10 +1002,15 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
     {
         $materialusage_details[]=array($row["MUD_ID"],$row["MU_ITEMS"],$row["MUD_RECEIPT_NO"],$row["MUD_QUANTITY"]);
     }
-    // MEETING DETAILS
+    //MEETING DETAILS
     $meetingdetails=mysqli_query($con,"SELECT MD_ID,MT_TOPIC,MD_REMARKS FROM LMC_MEETING_DETAILS MD, LMC_MEETING_TOPIC MT WHERE MD.MT_ID=MT.MT_ID AND TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
     while($row=mysqli_fetch_array($meetingdetails)){
         $meeting_details[]=array($row["MD_ID"],$row["MT_TOPIC"],$row['MD_REMARKS']);
+    }
+    //SITE STOCK USAGE DETAILS
+    $stockdetails=mysqli_query($con,"SELECT LISU_ID,L2.LID_ITEM_NO,L2.LID_DESCRIPTION,L1.LISU_QUANTITY FROM LMC_INVENTORY_STOCK_USED L1,LMC_INVENTORY_ITEM_DETAILS L2 WHERE L1.LID_ID=L2.LID_ID AND L1.TRD_ID=(SELECT TRD_ID FROM LMC_TEAM_REPORT_DETAILS WHERE ULD_ID='$activeemp' AND TRD_DATE='$date')");
+    while($row=mysqli_fetch_array($stockdetails)){
+        $stock_details[]=array($row["LISU_ID"],$row["LID_ITEM_NO"],$row["LID_DESCRIPTION"],$row['LISU_QUANTITY']);
     }
     //TEAM JOB
     $typeofjob=mysqli_query($con,"select TOJ_JOB,TOJ_ID from LMC_TYPE_OF_JOB");
@@ -966,7 +1037,7 @@ elseif($_REQUEST['option']=='SEARCH_DATA')
     {
         $imagefoldderid=$row['EMP_IMAGE_FOLDER_ID'];
     }
-    $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid,$meeting_details);
+    $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid,$meeting_details,$stock_details);
     echo json_encode($values);
 }
 // REPORT SUBMISSION UPDATE FORM - DT
@@ -981,9 +1052,8 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH_DATA')
     {
         $employeedetails[]=array($row['ULD_ID'],$row["TRD_DATE"],$row["STARTTIME"],$row["ENDTIME"],$row["TRD_ID"],$row["TERD_OT"],$row['TERD_REMARK'],$row['ULD_USERNAME'],$row['TERD_TIMESTAMP']);
     }
-//ERRPOR MESSAGE
+    //ERRPOR MESSAGE
     $errormsg=get_error_msg('4,17,21,83,133,143,144');
-
     $values=array($employeedetails,$errormsg);
     echo json_encode($values);
 }
@@ -993,8 +1063,10 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
     $trdid=$_REQUEST['trdid'];
     $empid=$_REQUEST['selectedemp'];
     $btn=$_REQUEST['btn'];
+    $itemno=array();
     //TEAM REPORT DETAILS
-    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1 WHERE L.TC_ID=T1.TC_ID AND TRD_ID='$trdid'");
+    $teamreport_details=mysqli_query($con,"SELECT DATE_FORMAT(TRD_DATE,'%d-%m-%Y') AS TRD_DATE,TRD_LOCATION,CLD_CONTRACT_NO,TRD_CONTRACT_NO,T1.TEAM_NAME,DATE_FORMAT(TRD_REACH_SITE,'%H:%i' ) AS REACHSITE,DATE_FORMAT(TRD_LEAVE_SITE,'%H:%i' ) AS LEAVESITE,TOJ_ID,DATE_FORMAT(TRD_WEATHER_FROM_TIME,'%H:%i' ) AS WEATHERFROM,DATE_FORMAT(TRD_WEATHER_TO_TIME,'%H:%i' ) AS WEATHERTO,TRD_PIPE_TESTING,TRD_START_PRESSURE,TRD_END_PRESSURE,TRD_REMARK,TRD_WEATHER_REASON,TRD_IMG_FILE_NAME
+FROM LMC_TEAM_REPORT_DETAILS L,LMC_TEAM_CREATION T1,LMC_CONTRACT_DETAILS LCD WHERE L.TC_ID=T1.TC_ID AND L.TRD_CONTRACT_NO=LCD.CLD_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($teamreport_details))
     {
         $jobid=$row["TOJ_ID"];
@@ -1011,7 +1083,13 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         }
 //        echo $base64;
         $team_report_details[]=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
-        $team_report_details1=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["TRD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
+        $team_report_details1=array($row["TRD_DATE"],$row["TRD_LOCATION"],$row["CLD_CONTRACT_NO"],$row["TEAM_NAME"],$row["REACHSITE"],$row["LEAVESITE"],$row["TOJ_ID"],$row["WEATHERFROM"],$row["WEATHERTO"],$row["TRD_PIPE_TESTING"],$row["TRD_START_PRESSURE"],$row["TRD_END_PRESSURE"],$row["TRD_REMARK"],$row["TRD_WEATHER_REASON"]);
+        // ITEM CODE NAME
+        $contactid=$row["TRD_CONTRACT_NO"];
+        $itemdtl=mysqli_query($con,"SELECT LID_ID,LID_ITEM_NO,LID_DESCRIPTION FROM LMC_INVENTORY_ITEM_DETAILS IID,LMC_CONTRACT_DETAILS LCD WHERE IID.CLD_ID=LCD.CLD_ID AND IID.CLD_ID=$contactid ORDER BY LID_ITEM_NO");
+        while($row=mysqli_fetch_array($itemdtl)){
+            $itemno[]=array('id'=>$row["LID_ID"],'no'=>$row["LID_ITEM_NO"],'name'=>$row["LID_DESCRIPTION"]);
+        }
     }
     //JOB ID DETAILS
     $jobdetails=mysqli_query($con,"SELECT GROUP_CONCAT(TOJ_JOB) AS JOB FROM LMC_TYPE_OF_JOB WHERE TOJ_ID IN($jobid)");
@@ -1067,10 +1145,15 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
     {
         $materialusage_details[]=array($row["MUD_ID"],$row["MU_ITEMS"],$row["MUD_RECEIPT_NO"],$row["MUD_QUANTITY"]);
     }
-    // MEETING DETAILS
+    //MEETING DETAILS
     $meetingdetails=mysqli_query($con,"SELECT MD_ID,MT_TOPIC,MD_REMARKS FROM LMC_MEETING_DETAILS MD, LMC_MEETING_TOPIC MT WHERE MD.MT_ID=MT.MT_ID AND TRD_ID='$trdid'");
     while($row=mysqli_fetch_array($meetingdetails)){
         $meeting_details[]=array($row["MD_ID"],$row["MT_TOPIC"],$row['MD_REMARKS']);
+    }
+    //SITE STOCK USAGE DETAILS
+    $stockdetails=mysqli_query($con,"SELECT LISU_ID,L2.LID_ITEM_NO,L2.LID_DESCRIPTION,L1.LISU_QUANTITY FROM LMC_INVENTORY_STOCK_USED L1,LMC_INVENTORY_ITEM_DETAILS L2 WHERE L1.LID_ID=L2.LID_ID AND L1.TRD_ID='$trdid'");
+    while($row=mysqli_fetch_array($stockdetails)){
+        $stock_details[]=array($row["LISU_ID"],$row["LID_ITEM_NO"],$row["LID_DESCRIPTION"],$row['LISU_QUANTITY']);
     }
     //TEAM JOB
     $typeofjob=mysqli_query($con,"select TOJ_JOB,TOJ_ID from LMC_TYPE_OF_JOB");
@@ -1090,7 +1173,6 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $jobdone_size[]=$row['SIZE'];
         $jobdone_length[]=$row["LENGTH"];
     }
-
     //ERRPOR MESSAGE
     $errormsg=get_error_msg('4,17,21,83,133,143,144,145,147,148,152,156,157');
     $folderid=mysqli_query($con,"SELECT EMP_IMAGE_FOLDER_ID FROM LMC_EMPLOYEE_DETAILS WHERE EMP_ID='$empid'");
@@ -1107,7 +1189,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         else{
             $weathertime='';
         }
-// TEAM REPORT
+    // TEAM REPORT
         $teamreporttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">TEAM REPORT</caption>
         <tr><td width="100" style= "padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>LOCATION</td><td width="360" style="padding-left: 10px;">'.$team_report_details1[1].'</td><td width="140" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>CONTRACT NO</td><td  width="250" style="padding-left: 10px;">'.$team_report_details1[2].'</td><td width="150" style="padding-left: 10px;">'.$team_report_details1[3].'</td></tr>
         </table>
@@ -1116,11 +1198,11 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         <tr><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>REACH SITE</td><td style="padding-left: 10px;" width="250">'.$team_report_details1[4].'</td><td width="250" style="color:#fff; background-color:#498af3; padding-left: 10px;font-weight: bold;" height=20px>LEAVE SITE</td><td style="padding-left: 10px;" width="250">'.$team_report_details1[5].'</td></tr>
         <tr><td width="250" colspan="1" style="color:#498af3;padding-left: 10px;color:#fff; background-color:#498af3;font-weight: bold;" height=20px>TYPE OF JOB</td><td style="padding-left: 10px;" width="250" colspan="3">'.$job_details.'</td></tr>
         </table>';
-// final table start
+    // final table start
         $reportheadername='TIME SHEET REPORT FOR '.$employeedetails[0][1].' ON '.date('d-m-Y',strtotime($team_report_details1[0]));
         $finaltable= '<html><body><table><tr><td style="text-align: center;"><div><img id=imglogo src="../image/LOGO.png"/></div></td></tr><tr><td><h2><div style="font-weight: bold;margin-bottom: 5cm;">' .$reportheadername.'</div></h2></td></tr><br><tr><td>'.$teamreporttable.'</td></tr>';
 
-// MEETING DETAILS
+    // MEETING DETAILS
         if(count($meeting_details)!=0)
         {
             $meetingtable='<br><table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MEETING</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td align="center" width="400" style="color:white;"height=20px nowrap><b>TOPIC</b></td><td height=20px align="center" style="color:white;" nowrap><b>REMARKS</b></td></tr>';
@@ -1131,7 +1213,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $meetingtable=$meetingtable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$meetingtable.'</td></tr>';
         }
-//JOB DONE DETAILS
+    // JOB DONE DETAILS
         $jobdonetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption style="caption-side: left;font-weight: bold;">JOB DONE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/>
         <tr><td width="250" style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold;" height=20px>PIPELAID</td><td style="text-align:center;" width="250" colspan=2>ROAD</td><td width="250" colspan=2 style="text-align:center;">CONC</td><td width="250" colspan=2 style="text-align:center;">TRUF</td></tr>
         <tr><td style="color:#fff; background-color:#498af3;padding-left: 10px;font-weight: bold; " height=20px>SIZE/LENGTH</td><td style="padding-left: 10px;">'.$jobdone_size[0].'</td><td style="padding-left: 10px;">'.$jobdone_length[0].'</td><td style="padding-left: 10px;">'.$jobdone_size[1].'</td><td style="padding-left: 10px;">'.$jobdone_length[1].'</td><td style="padding-left: 10px;">'.$jobdone_size[2].'</td><td style="padding-left: 10px;">'.$jobdone_length[2].'</td></tr>
@@ -1139,11 +1221,11 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         <tr><td style="padding-left: 10px;">'.$team_report_details1[9].'</td><td colspan="2" style="text-align:center;">'.$team_report_details1[10].'</td><td style="text-align:center;"colspan="2">'.$team_report_details1[11].'</td><td colspan="2" style="padding-left: 10px;">'.$team_report_details1[12].'</td></tr>
         </table>';
 
-//EMPLOYEE TABLE
+    // EMPLOYEE TABLE
         $employeetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EMPLOYEE DETAILS</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td align="center" style="color:white;" height=20px width="350" nowrap><b>EMPLOYEE NAME</b></td><td align="center" style="color:white;" height=20px nowrap width="100"><b>START</b></td><td width="100" align="center" style="color:white;" height=20px nowrap><b>END</b></td><td width="100" align="center" height=20px style="color:white;" nowrap><b>OT</b></td><td height=20px align="center" style="color:white;" height=20px width="350" nowrap><b>REMARKS</b></td></tr>';
         $employeetable=$employeetable."<tr style='padding-left: 10px;'><td height=20px nowrap style='padding-left: 10px;'>".$employeedetails[0][1]."</td><td height=20px nowrap style='text-align:center;'>".$employeedetails[0][2]."</td><td height=20px nowrap style='text-align:center;'>".$employeedetails[0][3]."</td><td height=20px nowrap style='text-align:center;'>".$employeedetails[0][4]."</td><td height=20px nowrap style='padding-left: 10px;'>".$employeedetails[0][5]."</td></tr></table>";
         $finaltable=$finaltable.'<br><br><tr><td>'.$jobdonetable.'</td></tr><br><br><tr><td>'.$employeetable.'</td></tr>';
-//Site Visit
+    // Site Visit
         if(count($sitevisit_details)!=0)
         {
             $sitevisittable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">SITE VISIT</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>DESIGNATION</b></td><td height=20px align="center" style="color:white;" nowrap><b>NAME</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
@@ -1154,7 +1236,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $sitevisittable=$sitevisittable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$sitevisittable.'</td></tr>';
         }
-// machinary equip trans
+    // machinary equip trans
         if(count($mechequip_details)!=0)
         {
             $machineryequipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY/EQUIPMENT TRANSFER</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>FROM(LORRY NO)</b></td><td height=20px align="center" style="color:white;" nowrap><b>ITEM</b></td><td height=20px align="center" style="color:white;" nowrap><b>TO(LORRY NO)</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
@@ -1165,7 +1247,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $machineryequipmenttable=$machineryequipmenttable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$machineryequipmenttable.'</td></tr>';
         }
-// machinary usage
+    // machinary usage
         if(count($machinery_usage_details)!=0)
         {
             $machineryusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MACHINERY USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>MACHINERY TYPE</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
@@ -1176,7 +1258,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $machineryusagetable=$machineryusagetable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$machineryusagetable.'</td></tr>';
         }
-// rental details
+    // rental details
         if(count($rentalmachinery_details)!=0)
         {
             $rentaltable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">RENTAL MACHINERY</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>LORRY NUMBER</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(STORE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>THROW EARTH(OUTSIDE)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="200" nowrap><b>REMARKS</b></td></tr>';
@@ -1187,7 +1269,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $rentaltable=$rentaltable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$rentaltable.'</td></tr>';
         }
-// equipment usage
+    // equipment usage
         if(count($equipmentusage_details)!=0)
         {
             $equipmenttable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">EQUIPMENT USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>AIR-COMPRESSOR</b></td><td height=20px align="center" style="color:white;" nowrap><b>LORRYNO(TRANSPORT)</b></td><td height=20px align="center" style="color:white;" nowrap><b>START</b></td><td height=20px align="center" style="color:white;" nowrap><b>END</b></td><td height=20px align="center" style="color:white;" width="250" nowrap><b>REMARKS</b></td></tr>';
@@ -1198,7 +1280,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $equipmenttable=$equipmenttable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$equipmenttable.'</td></tr>';
         }
-//fitting usage
+    // fitting usage
         if(count($fittingusage_details)!=0)
         {
             $fittingtable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">FITTING USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>SIZE</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td><td height=20px align="center" style="color:white;" width="300" nowrap><b>REMARKS</b></td></tr>';
@@ -1209,18 +1291,29 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
             $fittingtable=$fittingtable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$fittingtable.'</td></tr>';
         }
-//Material Usage //
+    // Material Usage //
         if(count($materialusage_details)!=0)
         {
             $materialusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>RECEIPT NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
             for($i=0;$i<count($materialusage_details);$i++)
             {
-                $materialusagetable=$materialusagetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$materialusage_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$materialusage_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$materialusage_details[$i][3]."</td></tr>";
+                $materialusagetable=$materialusagetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;'>".$materialusage_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;text-align:center;'>".$materialusage_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$materialusage_details[$i][3]."</td></tr>";
             }
             $materialusagetable=$materialusagetable.'</table>';
             $finaltable=$finaltable.'<br><br><tr><td>'.$materialusagetable.'</td></tr>';
         }
-//image
+    // stock Usage //
+        if(count($stock_details)!=0)
+        {
+            $stockusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">SITE STOCK USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center" ><td height=20px align="center" style="color:white;" nowrap><b>ITEM NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>ITEM NAME</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
+            for($i=0;$i<count($stock_details);$i++)
+            {
+                $stockusagetable=$stockusagetable."<tr style='padding-left: 10px;' ><td height=20px nowrap style='padding-left: 10px;text-align:center;'>".$stock_details[$i][1]."</td><td height=20px nowrap style='padding-left: 10px;'>".$stock_details[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$stock_details[$i][3]."</td></tr>";
+            }
+            $stockusagetable=$stockusagetable.'</table>';
+            $finaltable=$finaltable.'<br><br><tr><td>'.$stockusagetable.'</td></tr>';
+        }
+    // image
         if($base64[1]!=''&&$base64[1]!=undefined&&$base64[1]!=null)
         {
             $finaltable=$finaltable.'<br><br><tr><td><b>REPORT IMAGE</b><br><br><img id=image src="'.$base64[1].'"/></td></tr></table></body></html>';
@@ -1228,7 +1321,7 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         else{
             $finaltable=$finaltable.'</table></body></html>';
         }
-        $dir1 = $dir.'../Phpfiles/';
+        $dir1 = $dir.'/Phpfiles/';
         foreach(glob($dir1.'*.*') as $v){
             unlink($v);
         }
@@ -1239,10 +1332,10 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
         $mpdf->SetHTMLFooter('<div style="text-align: center;">{PAGENO}</div>');
         $mpdf->WriteHTML($finaltable);
         $reportpdf=$mpdf->Output('../Phpfiles/'.$reportheadername.'.pdf','f');
-        echo 'Phpfiles/'.$reportheadername.'.pdf';
+        echo '../Phpfiles/'.$reportheadername.'.pdf';
     }
     else{
-        $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid,$meeting_details);
+        $values=array($employeedetails,$sitevisit_details,$mechequip_details,$machinery_usage_details,$rentalmachinery_details,$equipmentusage_details,$fittingusage_details,$materialusage_details,$team_report_details,$job_details,$joptype,$activeemp_name,$jobdone_pipelaid,$jobdone_size,$jobdone_length,$base64,$errormsg,$imagefoldderid,$meeting_details,$stock_details,$itemno);
         echo json_encode($values);
     }
 }
@@ -1250,8 +1343,8 @@ elseif($_REQUEST['option']=='UPDATE_SEARCH')
 elseif($_REQUEST['Option']=='UpdateForm')
 {
     $teamlocation=$_POST["SRC_tr_txt_location"];
-    $contractno=$_POST["SRC_tr_txt_contractno"];
-    $teamname=$_POST['SRC_tr_lb_team'];
+    $contractid=$_POST["SRC_tr_lb_contractno"];
+    $teamname=$_POST['SRC_tr_tb_team'];
     $reportdate=$_POST['SRC_tr_txt_date'];
     $weather=$_POST['SRC_tr_txt_weather'];
     $weatherfrom=$_POST['SRC_tr_txt_wftime'];
@@ -1269,6 +1362,11 @@ elseif($_REQUEST['Option']=='UpdateForm')
         else{
             $typeofjob=$typeofjob .",".$joptype[$i];
         }
+    }
+    // CONTRACT NOs
+    $contract_no=mysqli_query($con,"SELECT CLD_CONTRACT_NO FROM LMC_CONTRACT_DETAILS WHERE CLD_ID = $contractid");
+    while($row=mysqli_fetch_array($contract_no)){
+        $contractno= $row["CLD_CONTRACT_NO"];
     }
 //JOB DONE ELEMENTS
     $pipelaidroad=$_POST['SRC_jd_chk_road'];
@@ -1354,6 +1452,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $size=$size1.$size2.$size3;
     $length=$length1.$length2.$length3;
 
+    $stockusage=$_POST["SRC_StockDetails"];
     $material=$_POST["SRC_MaterialDetails"];
     $fitting=$_POST["SRC_FittingDetails"];
     $equipment=$_POST["SRC_EquipmentDetails"];
@@ -1402,7 +1501,6 @@ elseif($_REQUEST['Option']=='UpdateForm')
 //                $data = str_replace(' ','+',$data);
 //                $data = base64_decode($data);
                 $success = file_put_contents($uploadpath, $imagedata);//file_put_contents($uploadpath, $data);
-
                 $imgflag=1;
             }
             catch(Exception $e){
@@ -1488,7 +1586,6 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $objPHPExcel->getActiveSheet()->getStyle('C3:C5')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
     $objPHPExcel->getActiveSheet()->getStyle('F3')->getFont()->getColor()->setRGB('FFFAFA');
     $objPHPExcel->getActiveSheet()->getStyle('F3')->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
-
     $maxrowNo=8;
     $MSrowNumber='';
     $JErowNumber='';
@@ -1499,7 +1596,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $EUrowNumber='';
     $FUrowNumber='';
     $MIUrowNumber='';
-
+    $SSUrowNumber='';
 //Meeting Details
     $MS_id;$MS_topic;$MS_remarks;
     if($meeting!='null')
@@ -1962,6 +2059,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     if($material!='null')
     {
         $MIUrowNumber=$maxrowNo;
+        $maxrowNo=$maxrowNo+count($material)+3;
         $materialusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">MATERIAL USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>ITEMS</b></td><td height=20px align="center" style="color:white;" nowrap><b>RECEIPT NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->getFont()->setBold(true);
         $objPHPExcel->getActiveSheet()->getStyle('A'.$MIUrowNumber)->applyFromArray($styleArray);
@@ -2009,7 +2107,58 @@ elseif($_REQUEST['Option']=='UpdateForm')
         $materialusagetable=$materialusagetable.'</table>';
         $finaltable=$finaltable.'<br><br><tr><td>'.$materialusagetable.'</td></tr>';
     }
-
+//Site Stock Usage //
+    $stock_id;$stockitemno;$stockitemname;$stockqty;
+    if($stockusage!='null')
+    {
+        $ISSrowNumber=$maxrowNo;
+        $stockusagetable='<table width=1000 border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;"><caption align="left" style="font-weight: bold;">SITE STOCK USAGE</caption><sethtmlpageheader name="header" page="all" value="on" show-this-page="1"/><tr style="color:white;" bgcolor="#498af3" align="center"><td height=20px align="center" style="color:white;" nowrap><b>ITEM NO</b></td><td height=20px align="center" style="color:white;" nowrap><b>ITEM NAME</b></td><td height=20px align="center" style="color:white;" nowrap><b>QUANTITY</b></td></tr>';
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$ISSrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$ISSrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$ISSrowNumber,'SITE STOCK USAGE');
+        $ISSrowNumber++;
+        $objPHPExcel->getActiveSheet()->getStyle($ISSrowNumber)->getFont()->setBold(true);
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$ISSrowNumber.':G'.$ISSrowNumber)->applyFromArray($styleArray);
+        $objPHPExcel->getActiveSheet()->setCellValue('A'.$ISSrowNumber,'ITEM NO');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$ISSrowNumber.':C'.$ISSrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('B'.$ISSrowNumber,'ITEM NAME');
+        $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$ISSrowNumber.':G'.$ISSrowNumber);
+        $objPHPExcel->getActiveSheet()->setCellValue('D'.$ISSrowNumber,'QUANTITY');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$ISSrowNumber.':G'.$ISSrowNumber)->getFont()->getColor()->setRGB('FFFAFA');
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$ISSrowNumber.':G'.$ISSrowNumber)->applyFromArray(array('fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID,'color' => array('rgb' => '#498af3'))));
+        $objPHPExcel->getActiveSheet()->getStyle('A'.$ISSrowNumber.':G'.$ISSrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $ISSrowNumber++;
+        for($i=0;$i<count($stockusage);$i++)
+        {
+            $stockusagetable=$stockusagetable."<tr style='padding-left: 10px;'><td height=20px nowrap style='padding-left: 10px;text-align:center;'>".$stockusage[$i][1]."</td><td height=20px nowrap>".$stockusage[$i][2]."</td><td height=20px nowrap style='text-align:center;'>".$stockusage[$i][3]."</td></tr>";
+            $objPHPExcel->getActiveSheet()->getStyle('B'.$ISSrowNumber.':G'.$ISSrowNumber)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $objPHPExcel->getActiveSheet()->getStyle('A'.$ISSrowNumber.':G'.$ISSrowNumber)->applyFromArray($styleArray);
+            $objPHPExcel->getActiveSheet()->setCellValue('A'.$ISSrowNumber,$stockusage[$i][1]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('B'.$ISSrowNumber.':C'.$ISSrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('B'.$ISSrowNumber,$stockusage[$i][2]);
+            $objPHPExcel->setActiveSheetIndex(0)->mergeCells('D'.$ISSrowNumber.':G'.$ISSrowNumber);
+            $objPHPExcel->getActiveSheet()->setCellValue('D'.$ISSrowNumber,$stockusage[$i][3]);
+            if($i==0)
+            {
+                $stock_id=$stockusage[$i][0];$stockitemno=$stockusage[$i][1]; $stockitemname=$stockusage[$i][2];$stockqty=$stockusage[$i][3];
+            }
+            else
+            {
+                if($stockusage[$i][0]=='' && $stockusage[$i][1]!='' && $stockusage[$i][3]!='')
+                {
+                    $stock_id=$stock_id.','.$stockusage[$i][0].' ';
+                }
+                else
+                {
+                    $stock_id=$stock_id.','.$stockusage[$i][0];
+                }
+                $stockitemno=$stockitemno.'^'.$stockusage[$i][1]; $stockitemname=$stockitemname.'^'.$stockusage[$i][2];$stockqty=$stockqty.'^'.$stockusage[$i][3];
+            }
+            $ISSrowNumber++;
+        }
+        $stockusagetable=$stockusagetable.'</table>';
+        $finaltable=$finaltable.'<br><br><tr><td>'.$stockusagetable.'</td></tr>';
+    }
     header('Content-Type: application/vnd.ms-excel');
     header('Content-Disposition: attachment;filename="simple.xls"');
     header('Cache-Control: max-age=0');
@@ -2036,16 +2185,15 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $mech_remark=$con->real_escape_string($mech_remark);
     $mechineryremark=$con->real_escape_string($mechineryremark);
     $fittingremark=$con->real_escape_string($fittingremark);
-    $materialqty=$con->real_escape_string($materialqty);
     $rental_remark=$con->real_escape_string($rental_remark);
     $equipmentremark=$con->real_escape_string($equipmentremark);
     $MS_remarks=$con->real_escape_string($MS_remarks);
     $Employeeremark=$con->real_escape_string($EmployeeReport[4]);
     //update part
     if($imgflag==1){
-    $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(2,'$teamname','$EmployeeReport[0]','$reportdate','$teamlocation',
-    '$contractno','$reachsite','$leavesite','$typeofjob','$weather','$weatherfrom','$weatherto','$pipetesting','$pressurestart',
-    '$pressureend','$teamremarks','$imgfilename','$pipelaid','$size','$length',
+        $callquery="CALL SP_LMC_REPORT_ENTRY_UPDATE_DELETE(2,'$teamname','$EmployeeReport[0]','$reportdate','$teamlocation',
+        '$contractid','$reachsite','$leavesite','$typeofjob','$weather','$weatherfrom','$weatherto','$pipetesting','$pressurestart',
+        '$pressureend','$teamremarks','$imgfilename','$pipelaid','$size','$length',
         '$EmployeeReport[1]','$EmployeeReport[2]','$EmployeeReport[3]','$Employeeremark',
         '$SV_ID','$SV_name','$SV_designation','$SV_start','$SV_end','$SV_remarks',
         '$ME_id','$mech_from','$mech_to','$mech_item','$mech_remark',
@@ -2054,7 +2202,8 @@ elseif($_REQUEST['Option']=='UpdateForm')
         '$mat_id','$materialitems','$materialreceipt','$materialqty',
         '$rental_id','$rental_lorryno','$rental_store', '$rental_outside','$rental_start','$rental_end','$rental_remark',
         '$equip_id','$equipmentcompressor','$equipmentlorryno','$equipmentstart','$equipmentend','$equipmentremark',
-        '$MS_id','$MS_topic','$MS_remarks','$UserStamp',@SUCCESS_MESSAGE)";
+        '$MS_id','$MS_topic','$MS_remarks','$stock_id','$stockitemno','$stockqty','$UserStamp',@SUCCESS_MESSAGE)";
+//        echo $callquery;exit;
         $result = $con->query($callquery);
         if(!$result){
             unlink($uploadpath);
@@ -2090,6 +2239,7 @@ elseif($_REQUEST['Option']=='UpdateForm')
     $flagvalues=array($flag,$dirflag,$writable);
     echo json_encode($flagvalues);
 }
+// MAIL SEND PART
 function Mail_part($sub,$emailbody,$finaltable,$reportfilename,$reportexldata,$xlreportfilename){
     global $con;
     try {
@@ -2117,6 +2267,23 @@ function Mail_part($sub,$emailbody,$finaltable,$reportfilename,$reportexldata,$x
         if ($row = mysqli_fetch_array($select_smtpsecure)) {
             $smtpsecure = $row["URC_DATA"];
         }
+        $admin_name = substr($ccaddress, 0, strpos($ccaddress, '@'));
+        $sadmin_name = substr($toaddress, 0, strpos($toaddress, '@'));
+        if(substr($admin_name, 0, strpos($admin_name, '.'))){
+            $admin_name = strtoupper(substr($admin_name, 0, strpos($admin_name, '.')));
+        }
+        else{
+            $admin_name=$admin_name;
+        }
+        if(substr($sadmin_name, 0, strpos($sadmin_name, '.'))){
+            $sadmin_name = strtoupper(substr($sadmin_name, 0, strpos($sadmin_name, '.')));
+        }
+        else{
+            $sadmin_name=$sadmin_name;
+        }
+        $spladminname=$admin_name.'/'.$sadmin_name;
+        $spladminname=strtoupper($spladminname);
+        $emailbody=str_replace('[SADMIN]',$spladminname,$emailbody);
         $mail = new PHPMailer;
         $mail->isSMTP();
         $mail->Host = $host;

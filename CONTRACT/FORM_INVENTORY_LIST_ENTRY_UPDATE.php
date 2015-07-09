@@ -52,7 +52,9 @@ include "../FOLDERMENU.php";
         });
         var table;
         function data_table(items){
+
             if(items.length>0) {
+                $('.preloader').hide();
                 var ILEU_table_header = '<table style="width:1500px" id="ILEU_tbl_htmltable" border="1"  cellspacing="0" class="srcresult"><thead bgcolor="#6495ed" style="color:white"><tr><th style="width:30px;text-align: center" nowrap>EDIT</th><th style="width:100px;text-align: center" nowrap>ITEM NO</th><th style="width:300px;text-align: center" nowrap>DESCRIPTION</th><th style="width:100px;text-align: center" nowrap>CONTRACT NO</th><th style="width:90px;text-align: center" nowrap>COST</th><th style="width:100px;text-align: center" nowrap>INTERNAL COST</th><th style="width:100px;text-align: center" nowrap>PERCENTAGE LEVEL</th><th style="width:100px;text-align: center" nowrap>COST AFTER DISCOUNT</th><th style="width:100px;text-align: center" nowrap>UNIT OF MEASURE</th><th style="width:90px;text-align: center" nowrap>QTY SOLD</th><th style="text-align: center" class="uk-timestp-column">TIMESTAMP</th></tr></thead><tbody>';
                 for (var i = 0; i < items.length; i++) {
                     ILEU_table_header += '<tr><td style="text-align:center;"><div><span style="display: block;color:green" class="glyphicon glyphicon-edit edit" id="'+i+'_'+items[i][0]+'"></span></div></td>';
@@ -84,7 +86,6 @@ include "../FOLDERMENU.php";
                         { "aTargets" : ["uk-date-column"] , "sType" : "uk_date"}, { "aTargets" : ["uk-timestp-column"] , "sType" : "uk_timestp"} ]
                 });
                 sorting();
-                $('.preloader').hide();
             }
             else{
                 var errdata=errormessage[3].replace('USER','ITEM');
@@ -117,6 +118,7 @@ include "../FOLDERMENU.php";
             $("#inv_entrydiv").find('select').val('SELECT');
             $("#inv_entrydiv").find('input:radio, input:checkbox').removeAttr('checked').removeAttr('selected');
             rowid='';
+            $('#ILEU_btn_save').attr('disabled','disabled');
         }
         $(document).on('click','#ILEU_btn_additem',function(){
             $('#ILEU_btn_additem').hide();
@@ -128,7 +130,7 @@ include "../FOLDERMENU.php";
             clearform();
         });
         $(document).on('change blur','#invlistentryform',function(){
-            if($('#ILEU_itemno').val()!='' && $('#ILEU_itemdesc').val()!='' && $('#ILEU_contractno').val()!='SELECT' && $('#ILEU_uom').val()!='SELECT'){
+            if($('#ILEU_itemno').val()!='' && $('#ILEU_itemdesc').val()!='' && $('#ILEU_contractno').val()!='SELECT' && $('#ILEU_uom').val()!='SELECT' && $('#ILEU_cost').val()!='' && $('#ILEU_percentlevel').val()!='' && $('#ILEU_costdiscount').val()!=''){
                 $('#ILEU_btn_save').removeAttr('disabled');
             }
             else{
@@ -152,9 +154,9 @@ include "../FOLDERMENU.php";
                     if(btnval=='SAVE'){
                         if(flagvalue==1){
                             var errdata=errormessage[0].replace('REPORT','ITEM');
-                            data_table(items);
                             show_msgbox("INVENTORY LIST ENTRY / UPDATE",errdata,"success",false);
                             clearform();
+                            data_table(items);
                         }
                         else if(flagvalue==0){
                             var errdata=errormessage[2].replace('REPORT','ITEM');
@@ -169,9 +171,9 @@ include "../FOLDERMENU.php";
                     else if(btnval=='UPDATE'){
                         if (flagvalue == 1) {
                             var errdata = errormessage[1].replace('REPORT', 'ITEM');
-                            data_table(items);
                             show_msgbox("INVENTORY LIST ENTRY / UPDATE", errdata, "success", false);
                             clearform();
+                            data_table(items);
                         }
                         else if (flagvalue == 0) {
                             var errdata = errormessage[4].replace('REPORT', 'ITEM');
@@ -188,6 +190,7 @@ include "../FOLDERMENU.php";
         });
         $(document).on('click','.edit',function(){
             $('.preloader').show();
+            $('#ILEU_btn_save').attr('disabled','disabled');
             $('#inv_entrydiv').hide();
             $('#ILEU_btn_additem').hide();
             $('#ILEU_btn_save').val('UPDATE');
@@ -235,17 +238,17 @@ include "../FOLDERMENU.php";
                             <div class="col-lg-2"><select class="form-control" id="ILEU_contractno" name="ILEU_contractno"><option>SELECT</option></select></div>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-3">COST </label>
+                            <label class="col-md-3">COST <em>*</em></label>
                             <div class="col-lg-2"><input type="text" class="form-control amountonly" id="ILEU_cost" name="ILEU_cost" placeholder="0.00"></div>
                             <label class="col-md-2">INTERNAL COST </label>
                             <div class="col-lg-2"><input type="text" class="form-control amountonly" id="ILEU_internalcost" name="ILEU_internalcost" placeholder="0.00"></div>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-3">PERCENTAGE LEVEL </label>
+                            <label class="col-md-3">PERCENTAGE LEVEL <em>*</em></label>
                             <div class="col-lg-2"><input type="text" class="form-control percentage" id="ILEU_percentlevel" name="ILEU_percentlevel" placeholder="Percentage"></div>
                         </div>
                         <div class="form-group">
-                            <label class="col-md-3">COST AFTER DISCOUNT </label>
+                            <label class="col-md-3">COST AFTER DISCOUNT <em>*</em></label>
                             <div class="col-lg-2"><input type="text" class="form-control amountonly" id="ILEU_costdiscount" name="ILEU_costdiscount" placeholder="0.00"></div>
                         </div>
                         <div class="form-group">

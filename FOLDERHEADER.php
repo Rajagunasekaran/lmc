@@ -37,7 +37,10 @@
     <!--Message box-->
     <link rel="stylesheet" type="text/css" href="../msgbox/jquery-confirm.css">
     <script type="text/javascript" src="../msgbox/jquery-confirm.js"></script>
-
+    <!--Load the AJAX API-->
+    <!--    <script type="text/javascript" src="https://www.google.com/jsapi"></script>-->
+    <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization',
+       'version':'1','packages':['timeline']}]}"></script>
     <!--DATA TABLE-->
     <link rel="stylesheet" href="../Data_table-10.6/media/css/jquery.dataTables.css">
     <link rel="stylesheet" href="../Data_table-10.6/media/css/jquery.dataTables.min.css">
@@ -54,7 +57,7 @@
         <?php include '../CSS/StyleSheet.css'; ?>
     </style>
     <meta charset="utf-8">
-    <link rel="shortcut icon" type="image/ico" href="../image/favicon.ico">
+    <link rel="shortcut icon" type="image/ico" href="../image/create_thumb.png">
     <meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0">
     <style>
         .dropdown-menu{
